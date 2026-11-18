@@ -1,0 +1,1 @@
+The Unity editor setup creates URP settings and materials in this directory. They have not been generated or validated by an installed Unity Editor in the current workspace.

@@ -1,0 +1,1 @@
+{"name":"Reviry.Tests","rootNamespace":"Reviry.Tests","references":["Reviry.Core"],"includePlatforms":["Editor"],"optionalUnityReferences":["TestAssemblies"],"autoReferenced":false}
