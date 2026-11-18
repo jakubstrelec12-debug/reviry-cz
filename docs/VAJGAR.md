@@ -1,9 +1,14 @@
 # REVÍRY CZ — Vajgar: závazný směr nové verze
 
+## Aktualizace — hratelná verze 0.2
+V kořeni repozitáře je nová skutečná 3D implementace v Three.js, distribuovaná pro první test přes GitHub Pages. Břeh a ostrov jsou z OSM relace 1744135; přidáno 358 mapových půdorysů budov. Modely střech, fasád, vybavení, ruky, ryby a vegetace jsou pracovní aproximace. Lov s jedním prutem na položenou má kompletní cyklus a deník. Geografické podmínky i herní logika prošly 13 automatickými testy; konstrukce scény samostatnou CPU kontrolou. GPU výstup nebyl ověřen, protože testovací prohlížeč nevytvoří WebGL kontext. Toto není splnění finálního grafického cíle. Nativní iOS distribuce dosud není zajištěna.
+
+Další prioritou je ověřit obraz a výkon na skutečném iPhonu a podle záběrů ze hry dokončit podobu prvního stanoviště. Podrobnosti v README.
+
 ## Cíl
 Realistický 3D rybářský simulátor, primárně pro iPhone. Prvním místem je skutečný rybník Vajgar v Jindřichově Hradci. Uživatel výslovně upřednostňuje vizuální věrnost a skutečnou lokalitu před webovým formátem. Původní index.html je samostatná starší verze; nepovažovat ji za vizuální základ nové hry.
 
-## Stav
+## Výchozí stav před implementací 0.2
 Tento dokument definuje rekonstrukci a podmínky přijetí. Není dokončenou 3D scénou, exportem pro iOS ani příslibem dosaženého fotorealismu. Konkrétní stanoviště a směr kamery zatím nejsou zaměřeny. Herní engine nové verze zatím není závazně zvolen.
 
 ## První dokončovaný celek
@@ -46,5 +51,5 @@ Požadavek je spustitelná hra bez ručního sestavování uživatelem. Zvolit a
 - Strategický plán města: https://m.jh.cz/filemanager/files/186426.pdf — místní kontext a využití Vajgaru. Není batymetrickým měřením.
 - Dokumentace Godot, export iOS: https://docs.godotengine.org/en/stable/tutorials/export/exporting_for_ios.html — technické požadavky jedné možné implementační cesty, nikoli rozhodnutí o finálním enginu.
 
-## Nejbližší výrobní krok
+## Původní výrobní krok
 Obstarat podklady pro jedno přesné stanoviště a ověřit engine/renderovací cestu na cílovém zařízení s reprezentativní vodou, vegetací a rybářským vybavením. Teprve podle skutečného výstupu potvrdit dosažitelnou kvalitu a rozpočet scény. Nepokračovat další generickou kresbou jezera.

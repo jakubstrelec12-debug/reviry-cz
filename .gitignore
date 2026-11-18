@@ -1,0 +1,5 @@
+node_modules/
+.openai/
+data/town.osm
+data/nominatim.json
+.DS_Store
