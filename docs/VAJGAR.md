@@ -1,5 +1,8 @@
 # REVÍRY CZ — Vajgar: závazný směr nové verze
 
+## Aktualizace — verze 0.3
+Fotografické materiály břehu a oblohy, vegetační billboardy předpočítané z detailního modelu, opravený výhled, drobnější kameny, mechanické čihátko a úpravy prutu a navijáku. Skutečný WebGL render ze stejného modulu byl ověřen přes Mesa a webgl-node; snímek bez HTML ovládání je v preview/vajgar-0.3.webp. Render nemá chyby WebGL a materiály se načetly. To nenahrazuje měření výkonu na iPhonu. Zástavba a vybavení nadále mají pracovní modely a původní fotorealistický cíl není splněný.
+
 ## Aktualizace — hratelná verze 0.2
 V kořeni repozitáře je nová skutečná 3D implementace v Three.js, distribuovaná pro první test přes GitHub Pages. Břeh a ostrov jsou z OSM relace 1744135; přidáno 358 mapových půdorysů budov. Modely střech, fasád, vybavení, ruky, ryby a vegetace jsou pracovní aproximace. Lov s jedním prutem na položenou má kompletní cyklus a deník. Geografické podmínky i herní logika prošly 13 automatickými testy; konstrukce scény samostatnou CPU kontrolou. GPU výstup nebyl ověřen, protože testovací prohlížeč nevytvoří WebGL kontext. Toto není splnění finálního grafického cíle. Nativní iOS distribuce dosud není zajištěna.
 
