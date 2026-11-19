@@ -44,3 +44,10 @@ Prompty pro extrakci: zachovat skutečný fotografovaný prut, naviják a ruku, 
 `equipment/fishing-deck.webp`: fotorealistický průhledný kompozit vytvořený vestavěným image_gen. Původní fotografie Wwery výše sloužila jako reference osvětlení a výšky kamery. Zadání: široké dřevěné stanoviště přes spodní čtvrtinu obrazu, šedohnědé zvětralé prkno, chladné rozptýlené světlo, zbytek průhledný; bez lidí, náčiní, textu a dalších částí krajiny. Výstup zmenšen na 1800 × 600, převeden do WebP se zachováním alfa. Tento kompozit sdílíme pod CC BY-SA 4.0, stejně jako úpravy fotografického prostředí.
 
 **Nejde o fotografii skutečného mola na Vajgaru.** Původní fotografie je zachována jako samostatný soubor; za běhu se mění její ořez a přidává se syntetické popředí. Označení AI popředí je v zápatí i v herním deníku.
+
+
+## Jednotná sestava náčiní — 0.11
+
+`equipment/resting-feeder.webp` a `equipment/held-feeder.webp`: nové syntetické fotorealistické průhledné podklady vytvořené vestavěným image_gen, 1024 × 1536, převod do WebP se zachováním alfa. Sdílíme pod CC BY-SA 4.0. Nenahrazují konkrétní výrobkové fotografie a nevyjadřují přesný model z katalogu. Odložený prut, naviják a trojnožka jsou jeden celek; v ruce má celek shodný vzhled bez podpěry. Za běhu se deformuje horní část prutu, ostatní součásti zůstávají společné.
+
+Finální zadání: fotorealistický štíhlý grafitový feederový prut s jemnou oranžovou špičkou, korková rukojeť, černo-stříbrný naviják mechanicky spojený s prutem, kompaktní nízká trojnožka, pohled sedícího rybáře shora šikmo k vodě. Kompletní předmět na průhledném pozadí, měkké zatažené světlo, chladné tlumené barvy, bez značek, krajiny a podlahy. Dodatečné zadání: odstranit mlžný lem, zachovat přesnou geometrii. Varianta v ruce: zachovat prut a naviják, odstranit trojnožku a přidat anatomicky správnou pravou ruku vstupující z pravého dolního okraje. Výstupy nejsou skutečné fotografie; označeno v zápatí a deníku. Původní CC0 výřez 0.8 zůstává jen pro záložní vykreslení při chybě nového podkladu.

@@ -1,10 +1,14 @@
-# REVÍRY CZ — Vajgar 0.10
+# REVÍRY CZ — Vajgar 0.11
 
 Rybářská hra pro Safari na iPhonu. Výhled nově tvoří **skutečná fotografie Vajgaru** s animovanou hladinou, prutem, čihátkem, náhozem, splávkem a krmením. Zjednodušená 3D zástavba se v hlavní hře nepoužívá. Vykreslování běží přes Canvas 2D a nepotřebuje WebGL.
 
-**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.10.0
+**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.11.0
 
 Nejlépe na šířku. Všechny herní fotografie jsou přiložené lokálně. HD / ECO mění rozlišení a jemnost animace vody. Fotografie není 360° panorama: tažením jde pouze mírně posouvat výhled a směr náhozu. Nejde o volně průchozí 3D svět.
+
+## Náčiní a kompozice — 0.11
+
+Odložený prut, naviják a nízká trojnožka tvoří jeden souvislý fotorealistický podklad. Nohy stojí na prknech a mají kontaktní stín; poloha sestavy se při změně ovládání neposouvá. Záběr deformuje pouze horní část prutu. Varianta v ruce používá stejný prut, naviják a rukojeť, bez stojanu. Oba podklady jsou vytvořené pomocí AI, ilustrační a nepředstavují fotografii vybraného výrobku. Stavový text je na výšku nad náčiním.
 
 ## Příprava lovu
 

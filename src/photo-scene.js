@@ -1,5 +1,5 @@
-import {biteMotion} from './bite-motion.js?v=0.10.0';
-import {RODS,RIGS} from './tackle.js?v=0.10.0';
+import {biteMotion} from './bite-motion.js?v=0.11.0';
+import {RODS,RIGS} from './tackle.js?v=0.11.0';
 
 export const PHOTO={src:'assets/vajgar-photograph.webp',author:'Wwery',title:'Pohled na Jindřichův Hradec přes rybník Vajgar',source:'https://commons.wikimedia.org/wiki/File:Pohled_na_Jind%C5%99ich%C5%AFv_Hradec_p%C5%99es_rybn%C3%ADk_Vajgar.jpg',license:'CC BY-SA 4.0',licenseUrl:'https://creativecommons.org/licenses/by-sa/4.0/',waterStart:.575};
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -21,7 +21,15 @@ export function gearLayout(w,h,{hudTop=h*.82,headerBottom=90,index=0,count=1,pos
  const size=clamp(Math.min(w/(dual?750:520),h/480),portrait?.64:.65,1.05);
  return {base,tip,size,hudTop,headerBottom};
 }
-export function heldLayout(w,h,pose=0,cast=0){return {scale:clamp(Math.min(w*.00056,h*.00055),.16,.30),angle:-.42+cast*.65-pose*.28,base:{x:h>w?w*1.02:w*.98+12,y:h+(h>w?-32:10)-pose*50}};}
+export function heldLayout(w,h,pose=0,cast=0){return {scale:Math.min(w*1.2,h*.70)/1536,angle:pose*.24-cast*.55,base:{x:w*.94,y:h*(h>w?.88:.97)-pose*20}};}
+// A single photographed-style assembly keeps the reel, blank and support in one perspective.
+// Feet stay on the pier, independent of changes in the controls above them.
+export function restingLayout(w,h,{index=0,count=1,shoreTop=h*.75}={}){
+ const portrait=h>w,dual=count>1,height=Math.min(h*(portrait?.70:.64),w*(dual?.92:1.2)),width=height*2/3;
+ const footY=Math.max(shoreTop+18,h*.94),y=footY-height*.96;
+ const right=dual?(index===0?w*.55:w*.99):w*.98;
+ return {x:right-width,y,width,height,footY,at:(u,v)=>({x:right-width+u*width,y:y+v*height})};
+}
 function loadImage(path){return new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>reject(new Error('Fotografii Vajgaru se nepodařilo načíst.'));image.src=new URL('../'+path,import.meta.url).href;});}
 function mix(a,b,t){return a+(b-a)*t;}
 function point(a,b,c,t){const u=1-t;return {x:u*u*a.x+2*u*t*b.x+t*t*c.x,y:u*u*a.y+2*u*t*b.y+t*t*c.y};}
@@ -33,7 +41,7 @@ export class LakeScene{
   try{this.high=localStorage.getItem('reviry-quality')!=='low';}catch{this.high=true;}
   this.background=document.createElement('canvas');this.bctx=this.background.getContext('2d');this.lastView='';this.bindLook();this.onResize=()=>this.resize();window.addEventListener('resize',this.onResize);
  }
- async init(){this.image=await loadImage(PHOTO.src);this.equipment={};await Promise.all([['rod','assets/equipment/rod-hand.webp'],['float','assets/equipment/waggler.webp'],['deck','assets/equipment/fishing-deck.webp']].map(async([key,path])=>{try{this.equipment[key]=await loadImage(path);}catch{this.assetWarnings.push(path);}}));this.resize();this.render(0);return this;}
+ async init(){this.image=await loadImage(PHOTO.src);this.equipment={};await Promise.all([['rod','assets/equipment/rod-hand.webp'],['float','assets/equipment/waggler.webp'],['deck','assets/equipment/fishing-deck.webp'],['resting','assets/equipment/resting-feeder.webp'],['held','assets/equipment/held-feeder.webp']].map(async([key,path])=>{try{this.equipment[key]=await loadImage(path);}catch{this.assetWarnings.push(path);}}));this.resize();this.render(0);return this;}
  resize(){this.width=innerWidth;this.height=innerHeight;this.ratio=Math.min(devicePixelRatio||1,this.high?1.75:1);for(const c of [this.canvas,this.background]){c.width=Math.round(this.width*this.ratio);c.height=Math.round(this.height*this.ratio);}this.ctx.setTransform(this.ratio,0,0,this.ratio,0,0);this.bctx.setTransform(this.ratio,0,0,this.ratio,0,0);this.lastView='';}
  setQuality(high){this.high=high;try{localStorage.setItem('reviry-quality',high?'high':'low');}catch{}this.resize();}
  bindLook(){let pointer=null,lastX=0,lastY=0;
@@ -83,27 +91,53 @@ export class LakeScene{
   c.restore();this.metrics.drawImages++;
  }
  drawPhotoHeld(){
-  const image=this.equipment?.rod;if(!image)return false;
-  const c=this.ctx,g=this.game,w=this.width,h=this.height,hud=this.inset.hudTop??h*.82,portrait=h>w;
-  const cast=g.phase==='casting'?g.castPower:0,{scale,angle,base}=heldLayout(w,h,this.pose,cast),cropY=image.height*.30,axisX=image.width*.83;
-  const transform=(x,y)=>({x:base.x+(x-axisX)*scale*Math.cos(angle)-(y-image.height)*scale*Math.sin(angle),y:base.y+(x-axisX)*scale*Math.sin(angle)+(y-image.height)*scale*Math.cos(angle)});
-  const joint=transform(image.width*.81,cropY+8),tip={x:joint.x-w*.16+cast*w*.22,y:Math.max((this.inset.headerBottom??85)+16,joint.y-(portrait?100:55)-this.pose*40)};
-  const focusAnchor={...tip};if(g.phase==='held'&&g.loadout.method==='feeder')tip.x+=biteMotion(g,this.clock).feederFlex;
-  const control={x:mix(joint.x,tip.x,.48)+(g.phase==='fight'?g.tension*25:0),y:mix(joint.y,tip.y,.5)};
-  const sample=t=>point(joint,control,tip,t),guides=[];
-  // Tapered flexible blank, textured with the photographed carbon foregrip.
-  for(let i=0;i<28;i++){
-   const a=sample(i/28),b=sample((i+1)/28),dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy),thickness=(3.8*(1-i/28)+.7)*clamp(scale/.25,.7,1.4);
-   c.save();c.translate(a.x,a.y);c.rotate(Math.atan2(dy,dx)-Math.PI/2);c.drawImage(image,image.width*.795,image.height*.33,image.width*.04,image.height*.08,-thickness/2,0,thickness,len+1);c.restore();
-  }
-  for(let i=0;i<6;i++){const t=.12+i*.16,p=sample(t),r=2.6-i*.29;this.ellipse(p.x+2,p.y+1,r,r*.55,null,'#9caaa5',.6);guides.push({x:p.x+2,y:p.y+1});}
-  const reel=transform(image.width*.39,image.height*.40);
+  const image=this.equipment?.held;if(!image)return false;
+  const c=this.ctx,g=this.game,cast=g.phase==='casting'?g.castPower:0,{scale,angle,base}=heldLayout(this.width,this.height,this.pose,cast);
+  const transform=(u,v)=>{const x=(u-.83)*image.width*scale,y=(v-.88)*image.height*scale;return {x:base.x+x*Math.cos(angle)-y*Math.sin(angle),y:base.y+x*Math.sin(angle)+y*Math.cos(angle)};};
+  const flex=(g.phase==='held'&&g.loadout.method==='feeder'?biteMotion(g,this.clock).feederFlex:0)+(g.phase==='fight'?g.tension*24:0),shift=v=>Math.pow(Math.max(0,1-v/.42),2)*flex;
+  const rawTip=transform(.049,.039),tip={x:rawTip.x+shift(.039)*Math.cos(angle),y:rawTip.y+shift(.039)*Math.sin(angle)};this.tip=tip;
+  c.save();c.translate(base.x,base.y);c.rotate(angle);c.filter='saturate(0.76) brightness(0.88)';
+  const cut=Math.round(image.height*.42),x=-.83*image.width*scale,y=-.88*image.height*scale;
+  if(Math.abs(flex)<.01)c.drawImage(image,x,y,image.width*scale,image.height*scale);
+  else{c.drawImage(image,0,cut,image.width,image.height-cut,x,y+cut*scale,image.width*scale,(image.height-cut)*scale);for(let sy=0;sy<cut;sy+=3){const sh=Math.min(3,cut-sy);c.drawImage(image,0,sy,image.width,sh,x+shift(sy/image.height),y+sy*scale,image.width*scale,sh*scale+.2);}}
+  c.restore();
   if(!['ready','casting','landed','escaped'].includes(g.phase)){
-   this.line([reel,...guides,tip],'rgba(222,232,222,.42)',.55);let end=this.target;if(g.phase==='flying'){const f=clamp(g.elapsed/1.1,0,1);end={x:mix(tip.x,end.x,f),y:mix(tip.y,end.y,f)-Math.sin(Math.PI*f)*h*.20};if(g.loadout.method==='float')this.drawFloat(end,true);else this.drawTerminal(end,scale*3);}
-   c.beginPath();c.moveTo(tip.x,tip.y);c.quadraticCurveTo(mix(tip.x,end.x,.5),mix(tip.y,end.y,.5)+5,end.x,end.y);c.strokeStyle='rgba(225,236,225,.45)';c.lineWidth=.6;c.stroke();
+   let end=this.target;if(g.phase==='flying'){const f=clamp(g.elapsed/1.1,0,1);end={x:mix(tip.x,end.x,f),y:mix(tip.y,end.y,f)-Math.sin(Math.PI*f)*this.height*.20};if(g.loadout.method==='float')this.drawFloat(end,true);else this.drawTerminal(end,scale*3);}
+   c.beginPath();c.moveTo(tip.x,tip.y);c.quadraticCurveTo(mix(tip.x,end.x,.5),mix(tip.y,end.y,.5)+5,end.x,end.y);c.strokeStyle='rgba(215,229,215,.34)';c.lineWidth=.55;c.stroke();
   }
-  c.save();c.translate(base.x,base.y);c.rotate(angle);c.filter='saturate(0.82) brightness(0.94)';c.drawImage(image,0,cropY,image.width,image.height-cropY,-axisX*scale,-(image.height-cropY)*scale,image.width*scale,(image.height-cropY)*scale);c.restore();
-  if(g.loadout.method==='feeder'&&g.phase==='held')this.signals[this.drawIndex]={...tip,anchor:focusAnchor,kind:'feeder'};this.tip=tip;this.metrics.heldPhoto=true;this.metrics.drawImages+=29;return true;
+  if(g.loadout.method==='feeder'&&g.phase==='held')this.signals[this.drawIndex]={...tip,anchor:rawTip,kind:'feeder'};
+  this.metrics.heldPhoto=true;this.metrics.drawImages+=Math.abs(flex)<.01?1:1+Math.ceil(cut/3);return true;
+ }
+ drawPhotoResting(){
+  const image=this.equipment?.resting;if(!image)return false;
+  const c=this.ctx,g=this.game,{x,y,width,height,at,footY}=restingLayout(this.width,this.height,{index:this.drawIndex,count:this.drawCount,shoreTop:this.shoreTop});
+  const feeder=g.loadout.method==='feeder',flex=feeder?biteMotion(g,this.clock).feederFlex:0;
+  // Only the fine upper section bends. The support and reel never move with the bite.
+  const shift=v=>Math.pow(Math.max(0,1-v/.42),2)*flex;
+  const rawTip=at(.049,.039),tip={x:rawTip.x+shift(.039),y:rawTip.y};this.tip=tip;
+  c.save();c.filter='saturate(0.76) brightness(0.88)';
+  // Contact shadows under each foot tie the support to the wood rather than to the viewport.
+  for(const [u,v] of [[.225,.947],[.501,.909],[.783,.947]]){const p=at(u,v);this.ellipse(p.x,p.y+2,width*.044,height*.006,'rgba(9,17,16,.23)');}
+  const cut=Math.round(image.height*.42);if(Math.abs(flex)<.01){c.drawImage(image,x,y,width,height);}else{c.drawImage(image,0,cut,image.width,image.height-cut,x,y+height*cut/image.height,width,height*(1-cut/image.height));
+  for(let sy=0;sy<cut;sy+=3){const sh=Math.min(3,cut-sy),v=sy/image.height;c.drawImage(image,0,sy,image.width,sh,x+shift(v),y+height*v,width,height*sh/image.height+.2);}}
+  c.restore();this.metrics.restingPhoto=true;this.metrics.drawImages+=Math.abs(flex)<.01?1:1+Math.ceil(cut/3);
+  const guides=[[.096,.079],[.139,.117],[.178,.157],[.231,.214],[.305,.295],[.407,.413]].map(([u,v])=>{const p=at(u,v);return {x:p.x+shift(v),y:p.y};});
+  const reel=at(.65,.762),points=[reel];
+  if(!feeder&&['waiting','bite'].includes(g.phase)){
+   const origin=at(.43,.66),limit=(this.inset.hudTop??this.height*.82)-26;
+   const anchor={x:origin.x,y:Math.min(origin.y,limit)},motion=biteMotion(g,this.clock).ledgerLift;
+   const indicator={x:anchor.x,y:anchor.y+motion};
+   this.signals[this.drawIndex]={...indicator,anchor,kind:'ledger'};
+   points.push(indicator);const grad=c.createLinearGradient(indicator.x-3,0,indicator.x+3,0);grad.addColorStop(0,'#4e5941');grad.addColorStop(.45,'#c6cca0');grad.addColorStop(1,'#7f8d60');
+   this.ellipse(indicator.x,indicator.y,3.5,7,grad,'#28332b',.6);
+   const tether=at(.50,.91);this.line([{x:indicator.x,y:indicator.y+7},tether],'rgba(100,115,94,.6)',.55);
+  }
+  if(feeder)this.signals[this.drawIndex]={...tip,anchor:rawTip,kind:'feeder'};
+  if(!['ready','landed','escaped'].includes(g.phase)){
+   points.push(...guides.reverse(),tip);this.line(points,'rgba(208,221,208,.34)',.55);
+   const end=this.target;c.beginPath();c.moveTo(tip.x,tip.y);c.quadraticCurveTo(mix(tip.x,end.x,.5),mix(tip.y,end.y,.5)+5,end.x,end.y);c.strokeStyle='rgba(217,229,216,.32)';c.lineWidth=.55;c.stroke();
+  }
+  return true;
  }
  drawFish(){const g=this.game;if(g.phase!=='fight'||g.distance>8)return;
   const c=this.ctx,p=this.target,s=clamp(8/g.distance,.9,2.2)*(g.fish?.length||50)/60;
@@ -113,7 +147,7 @@ export class LakeScene{
   this.ellipse(p.x,p.y,35+Math.sin(this.clock*4)*4,5,null,'rgba(223,236,222,.35)',1);
  }
  drawRig(){const c=this.ctx,g=this.game,w=this.width,h=this.height,method=g.loadout.method,floating=method==='float',fighting=g.phase==='fight',held=g.phase==='held',casting=g.phase==='casting',flying=g.phase==='flying';
-  const hand=floating||fighting||held||casting||flying||g.time-g.lastStrikeAt<.55;if(hand&&this.drawPhotoHeld())return;const layout=gearLayout(w,h,{...this.inset,index:this.drawIndex,count:this.drawCount,pose:this.pose,waterTop:this.waterTop});const {base,size}=layout;let tip={...layout.tip};
+  const hand=floating||fighting||held||casting||flying||g.time-g.lastStrikeAt<.55;if(hand&&this.drawPhotoHeld())return;if(!hand&&this.drawPhotoResting())return;const layout=gearLayout(w,h,{...this.inset,index:this.drawIndex,count:this.drawCount,pose:this.pose,waterTop:this.waterTop});const {base,size}=layout;let tip={...layout.tip};
   if(casting){tip.x+=w*g.castPower*.14;tip.y-=h*g.castPower*.15;}
   const bend=fighting?g.tension*48:method==='feeder'?7+(g.phase==='bite'?(8+Math.sin(g.elapsed*10)*6)*(g.biteStyle==='dropback'?-1:1):0):0;
   const control={x:mix(base.x,tip.x,.48)+bend*size,y:mix(base.y,tip.y,.45)-bend*.3*size};

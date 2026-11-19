@@ -76,3 +76,11 @@ body[data-phase="waiting"] .controls,body[data-phase="bite"] .controls{min-heigh
 /* Fishing station: keep the photographic equipment clear of the controls. */
 @media(min-width:651px){.fishing-ui{grid-template-columns:minmax(230px,420px);right:auto;width:min(420px,50vw);gap:12px}.fishing-ui .controls{grid-column:1;grid-row:auto;justify-content:flex-start;justify-self:start;max-width:100%}.fishing-ui .status-block,.fishing-ui .fight-panel{grid-column:1}.fishing-ui .controls .action{min-width:140px}.fishing-ui .controls .secondary{max-width:140px}.fishing-ui .status-block h1{font-size:30px}}
 @media(max-height:500px) and (orientation:landscape){.fishing-ui{width:min(390px,48vw);grid-template-columns:minmax(230px,1fr)}.fishing-ui .status-block h1{font-size:22px}.fishing-ui .controls .secondary{padding:10px 12px}.fishing-ui .controls .action{min-width:125px;padding:12px}}
+
+/* Quiet-water status leaves the complete support and reel visible on the pier. */
+@media (orientation:portrait){
+ body[data-phase="waiting"] .status-block,body[data-phase="bite"] .status-block,body[data-phase="escaped"] .status-block{position:fixed;top:var(--station-note-top,150px);left:18px;max-width:72%;}
+ body[data-phase="waiting"] .status-block h1,body[data-phase="bite"] .status-block h1,body[data-phase="escaped"] .status-block h1{font-size:21px;margin:6px 0;}
+ body[data-phase="waiting"] .status-block #hint,body[data-phase="bite"] .status-block #hint,body[data-phase="escaped"] .status-block #hint{font-size:11px;max-width:240px;}
+ body[data-phase="waiting"] #action{display:none;}
+}
