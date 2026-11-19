@@ -2,9 +2,17 @@
 
 Rybářská hra pro Safari na iPhonu. Výhled nově tvoří **skutečná fotografie Vajgaru** s animovanou hladinou, prutem, čihátkem, náhozem, splávkem a krmením. Zjednodušená 3D zástavba se v hlavní hře nepoužívá. Vykreslování běží přes Canvas 2D a nepotřebuje WebGL.
 
-**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.12.2
+**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.13.0
 
 Nejlépe na šířku. Všechny herní fotografie jsou přiložené lokálně. HD / ECO mění rozlišení a jemnost animace vody. Fotografie není 360° panorama: tažením jde pouze mírně posouvat výhled a směr náhozu. Nejde o volně průchozí 3D svět.
+
+## Datum, čas a světlo — 0.13.0
+
+Před výpravou, v horní části přípravy montáže nebo v deníku zvol **Výprava: datum · čas · změnit**. Zvol datum a čas nebo použij rychlou volbu ráno / poledne / večer / noc. Nastavení je společné pro oba pruty, uloží se pro příště a do záznamu úlovku. Starší sestavy začínají základním letním ránem 15. 6. 2026 v 07:00. Pro změnu stáhni oba pruty; zakrmená místa se při změně opustí. Zavření bez potvrzení změny zahodí.
+
+Roční období a denní doba ovlivňují druhově odlišnou aktivitu, skutečný výběr ryby a průměrné čekání na záběr. Návnada a nástraha dál rozhodují o cílovém druhu. Přehled ukazuje relativní aktivitu vůči základnímu letnímu ránu, nikoli procentní pravděpodobnost úlovku. Jde o zjednodušený herní model bez předpovědi počasí. Čas je pevně vybraný pro celou výpravu; vzhled vegetace fotografie se s datem nemění.
+
+Celá scéna včetně mola a náčiní sdílí teplý ranní / večerní odstín a noční ztmavení. Vlasec ve zdolávání reaguje na napětí a při dobírání na povolení; swinger se otáčí kolem pevného raménka. Prázdné signalizační náhledy před náhozem zabírají méně místa.
 
 ## Širší pohled — 0.12.2
 

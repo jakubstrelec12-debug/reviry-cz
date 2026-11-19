@@ -25,6 +25,7 @@ test('photographic renderer executes every phase and technique without a GPU',as
  g.loadout=methodPreset('ledger');g.phase='bite';for(const indicator of ['bobbin','swinger','electronic']){g.loadout.indicator=indicator;scene.render(.2);assert.equal(scene.signals[0].kind,'ledger');}
  assert.equal(scene.metrics.engine,'photographic-2d');assert.ok(scene.metrics.drawImages>10);
  const pixels=scene.ctx.getImageData(10,10,300,100).data;assert.ok(pixels.some((v,i)=>i%4!==3&&v>50));
+ const daylight=scene.ctx.getImageData(25,25,80,60).data,brightness=px=>px.reduce((sum,n,i)=>sum+(i%4===3?0:n),0);g.trip={date:'2026-06-15',time:'23:00'};const frozen=JSON.stringify(g);scene.render(0);assert.ok(brightness(scene.ctx.getImageData(25,25,80,60).data)<brightness(daylight)*.7);assert.equal(JSON.stringify(g),frozen);g.trip={date:'2026-06-15',time:'07:00'};
  const before=scene.clock;scene.render(0);assert.equal(scene.clock,before);scene.setQuality(false);scene.render(.05);assert.equal(scene.ratio,1);scene.dispose();
 });
 test('boilies are always selectable for bottom fishing and automatically choose the hair rig',()=>{

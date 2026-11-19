@@ -1,4 +1,5 @@
-import {speciesWeights,BAITS,FEEDS} from './tackle.js?v=0.12.2';
+import {speciesActivity} from './trip.js?v=0.13.0';
+import {speciesWeights,BAITS,FEEDS} from './tackle.js?v=0.13.0';
 export const STOCK_SOURCES={
  jarosov2022:{title:'Pořadatel závodu · Jarošov, 30. 4. 2022',url:'https://www.rybarskezebricky.cz/termin.php?co=detail&id=10893',date:'2022',scope:'Konkrétní malá vodní nádrž; osádka uvedená pořadatelem závodu.'},
  jarosov2025:{title:'Jarní šupinka · 29. 3. 2025',url:'https://www.rybarskezebricky.cz/termin.php?co=detail&id=13289',date:'2025',scope:'Stejná nádrž; novější seznam uvádí i štiku, candáta a okouna.'},
@@ -16,10 +17,10 @@ export const VENUES={
 export function getVenue(id){return Object.hasOwn(VENUES,id)?VENUES[id]:VENUES.vajgar;}
 export const EXTRA_SPECIES=[{id:'amur',name:'Amur bílý',min:1.2,max:8,power:.95,color:0x8e9970,lengthBase:25,lengthFactor:25},{id:'crucian',name:'Karas (druh neurčen)',min:.15,max:1.2,power:.40,color:0xb6a067,lengthBase:12,lengthFactor:25},{id:'roach',name:'Plotice obecná',min:.08,max:.65,power:.32,color:0xb7b5a1,lengthBase:8,lengthFactor:22}];
 export const SPECIES_NAMES={carp:'Kapr obecný',tench:'Lín obecný',bream:'Cejn velký',...Object.fromEntries(EXTRA_SPECIES.map(s=>[s.id,s.name]))};
-export function venueWeights(loadout,id='vajgar',feedBonus=0){
+export function venueWeights(loadout,id='vajgar',feedBonus=0,trip=null){
  const base=speciesWeights(loadout,feedBonus),ids=getVenue(id).playable;
  const natural=BAITS[loadout.bait].family==='natural',small=natural||loadout.bait==='softPellet6',plant=['corn','bread','wheat','pea','potato','tiger','dough'].includes(loadout.bait);
  const extras={amur:plant?.32:natural?.015:.06,crucian:small?.32:.01,roach:small?.55:.005};
- return ids.map(key=>{const i=['carp','tench','bream'].indexOf(key);if(i>=0)return base[i];if(loadout.bait==='boilie20')return 0;return extras[key]*(1+feedBonus*((FEEDS[loadout.feed].weights[plant?0:2]||1)-1));});
+ return ids.map(key=>{const i=['carp','tench','bream'].indexOf(key);if(i>=0)return base[i]*speciesActivity(key,trip);if(loadout.bait==='boilie20')return 0;return speciesActivity(key,trip)*extras[key]*(1+feedBonus*((FEEDS[loadout.feed].weights[plant?0:2]||1)-1));});
 }
-export function venueChances(loadout,id='vajgar',feedBonus=0){const w=venueWeights(loadout,id,feedBonus),sum=w.reduce((a,b)=>a+b,0);return w.map(v=>v/sum);}
+export function venueChances(loadout,id='vajgar',feedBonus=0,trip=null){const w=venueWeights(loadout,id,feedBonus,trip),sum=w.reduce((a,b)=>a+b,0);return w.map(v=>v/sum);}

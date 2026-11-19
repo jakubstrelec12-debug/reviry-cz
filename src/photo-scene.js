@@ -1,6 +1,7 @@
-import {getVenue} from './venues.js?v=0.12.2';
-import {biteMotion} from './bite-motion.js?v=0.12.2';
-import {RODS,RIGS} from './tackle.js?v=0.12.2';
+import {tripConditions} from './trip.js?v=0.13.0';
+import {getVenue} from './venues.js?v=0.13.0';
+import {biteMotion} from './bite-motion.js?v=0.13.0';
+import {RODS,RIGS} from './tackle.js?v=0.13.0';
 
 export const PHOTO=getVenue('vajgar').photo;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -58,7 +59,7 @@ export class LakeScene{
  setSignalViews(views){this.signalViews=views;}
  setSignalVisible(visible){this.signalVisible=visible;}
  setCastDirection(){this.castYaw=this.yaw;}
- splash(index){const target=this.targets?.[index]||this.target;if(target)this.ripples.push({...target,time:this.clock});this.ripples=this.ripples.slice(-6);}
+ splash(index){const target=this.targets?.[index]||this.target;if(target)this.ripples.push({...target,time:this.clock,distance:this.game.rods?.[index]?.distance||this.game.distance||20});this.ripples=this.ripples.slice(-6);}
  scatterFeed(index){const target=this.targets?.[index]||this.target;if(target)this.feedThrow={time:this.clock,start:{x:this.width*.25,y:this.height},end:{...target}};}
  cachePhotograph(){
   const key=[this.yaw.toFixed(3),this.pitch.toFixed(3),this.width,this.height,this.photo.src,this.wideView].join('/');if(key===this.lastView)return;
@@ -90,9 +91,25 @@ export class LakeScene{
    c.drawImage(this.background,0,y*r,w*r,size*r,wave*depth*1.7,y,w,size);this.metrics.drawImages++;
   }
  }
+ drawLighting(){
+  const c=this.ctx,{light,warmth,darkness,morning}=tripConditions(this.game.trip),w=this.width,h=this.height;
+  // Grade the whole scene, including rods and foreground, in the same light.
+  c.save();if(warmth>.005){c.fillStyle=`rgba(217,145,78,${warmth*.6})`;c.fillRect(0,0,w,h);}
+  if(darkness>.005){c.fillStyle=`rgba(10,21,46,${darkness})`;c.fillRect(0,0,w,h);}
+  if(light>.1&&warmth>.015&&this.shoreTop>this.waterTop){
+   c.beginPath();c.rect(0,this.waterTop,w,this.shoreTop-this.waterTop);c.clip();
+   const cx=w*(morning>.2?.70:.30),span=w*.28,glow=c.createLinearGradient(cx-span,0,cx+span,0);glow.addColorStop(0,'rgba(255,222,164,0)');glow.addColorStop(.5,`rgba(255,222,164,${warmth*.28})`);glow.addColorStop(1,'rgba(255,222,164,0)');c.fillStyle=glow;c.fillRect(cx-span,this.waterTop,span*2,this.shoreTop-this.waterTop);
+  }c.restore();
+ }
+ drawWaterLine(tip,end,g){
+  const c=this.ctx,slack=g.phase==='held'?g.slackToTake||0:0,taut=g.phase==='fight'?clamp(g.tension,0,1):0;
+  const sag=(g.phase==='flying'?2:4+slack*34)*(1-taut*.88),breeze=Math.sin(this.clock*.9+this.drawIndex*2)*(1-taut)*1.5;
+  c.beginPath();c.moveTo(tip.x,tip.y);c.quadraticCurveTo(mix(tip.x,end.x,.5)+breeze,mix(tip.y,end.y,.5)+sag,end.x,end.y);c.strokeStyle='rgba(213,225,214,.27)';c.lineWidth=.5;c.stroke();
+  if(['waiting','bite','fight','held'].includes(g.phase)){this.ellipse(end.x,end.y,2.6, .65,null,'rgba(211,227,214,.18)',.5);}
+ }
  drawRipples(){const c=this.ctx,t=this.clock;
   this.ripples=this.ripples.filter(p=>t-p.time<5);
-  for(const p of this.ripples){const age=t-p.time;for(let i=0;i<3;i++){const f=age-i*.24;if(f<0)continue;const radius=5+f*19;this.ellipse(p.x,p.y,radius,radius*.17,null,`rgba(231,242,228,${Math.max(0,.45-f*.09)})`,1);}}
+  for(const p of this.ripples){const age=t-p.time;for(let i=0;i<3;i++){const f=age-i*.24;if(f<0)continue;const scale=clamp(18/Math.max(8,p.distance||20),.45,1.4),radius=(3+f*14)*scale;this.ellipse(p.x,p.y,radius,radius*.17,null,`rgba(231,242,228,${Math.max(0,.45-f*.09)})`,1);}}
   if(this.feedThrow){const p=this.feedThrow,f=clamp((t-p.time)/.95,0,1);for(let i=0;i<20;i++){const x=mix(p.start.x,p.end.x+Math.sin(i*2.4)*18,f),y=mix(p.start.y,p.end.y+Math.cos(i*2.4)*4,f)-Math.sin(Math.PI*f)*(this.height*.22+i%3*5);this.ellipse(x,y,1.4,1.2,'#cfb77d');}if(f>=1){this.feedThrow=null;this.splash();}}
  }
  drawFloat(target,flying){
@@ -122,7 +139,7 @@ export class LakeScene{
   c.restore();
   if(!['ready','casting','landed','escaped'].includes(g.phase)){
    let end=this.target;if(g.phase==='flying'){const f=clamp(g.elapsed/1.1,0,1);end={x:mix(tip.x,end.x,f),y:mix(tip.y,end.y,f)-Math.sin(Math.PI*f)*this.height*.20};if(g.loadout.method==='float')this.drawFloat(end,true);else this.drawTerminal(end,scale*3);}
-   c.beginPath();c.moveTo(tip.x,tip.y);c.quadraticCurveTo(mix(tip.x,end.x,.5),mix(tip.y,end.y,.5)+5,end.x,end.y);c.strokeStyle='rgba(215,229,215,.34)';c.lineWidth=.55;c.stroke();
+   this.drawWaterLine(tip,end,g);
   }
   if(g.loadout.method==='feeder'&&g.phase==='held')this.signals[this.drawIndex]={...tip,anchor:rawTip,kind:'feeder'};
   this.metrics.heldPhoto=true;this.metrics.drawImages+=Math.abs(flex)<.01?1:1+Math.ceil(cut/3);return true;
@@ -145,10 +162,11 @@ export class LakeScene{
   if(!feeder&&['waiting','bite'].includes(g.phase)){
    const origin=at(.43,.80),limit=this.height>this.width?(this.inset.hudTop??this.height*.82)-26:Infinity;
    const anchor={x:origin.x,y:Math.min(origin.y,limit)},motion=biteMotion(g,this.clock).ledgerLift;
-   const indicator={x:anchor.x,y:anchor.y+motion};
+   const type=g.loadout.indicator||'bobbin',tether=at(.50,.91),arm=Math.hypot(anchor.x-tether.x,anchor.y-tether.y),angle=Math.atan2(anchor.y-tether.y,anchor.x-tether.x)+(motion/Math.max(30,arm));
+   const indicator=type==='bobbin'?{x:anchor.x,y:anchor.y+motion}:{x:tether.x+Math.cos(angle)*arm,y:tether.y+Math.sin(angle)*arm};
    this.signals[this.drawIndex]={...indicator,anchor,kind:'ledger'};
    points.push(indicator);const grad=c.createLinearGradient(indicator.x-3,0,indicator.x+3,0);grad.addColorStop(0,'#4e5941');grad.addColorStop(.45,'#c6cca0');grad.addColorStop(1,'#7f8d60');
-   const type=g.loadout.indicator||'bobbin',tether=at(.50,.91);
+
    if(type!=='bobbin')this.line([tether,indicator],'#8d9a94',2);
    this.ellipse(indicator.x,indicator.y,3.5,7,type==='bobbin'?grad:'#72b8c6','#28332b',.6);
    if(type==='bobbin')this.line([{x:indicator.x,y:indicator.y+7},tether],'rgba(100,115,94,.6)',.55);
@@ -161,7 +179,7 @@ export class LakeScene{
   if(feeder)this.signals[this.drawIndex]={...tip,anchor:rawTip,kind:'feeder'};
   if(!['ready','landed','escaped'].includes(g.phase)){
    points.push(...guides.reverse(),tip);this.line(points,'rgba(208,221,208,.34)',.55);
-   const end=this.target;c.beginPath();c.moveTo(tip.x,tip.y);c.quadraticCurveTo(mix(tip.x,end.x,.5),mix(tip.y,end.y,.5)+5,end.x,end.y);c.strokeStyle='rgba(217,229,216,.32)';c.lineWidth=.55;c.stroke();
+   const end=this.target;this.drawWaterLine(tip,end,g);
   }
   return true;
  }
@@ -236,7 +254,7 @@ export class LakeScene{
    this.target=waterPoint(this.width,this.height,this.waterTop,g.distance||30,(g.castAngle||0)-this.yaw+(rods.length>1?(i===0?-.05:.05):0),this.equipment.deck?this.shoreTop:null);if(g.loadout.method==='float')this.target.x-=this.width*.12;this.targets.push({...this.target});
    this.drawFish();if(g.loadout.method==='float'&&['waiting','bite'].includes(g.phase))this.drawFloat(this.target,false);this.drawRig();
   }
-  this.game=session;this.target=this.targets[active];
+  this.game=session;this.target=this.targets[active];this.drawLighting();
  }
 
  dispose(){window.removeEventListener('resize',this.onResize);}
