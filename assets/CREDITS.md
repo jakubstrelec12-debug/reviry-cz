@@ -38,3 +38,9 @@ Nejde o procedurálně vygenerovanou rekonstrukci ani o 360° panorama. Snímek 
 Jména modelů v přípravě lovu jsou oddělená od těchto ilustračních snímků: fotografie automaticky nezobrazuje vybraný výrobek Mivardi. Zdroj, autor, licence a úpravy jsou uvedeny také v herním deníku v části O prostředí a podkladech. Výrobci ani fotografové hru nezaštiťují. Od verze 0.9 optický detail znovu vykresluje tutéž scénu se stejnou polohou náčiní a stejným časem ve vyšším rozlišení. Nejde o nezávislou animaci ani o další fotografii.
 
 Prompty pro extrakci: zachovat skutečný fotografovaný prut, naviják a ruku, odstranit pouze béžovou stěnu; u splávku zachovat přesný tvar, barevné tělo a červenou špičku, odstranit bílé pozadí. Použit vestavěný image_gen s průhledným pozadím.
+
+## Popředí stanoviště — 0.10
+
+`equipment/fishing-deck.webp`: fotorealistický průhledný kompozit vytvořený vestavěným image_gen. Původní fotografie Wwery výše sloužila jako reference osvětlení a výšky kamery. Zadání: široké dřevěné stanoviště přes spodní čtvrtinu obrazu, šedohnědé zvětralé prkno, chladné rozptýlené světlo, zbytek průhledný; bez lidí, náčiní, textu a dalších částí krajiny. Výstup zmenšen na 1800 × 600, převeden do WebP se zachováním alfa. Tento kompozit sdílíme pod CC BY-SA 4.0, stejně jako úpravy fotografického prostředí.
+
+**Nejde o fotografii skutečného mola na Vajgaru.** Původní fotografie je zachována jako samostatný soubor; za běhu se mění její ořez a přidává se syntetické popředí. Označení AI popředí je v zápatí i v herním deníku.

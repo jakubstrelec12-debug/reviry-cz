@@ -1,5 +1,5 @@
-import {strikeWindow,assessStrike,strikeReason} from './strike-timing.js?v=0.9.0';
-import {DEFAULT_LOADOUT, METHODS, RODS, RIGS, catchWeight, validateLoadout, cleanLoadout, feedInfluence, speciesWeights, biteDelay} from './tackle.js?v=0.9.0';
+import {strikeWindow,assessStrike,strikeReason} from './strike-timing.js?v=0.10.0';
+import {DEFAULT_LOADOUT, METHODS, RODS, RIGS, catchWeight, validateLoadout, cleanLoadout, feedInfluence, speciesWeights, biteDelay,createFeedStocks} from './tackle.js?v=0.10.0';
 export const SPECIES = [
   {id:'carp',name:'Kapr obecný', min:1.4, max:7.8, power:0.85, color:0xb79b5d},
   {id:'tench',name:'Lín obecný', min:0.45, max:2.3, power:0.6, color:0x6d7841},
@@ -7,7 +7,7 @@ export const SPECIES = [
 ];
 export class Fishing {
   constructor(random = Math.random) {
-    this.loadout={...DEFAULT_LOADOUT};this.feedSpot=null;this.feedStocks={grain:1000,groundbait:1000,micro:1000};this.castAngle=0;this.random=random; this.phase='ready'; this.time=0;this.castPower=0;this.distance=0;
+    this.loadout={...DEFAULT_LOADOUT};this.feedSpot=null;this.feedStocks=createFeedStocks();this.castAngle=0;this.random=random; this.phase='ready'; this.time=0;this.castPower=0;this.distance=0;
     this.drag=0.48;this.tension=0.25;this.stamina=1;this.reeling=false;this.lifting=false;
     this.elapsed=0;this.biteIn=0;this.biteElapsed=0;this.fish=null;this.result=null;
     this.biteWindow=null;this.slackToTake=0;this.hookQuality=1;this.lastStrike=null;this.lastStrikeAt=-Infinity;this.journal=[]; this.onChange=()=>{};this.onEvent=()=>{};this.paused=false;
@@ -20,7 +20,7 @@ export class Fishing {
   }
   get feedBonus(){return feedInfluence(this.loadout,this.feedSpot,this.time,this.distance,this.castAngle);}
   depositFeed(grams){
-    const type=this.loadout.feed;if(type==='none'||this.feedStocks[type]<grams)return false;
+    const type=this.loadout.feed;if(type==='none'||!Number.isFinite(this.feedStocks[type])||this.feedStocks[type]<grams)return false;
     this.feedStocks[type]-=grams;
     const previous=this.feedSpot,near=previous&&previous.type===type&&Math.abs(previous.distance-this.distance)<7&&Math.abs(previous.angle-this.castAngle)<.18;
     this.feedSpot={type,time:this.time,distance:this.distance,angle:this.castAngle,grams:Math.min(500,grams+(near?previous.grams*Math.max(0,1-(this.time-previous.time)/240):0))};return true;
@@ -56,7 +56,7 @@ export class Fishing {
     if(this.phase==='flying'&&this.elapsed>1.1){this.phase='waiting';if(RIGS[this.loadout.rig].feeder)this.depositFeed(20);this.biteIn=biteDelay(this.loadout,this.random(),this.feedBonus);this.elapsed=0;this.emit('splash');}
     if(this.phase==='waiting'&&this.elapsed>=this.biteIn){
       const weights=speciesWeights(this.loadout,this.feedBonus);let pick=Math.max(0,Math.min(1-Number.EPSILON,this.random()))*weights.reduce((a,b)=>a+b,0),index=0;while(index<weights.length-1&&pick>=weights[index])pick-=weights[index++];const species=SPECIES[index];
-      const weight=catchWeight(species,this.loadout,this.random());
+      const weight=catchWeight(species,this.loadout,this.random(),this.feedBonus);
       this.fish={...species,weight,length:Math.round(22+Math.pow(weight,0.44)*23)};
       this.biteStyle=Math.round(weight*100)%3===0?'dropback':'pull';this.biteWindow=strikeWindow(this.loadout,this.fish);this.phase='bite';this.elapsed=0;this.biteElapsed=0;this.emit('bite');
     }

@@ -68,3 +68,11 @@ test('photographic equipment has real alpha; float visibly submerges and its foc
  const red=()=>{const t=scene.signals[0],px=scene.ctx.getImageData(Math.round(t.x)-8,Math.round(t.y)-25,16,25).data;let n=0;for(let i=0;i<px.length;i+=4)if(px[i]>150&&px[i]>px[i+1]*1.8&&px[i]>px[i+2]*1.8)n++;return n;};
  const before=red();assert.ok(before>5);const zoomBefore=focus.toBuffer('image/png');game.phase='bite';game.elapsed=3;scene.render(0);assert.ok(red()<before/2);assert.notDeepEqual(focus.toBuffer('image/png'),zoomBefore);const frozen=JSON.stringify(game),clock=scene.clock,context=scene.ctx;scene.render(0);assert.equal(scene.clock,clock);assert.equal(JSON.stringify(game),frozen);assert.equal(scene.ctx,context);scene.setSignalVisible(false);const hidden=focus.toBuffer('image/png');game.elapsed=.2;scene.render(0);assert.deepEqual(focus.toBuffer('image/png'),hidden);scene.setSignalVisible(true);scene.render(0);assert.notDeepEqual(focus.toBuffer('image/png'),hidden);scene.dispose();
 });
+
+test('foreground station keeps held equipment independent of HUD and cast targets on water',async()=>{
+ const {heldLayout}=await import('../src/photo-scene.js');
+ for(const [w,h] of [[390,650],[390,844],[844,390],[1366,768]]){
+  const rest=heldLayout(w,h),lift=heldLayout(w,h,.8);assert.ok(rest.base.y>=h);assert.ok(lift.base.y<rest.base.y);assert.ok(rest.scale>=.16&&rest.scale<=.30);assert.ok(rest.base.x>w*.9);
+  const top=h*.43,bottom=h*.75;for(const d of [3,7,20,54]){const target=waterPoint(w,h,top,d,0,bottom);assert.ok(target.y>top&&target.y<bottom-10);}
+ }
+});

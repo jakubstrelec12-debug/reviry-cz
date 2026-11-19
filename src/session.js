@@ -1,10 +1,10 @@
-import {Fishing} from './fishing.js?v=0.9.0';
-import {cleanLoadout,validateLoadout} from './tackle.js?v=0.9.0';
+import {Fishing} from './fishing.js?v=0.10.0';
+import {cleanLoadout,validateLoadout,createFeedStocks} from './tackle.js?v=0.10.0';
 const LOCKED=['casting','flying','held','fight','landed'];
 export class FishingSession{
  constructor(random=Math.random){
   this.rods=[new Fishing(random),new Fishing(random)];this.activeIndex=0;this.secondEnabled=false;this.onChange=()=>{};this.onEvent=()=>{};this._paused=false;this._journal=[];
-  const stocks={grain:1000,groundbait:1000,micro:1000};
+  const stocks=createFeedStocks();
   this.rods.forEach((rod,index)=>{rod.feedStocks=stocks;rod.journal=this._journal;rod.onEvent=(event,data)=>{
    if(event==='landed'){data.rodNumber=index+1;this.journal=rod.journal;}
    this.onEvent(event,{...data,rodIndex:index});this.onChange(this);

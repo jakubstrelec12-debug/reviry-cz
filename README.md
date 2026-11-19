@@ -1,8 +1,8 @@
-# REVÍRY CZ — Vajgar 0.9
+# REVÍRY CZ — Vajgar 0.10
 
 Rybářská hra pro Safari na iPhonu. Výhled nově tvoří **skutečná fotografie Vajgaru** s animovanou hladinou, prutem, čihátkem, náhozem, splávkem a krmením. Zjednodušená 3D zástavba se v hlavní hře nepoužívá. Vykreslování běží přes Canvas 2D a nepotřebuje WebGL.
 
-**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.9.0
+**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.10.0
 
 Nejlépe na šířku. Všechny herní fotografie jsou přiložené lokálně. HD / ECO mění rozlišení a jemnost animace vody. Fotografie není 360° panorama: tažením jde pouze mírně posouvat výhled a směr náhozu. Nejde o volně průchozí 3D svět.
 
@@ -76,3 +76,13 @@ Zaseknout lze i při čekání tlačítkem Zaseknout: bez záběru to skončí d
 U položené a feederu je stále nutné vzít prut. To **nezastaví ani neobnoví** čas ryby na nástraze. Při padavém záběru je po zvednutí prutu potřeba podržet Dobrat vlasec a teprve potom zaseknout. Navíjení skutečně ubírá povolení a současně běží čas záběru. Hraniční, ale platný zásek má slabší kontakt: při zdolávání hůře snáší povolený vlasec. Karta úlovku a deník uchovávají kvalitu záseku.
 
 Validace: 49 testů, včetně brzkého / čistého / pozdního záseku pro každou techniku, záseku bez ryby, dobírání vlasce, pauzy, společné časové osy po zvednutí prutu, celého UI cyklu a zachování herního stavu při optickém vykreslení.
+
+### Rybářské stanoviště a katalog 0.10
+
+Fotografie je rámovaná s vyšším horizontem a větším prostorem hladiny. V popředí je samostatná fotorealistická vrstva dřevěného stanoviště vytvořená AI; nejde o fotografii existujícího mola na Vajgaru. Animace vody, splávek a dopady zůstávají před jeho hranou. Fotografie ruky a navijáku je menší, barevně přizpůsobená a vychází ze spodního pravého okraje. Její poloha se neodvozuje od výšky panelu ovládání. Na šířku je ovládání vlevo, aby nezakrývalo vybavení.
+
+Katalog obsahuje **25 nástrah a 11 návnad** (plus volbu bez krmení). Nástrahy jsou rozdělené na přírodní, potápivé boilies, pop-up / wafters a pelety. Nabídka podle techniky zahrnuje kukly, pinkies, patentky, pšenici, hrách, těsto, bramboru, lančmít, sýr, tygří ořech, mini boilies, dvě velikosti Nikl pop-up a tři Sonubaits wafters. Volba upraví kompatibilní montáž a háček. Plavaná nezobrazuje nástrahy vyžadující vlasovou montáž na dno.
+
+Krmení má vlastní zásobu pro každý typ, společnou oběma prutům. Konopí a celá pšenice se nabízejí pro volné zakrmení; do krmítka se volí směsi nebo drobné složky. Doba působení směsí se liší a některé zvýhodňují větší úlovky. Šance, tempo a velikosti jsou herní parametry, nikoli změřené vlastnosti výrobků nebo populace Vajgaru. Značkové položky mají odkaz na zdroj; ilustrační kresby a fotografie nemusí zobrazovat konkrétní zvolený výrobek.
+
+Validace: 54 testů — celý cyklus lovu a záseku, dostupnost všech nástrah s platnou montáží, jemné háčky, filtrování, všechny zásoby / spotřeba krmení, zákaz celého partiklu v krmítku, doba rozpadu a vliv na úlovek, ukotvení pohledu a dopady na vodu před stanovištěm.

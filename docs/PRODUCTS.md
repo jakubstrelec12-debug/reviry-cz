@@ -17,3 +17,17 @@ Ověřeno 19. 11. 2026. Názvy a délky / rozměry odpovídají následujícím 
 | Sonubaits Supercrush Green | https://www.sonubaits.com/en/products/groundbait/sp-10474 |
 
 Původní vlastní monofily v uložených sestavách se zachovávají pod označením „Vlastní monofil“. Nejsou přejmenované na výrobek s jiným skutečným průměrem. Červi, žížaly, pečivo, kukuřice a obecné krmné složky jsou bez přisuzované komerční značky.
+
+## Doplnění katalogu 0.10
+
+Ověřeno 19. 11. 2026. Dostupnost konkrétních variant může být odlišná; hra není živý obchodní sklad. Generické přírodní nástrahy, peleta halibut a obecné směsi nejsou připsané vymyšlené značce. Herní reakce ryb nepředstavuje měření účinnosti výrobků.
+
+| Položka | Zdroj |
+| --- | --- |
+| Nikl Plovoucí boilies Scopex & Squid, 10 a 14 mm | https://www.nikl.cz/nikl-plovouci-boilies-scopex-squid_z39299/ |
+| Sonubaits Band’um Wafters: Banoffee 6 mm, Krill & Squid 8 mm, Pineapple & Coconut 10 mm | https://www.sonubaits.com/es/products/hookbaits/sp-10353 |
+| Mivardi Tygří ořech | https://www.mivardi.cz/tygri-orech |
+| Mivardi Tygří ořech drcený | https://www.mivardi.cz/tygri-orech-drceny-1kg |
+| Mivardi Method mix Rapid Champion | https://www.mivardi.cz/method-mix-rapid-champion |
+
+UI rozlišuje nástrahu na háček / přívěs a návnadu do krmného místa. Rozměry a typy značkových nástrah odpovídají zdrojům; barvy náhledů jsou ilustrativní.

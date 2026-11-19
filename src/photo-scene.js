@@ -1,5 +1,5 @@
-import {biteMotion} from './bite-motion.js?v=0.9.0';
-import {RODS,RIGS} from './tackle.js?v=0.9.0';
+import {biteMotion} from './bite-motion.js?v=0.10.0';
+import {RODS,RIGS} from './tackle.js?v=0.10.0';
 
 export const PHOTO={src:'assets/vajgar-photograph.webp',author:'Wwery',title:'Pohled na Jindřichův Hradec přes rybník Vajgar',source:'https://commons.wikimedia.org/wiki/File:Pohled_na_Jind%C5%99ich%C5%AFv_Hradec_p%C5%99es_rybn%C3%ADk_Vajgar.jpg',license:'CC BY-SA 4.0',licenseUrl:'https://creativecommons.org/licenses/by-sa/4.0/',waterStart:.575};
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -7,8 +7,8 @@ export function photoCrop(iw,ih,w,h,yaw=0,pitch=0){
  const scale=Math.max(w/iw,h/ih)*1.055,sw=w/scale,sh=h/scale;
  return {sx:clamp((iw-sw)/2+yaw*iw*.4,0,iw-sw),sy:clamp((ih-sh)/2+pitch*ih*.3,0,ih-sh),sw,sh,scale};
 }
-export function waterPoint(w,h,waterTop,distance,angle=0){
- const near=h*.84,far=Math.max(waterTop+18,h*.60),depth=clamp(Math.log1p(distance)/Math.log(65),0,1);
+export function waterPoint(w,h,waterTop,distance,angle=0,waterBottom=null){
+ const near=waterBottom===null?h*.84:waterBottom-14,far=waterBottom===null?Math.max(waterTop+18,h*.60):Math.min(near-12,waterTop+18),depth=clamp(Math.log1p(distance)/Math.log(65),0,1);
  return {x:w*(.50+Math.sin(angle)*.65),y:near+(far-near)*depth};
 }
 export function gearLayout(w,h,{hudTop=h*.82,headerBottom=90,index=0,count=1,pose=0,waterTop=h*.56}={}){
@@ -21,6 +21,7 @@ export function gearLayout(w,h,{hudTop=h*.82,headerBottom=90,index=0,count=1,pos
  const size=clamp(Math.min(w/(dual?750:520),h/480),portrait?.64:.65,1.05);
  return {base,tip,size,hudTop,headerBottom};
 }
+export function heldLayout(w,h,pose=0,cast=0){return {scale:clamp(Math.min(w*.00056,h*.00055),.16,.30),angle:-.42+cast*.65-pose*.28,base:{x:h>w?w*1.02:w*.98+12,y:h+10-pose*50}};}
 function loadImage(path){return new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>reject(new Error('Fotografii Vajgaru se nepodařilo načíst.'));image.src=new URL('../'+path,import.meta.url).href;});}
 function mix(a,b,t){return a+(b-a)*t;}
 function point(a,b,c,t){const u=1-t;return {x:u*u*a.x+2*u*t*b.x+t*t*c.x,y:u*u*a.y+2*u*t*b.y+t*t*c.y};}
@@ -32,7 +33,7 @@ export class LakeScene{
   try{this.high=localStorage.getItem('reviry-quality')!=='low';}catch{this.high=true;}
   this.background=document.createElement('canvas');this.bctx=this.background.getContext('2d');this.lastView='';this.bindLook();this.onResize=()=>this.resize();window.addEventListener('resize',this.onResize);
  }
- async init(){this.image=await loadImage(PHOTO.src);this.equipment={};await Promise.all([['rod','assets/equipment/rod-hand.webp'],['float','assets/equipment/waggler.webp']].map(async([key,path])=>{try{this.equipment[key]=await loadImage(path);}catch{this.assetWarnings.push(path);}}));this.resize();this.render(0);return this;}
+ async init(){this.image=await loadImage(PHOTO.src);this.equipment={};await Promise.all([['rod','assets/equipment/rod-hand.webp'],['float','assets/equipment/waggler.webp'],['deck','assets/equipment/fishing-deck.webp']].map(async([key,path])=>{try{this.equipment[key]=await loadImage(path);}catch{this.assetWarnings.push(path);}}));this.resize();this.render(0);return this;}
  resize(){this.width=innerWidth;this.height=innerHeight;this.ratio=Math.min(devicePixelRatio||1,this.high?1.75:1);for(const c of [this.canvas,this.background]){c.width=Math.round(this.width*this.ratio);c.height=Math.round(this.height*this.ratio);}this.ctx.setTransform(this.ratio,0,0,this.ratio,0,0);this.bctx.setTransform(this.ratio,0,0,this.ratio,0,0);this.lastView='';}
  setQuality(high){this.high=high;try{localStorage.setItem('reviry-quality',high?'high':'low');}catch{}this.resize();}
  bindLook(){let pointer=null,lastX=0,lastY=0;
@@ -49,15 +50,16 @@ export class LakeScene{
  cachePhotograph(){
   const key=[this.yaw.toFixed(3),this.pitch.toFixed(3),this.width,this.height].join('/');if(key===this.lastView)return;
   this.crop=photoCrop(this.image.width,this.image.height,this.width,this.height,this.yaw,this.pitch);const p=this.crop;
-  this.bctx.drawImage(this.image,p.sx,p.sy,p.sw,p.sh,0,0,this.width,this.height);
-  this.waterTop=clamp((this.image.height*PHOTO.waterStart-p.sy)*p.scale,0,this.height);this.lastView=key;
+  const lift=this.equipment.deck?this.height*.13:0;this.bctx.fillStyle='#1c2927';this.bctx.fillRect(0,0,this.width,this.height);this.bctx.drawImage(this.image,p.sx,p.sy,p.sw,p.sh,0,-lift,this.width,this.height);
+  if(this.equipment.deck){const d=this.equipment.deck;this.deckCrop=photoCrop(d.width,d.height,this.width,this.height,this.yaw*.25,this.pitch*.25);this.shoreTop=clamp((d.height*.739-this.deckCrop.sy)*this.deckCrop.scale,0,this.height);}else this.shoreTop=this.height;
+  this.waterTop=clamp((this.image.height*PHOTO.waterStart-p.sy)*p.scale-lift,0,this.height);this.lastView=key;
  }
  ellipse(x,y,rx,ry,fill,stroke=null,width=1){const c=this.ctx;c.beginPath();c.ellipse(x,y,Math.max(.1,rx),Math.max(.1,ry),0,0,Math.PI*2);if(fill){c.fillStyle=fill;c.fill();}if(stroke){c.strokeStyle=stroke;c.lineWidth=width;c.stroke();}}
  line(points,color,width=1){const c=this.ctx;c.beginPath();c.moveTo(points[0].x,points[0].y);for(const p of points.slice(1))c.lineTo(p.x,p.y);c.strokeStyle=color;c.lineWidth=width;c.lineCap='round';c.stroke();}
  water(){const c=this.ctx,w=this.width,h=this.height,r=this.ratio;c.drawImage(this.background,0,0,w,h);this.metrics.drawImages=1;
   const step=this.high?4:8;
-  for(let y=Math.ceil(this.waterTop);y<h;y+=step){
-   const size=Math.min(step,h-y),depth=(y-this.waterTop)/Math.max(1,h-this.waterTop),wave=Math.sin(y*.11+this.clock*1.1)+Math.sin(y*.057-this.clock*.7)*.35;
+  for(let y=Math.ceil(this.waterTop);y<Math.min(h,this.shoreTop);y+=step){
+   const size=Math.min(step,this.shoreTop-y),depth=(y-this.waterTop)/Math.max(1,h-this.waterTop),wave=Math.sin(y*.11+this.clock*1.1)+Math.sin(y*.057-this.clock*.7)*.35;
    c.drawImage(this.background,0,y*r,w*r,size*r,wave*depth*1.7,y,w,size);this.metrics.drawImages++;
   }
  }
@@ -83,9 +85,7 @@ export class LakeScene{
  drawPhotoHeld(){
   const image=this.equipment?.rod;if(!image)return false;
   const c=this.ctx,g=this.game,w=this.width,h=this.height,hud=this.inset.hudTop??h*.82,portrait=h>w;
-  const scale=Math.min(clamp(w*.00029,portrait?.25:.15,.37),Math.max(.075,(hud-(this.inset.headerBottom??85)-38)/(image.height*.68))),cropY=image.height*.30,axisX=image.width*.83;
-  const cast=g.phase==='casting'?g.castPower:0,angle=-.30+cast*.65-this.pose*.28;
-  const base={x:portrait?w*.98:w+10,y:hud+(portrait?45:28)-this.pose*35};
+  const cast=g.phase==='casting'?g.castPower:0,{scale,angle,base}=heldLayout(w,h,this.pose,cast),cropY=image.height*.30,axisX=image.width*.83;
   const transform=(x,y)=>({x:base.x+(x-axisX)*scale*Math.cos(angle)-(y-image.height)*scale*Math.sin(angle),y:base.y+(x-axisX)*scale*Math.sin(angle)+(y-image.height)*scale*Math.cos(angle)});
   const joint=transform(image.width*.81,cropY+8),tip={x:joint.x-w*.16+cast*w*.22,y:Math.max((this.inset.headerBottom??85)+16,joint.y-(portrait?100:55)-this.pose*40)};
   const focusAnchor={...tip};if(g.phase==='held'&&g.loadout.method==='feeder')tip.x+=biteMotion(g,this.clock).feederFlex;
@@ -102,7 +102,7 @@ export class LakeScene{
    this.line([reel,...guides,tip],'rgba(222,232,222,.42)',.55);let end=this.target;if(g.phase==='flying'){const f=clamp(g.elapsed/1.1,0,1);end={x:mix(tip.x,end.x,f),y:mix(tip.y,end.y,f)-Math.sin(Math.PI*f)*h*.20};if(g.loadout.method==='float')this.drawFloat(end,true);else this.drawTerminal(end,scale*3);}
    c.beginPath();c.moveTo(tip.x,tip.y);c.quadraticCurveTo(mix(tip.x,end.x,.5),mix(tip.y,end.y,.5)+5,end.x,end.y);c.strokeStyle='rgba(225,236,225,.45)';c.lineWidth=.6;c.stroke();
   }
-  c.save();c.translate(base.x,base.y);c.rotate(angle);c.drawImage(image,0,cropY,image.width,image.height-cropY,-axisX*scale,-(image.height-cropY)*scale,image.width*scale,(image.height-cropY)*scale);c.restore();
+  c.save();c.translate(base.x,base.y);c.rotate(angle);c.filter='saturate(0.82) brightness(0.94)';c.drawImage(image,0,cropY,image.width,image.height-cropY,-axisX*scale,-(image.height-cropY)*scale,image.width*scale,(image.height-cropY)*scale);c.restore();
   if(g.loadout.method==='feeder'&&g.phase==='held')this.signals[this.drawIndex]={...tip,anchor:focusAnchor,kind:'feeder'};this.tip=tip;this.metrics.heldPhoto=true;this.metrics.drawImages+=29;return true;
  }
  drawFish(){const g=this.game;if(g.phase!=='fight'||g.distance>8)return;
@@ -166,12 +166,14 @@ export class LakeScene{
   try{this.ctx=ctx;this.drawFrame(0);}finally{this.ctx=mainCtx;ctx.restore();Object.assign(this,saved);this.metrics={...metrics,opticalDetail:true};}
  }
  render(dt){if(!this.image)return;this.clock+=Math.max(0,dt);this.cachePhotograph();this.drawFrame(dt);this.paintSignal(this.game.activeIndex||0);}
- drawFrame(dt){this.water();this.drawRipples();
+ drawFrame(dt){this.water();this.ctx.save();this.ctx.beginPath();this.ctx.rect(0,this.waterTop,this.width,Math.max(0,this.shoreTop-this.waterTop));this.ctx.clip();this.drawRipples();this.ctx.restore();
+  if(this.equipment.deck){const d=this.equipment.deck,p=this.deckCrop;this.ctx.drawImage(d,p.sx,p.sy,p.sw,p.sh,0,0,this.width,this.height);this.metrics.drawImages++;}
+
   const session=this.game,rods=session.enabledRods||[session],active=session.activeIndex||0;this.drawCount=rods.length;this.targets=[];this.signals=[];
   for(let i=0;i<rods.length;i++){
    const g=rods[i];this.game=g;this.drawIndex=i;
    const strikePulse=Math.max(0,1-(g.time-g.lastStrikeAt)/.55);const targetPose=Math.max(['held','fight'].includes(g.phase)?g.lifting?.9:.5:0,strikePulse*.85);this.poseByRod[i]=mix(this.poseByRod[i],targetPose,1-Math.exp(-Math.max(0,dt)*8));this.pose=this.poseByRod[i];
-   this.target=waterPoint(this.width,this.height,this.waterTop,g.distance||30,(g.castAngle||0)-this.yaw+(rods.length>1?(i===0?-.05:.05):0));if(g.loadout.method==='float')this.target.x-=this.width*.12;this.targets.push({...this.target});
+   this.target=waterPoint(this.width,this.height,this.waterTop,g.distance||30,(g.castAngle||0)-this.yaw+(rods.length>1?(i===0?-.05:.05):0),this.equipment.deck?this.shoreTop:null);if(g.loadout.method==='float')this.target.x-=this.width*.12;this.targets.push({...this.target});
    this.drawFish();if(g.loadout.method==='float'&&['waiting','bite'].includes(g.phase))this.drawFloat(this.target,false);this.drawRig();
   }
   this.game=session;this.target=this.targets[active];

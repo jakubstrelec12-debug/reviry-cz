@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {Fishing} from '../src/fishing.js';
-import {METHODS,RIGS,DEFAULT_LOADOUT,methodPreset,validateLoadout,speciesWeights,feedInfluence,biteDelay} from '../src/tackle.js';
+import {METHODS,RIGS,DEFAULT_LOADOUT,methodPreset,validateLoadout,speciesWeights,feedInfluence,biteDelay,chooseBait} from '../src/tackle.js';
 import {FISH_PHOTOS,photoFor} from '../src/fish-photos.js';
 import fs from 'node:fs';
 function step(g,seconds){for(let i=0;i<seconds*20;i++)g.tick(.05);}
@@ -13,7 +13,7 @@ test('all technique presets and every offered rig have a playable compatible bai
  assert.deepEqual(validateLoadout(DEFAULT_LOADOUT),[]);
  for(const method of Object.keys(METHODS)){
   const v=methodPreset(method);assert.deepEqual(validateLoadout(v),[]);
-  for(const rig of METHODS[method].rigs)for(const bait of RIGS[rig].baits){const variant={...v,rig,bait,leader:rig==='method'?20:v.leader};assert.deepEqual(validateLoadout(variant),[]);}
+  for(const rig of METHODS[method].rigs)for(const bait of RIGS[rig].baits){const variant=chooseBait({...v,rig,leader:rig==='method'?20:v.leader},bait);assert.deepEqual(validateLoadout(variant),[]);}
  }
 });
 test('invalid saved values, incompatible rigs and terminal presentations are rejected',()=>{

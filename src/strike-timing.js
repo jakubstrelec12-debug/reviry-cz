@@ -1,7 +1,8 @@
+import {BAITS} from './tackle.js?v=0.10.0';
 // Gameplay model: deliberately readable timing, not measured biological data.
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 export function strikeWindow(loadout,fish={}){
- const method=loadout.method,hair=['hair','springHair','method'].includes(loadout.rig),largeBait=['boilie','boilie20','pellet'].includes(loadout.bait);
+ const method=loadout.method,hair=['hair','springHair','method'].includes(loadout.rig),largeBait=BAITS[loadout.bait]?.hairOnly===true;
  const cautious=fish?.id==='tench'?.30:fish?.id==='bream'?-.12:0;
  const touchEnd=(method==='float'?.70:method==='feeder'?.90:1.15)+cautious+(largeBait?.22:0);
  const openAt=touchEnd+.5+(hair?.15:0),closeAt=openAt+(method==='float'?3:method==='feeder'?3.8:4.8)+(hair?.5:0);
