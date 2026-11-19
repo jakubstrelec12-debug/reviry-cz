@@ -1,8 +1,8 @@
-# REVÍRY CZ — Vajgar 0.3
+# REVÍRY CZ — Vajgar 0.4
 
 První hratelná **3D pracovní rekonstrukce Vajgaru**, pro rychlé vyzkoušení na iPhonu přes Safari. Není to hotová fotorealistická rekonstrukce ani nativní iOS aplikace.
 
-**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.3.0
+**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.4.0
 
 Nejlépe na šířku. Kód i mapová data se načítají ze stejného webu; 3D engine je přiložený, není závislý na CDN. WebGL je nutný. Pro méně výkonná zařízení přepnout HD na ECO.
 
@@ -39,3 +39,15 @@ Původní 2D verze je v `legacy/`; její data se do nového deníku nepřevádě
 Fotografické materiály země, fotografická obloha, vegetační billboardy odvozené z detailního stromu, upravená voda a směrování slunce, oprava překážejících kamenů, výhled a mechanické čihátko. Viz assets/CREDITS.md. Zástavba a rybářské vybavení stále mají pracovní modely; tato verze nedosahuje původních fotorealistických referencí.
 
 Volitelný skutečný render bez prohlížeče: nainstalovat vývojové závislosti, na Linuxu zajistit EGL/GLES (libegl1, libgles2 a Mesa), pak `EGL_PLATFORM=surfaceless npm run render`. Nástroj ukládá preview/vajgar-render.png, bez HTML ovládání. Nepotřebuje měnit nastavení prohlížeče.
+
+## Změny 0.4
+
+- Souvislý kuželový blank prutu; očka a vlasec vycházejí ze stejné křivky ohybu. Vybavení je při čekání ukotvené na břehu a při uchopení plynule přechází do ruky.
+- Vlasec prochází čihátkem a očky. Let zátěže při náhozu má prostorový oblouk. Vzdálenost ryby se nyní počítá od hrany vody, aby se u břehu nedostávala do suchého terénu.
+- Jemnější vegetace v trsech s pohybem ve větru, drobný reliéf blízkého břehu, vlhký pás na hraně vody a méně pravidelné vlnění s filtrovanými odrazy.
+- Nový společný model ryby pro scénu a kartu úlovku: tělo s barevným přechodem, šupinový bump, ploutve, skřele, oči a tlama. Druhy zatím sdílejí geometrii a liší se barvou a velikostí; nejsou to tři věrné druhové modely.
+- Oprava obnovy viditelnosti objektů po vykreslení odrazu.
+
+Ověření 0.4: 15 automatických testů herní logiky, geografie a geometrie modelů. Skutečný WebGL render přes Mesa v režimu čekání, zdolávání, na výšku a pro kartu úlovku; kontrola konečnosti vrcholů, ukotvení stojanu a obnovy viditelnosti. Jde o snímky stejného renderovacího kódu, bez HTML ovládání. Výkon a ovládání na fyzickém iPhonu nadále nejsou ověřené. Zástavba, ruce a vybavení stále vyžadují výtvarnou práci; verze nesplňuje původní fotorealistický cíl.
+
+Kontrolní snímky: `preview/vajgar-0.4.webp`, `preview/fight-0.4.webp`, `preview/portrait-0.4.webp`, `preview/fish-0.4.png`.

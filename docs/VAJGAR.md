@@ -1,5 +1,8 @@
 # REVÍRY CZ — Vajgar: závazný směr nové verze
 
+## Aktualizace — verze 0.4
+Dokončen další průchod blízkou scénou: spojitý ohyb prutu s odpovídajícími očky a vlas­cem, ukotvené vybavení, oblouk náhozu, model ryby a její skutečný 3D portrét, oprava pozice u břehu, vítr v trsech trávy, reliéf blízké půdy a úprava vody. Mapa a stanoviště zůstávají původní. Reliéf je výtvarná aproximace, nikoli zaměření. Snímky z renderu jsou ve `preview/`. 15 automatických testů prošlo. Finální fotorealismus, věrné modely jednotlivých druhů a test na fyzickém iPhonu zůstávají otevřené.
+
 ## Aktualizace — verze 0.3
 Fotografické materiály břehu a oblohy, vegetační billboardy předpočítané z detailního modelu, opravený výhled, drobnější kameny, mechanické čihátko a úpravy prutu a navijáku. Skutečný WebGL render ze stejného modulu byl ověřen přes Mesa a webgl-node; snímek bez HTML ovládání je v preview/vajgar-0.3.webp. Render nemá chyby WebGL a materiály se načetly. To nenahrazuje měření výkonu na iPhonu. Zástavba a vybavení nadále mají pracovní modely a původní fotorealistický cíl není splněný.
 
