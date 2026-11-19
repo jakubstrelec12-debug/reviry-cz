@@ -51,7 +51,7 @@ test('two-rod UI keeps both live indicators and lets an inactive bite be picked 
  await new Promise(setImmediate);
  const $=id=>document.getElementById(id),state=()=>dom.window.reviry.getState(),tick=()=>{now+=50;frame(now);},press=(id,type)=>$(id).dispatchEvent(new dom.window.KeyboardEvent(type,{key:' ',bubbles:true})),action=()=>{press('action','keydown');press('action','keyup');},cast=()=>{action();for(let i=0;i<25;i++)tick();};
  $('start').click();$('setupApply').click();tick();cast();$('addRod').click();tick();
- $('tackle').click();assert.equal($('setupRodPicker').classList.contains('hidden'),false);
+ $('tackle').click();assert.equal($('setupRodPicker').classList.contains('hidden'),false);assert.match($('setupApply').textContent,/OBOU PRUTŮ/);
  document.querySelector('[data-setup-rod="0"]').click();assert.match($('setupSummary').textContent,/Kukuřice/);
  document.querySelector('[data-setup-rod="1"]').click();document.querySelector('[data-tab="bait"]').click();document.querySelector('[data-bait="boilie"]').click();
  document.querySelector('[data-setup-rod="0"]').click();assert.match($('setupSummary').textContent,/Kukuřice/);
