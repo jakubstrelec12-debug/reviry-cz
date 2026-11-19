@@ -10,7 +10,7 @@ globalThis.window={addEventListener(){},removeEventListener(){}};globalThis.loca
 globalThis.document={createElement(name){if(name==='canvas')return createCanvas(width,height);throw new Error('Unexpected DOM request');}};
 globalThis.Image=class extends NativeImage{set src(value){super.src=value.startsWith('file:')?fileURLToPath(value):value;}get src(){return super.src;}};
 const canvas=createCanvas(width,height);canvas.addEventListener=()=>{};canvas.setPointerCapture=()=>{};
-const game=new Fishing(()=>.2);game.setLoadout(methodPreset(process.env.RENDER_METHOD||'ledger'));game.loadout.rig=process.env.RENDER_RIG||game.loadout.rig;
+const game=new Fishing(()=>.2);game.venueId=process.env.RENDER_VENUE||'vajgar';game.setLoadout(methodPreset(process.env.RENDER_METHOD||'ledger'));game.loadout.rig=process.env.RENDER_RIG||game.loadout.rig;
 game.phase=process.env.RENDER_PHASE||'waiting';game.distance=game.phase==='fight'?3:30;game.tension=.65;game.fish={id:'carp',name:'Kapr obecný',length:65};game.elapsed=Number(process.env.RENDER_ELAPSED)||.5;game.biteElapsed=game.elapsed;game.biteStyle=process.env.RENDER_BITE_STYLE||'pull';
 const scene=await new LakeScene(canvas,game).init();if(process.env.RENDER_HUD_TOP)scene.setUiBounds({hudTop:Number(process.env.RENDER_HUD_TOP),headerBottom:Number(process.env.RENDER_HEADER_BOTTOM)||120});const focus=process.env.RENDER_SIGNAL?createCanvas(320,320):null;if(focus)scene.setSignalCanvas(focus);for(let i=0;i<4;i++)scene.render(.05);
 await fs.writeFile(process.argv[2]||new URL('../preview/vajgar-0.6.png',import.meta.url),canvas.toBuffer('image/png'));

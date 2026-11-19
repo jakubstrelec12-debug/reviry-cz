@@ -35,3 +35,13 @@ test('bottom feeder shortcut is visible and boilies are reachable without huntin
  const b=bench();click('[data-quick-feeder]');assert.equal(b.p.draft.method,'ledger');assert.equal(b.p.draft.rig,'spring');assert.equal(b.p.draft.feed,'groundbait');click('[data-tab="bait"]');
  assert.ok(document.querySelector('[data-bait="boilie20"]'));click('[data-bait="boilie20"]');assert.equal(b.p.draft.rig,'springHair');assert.match(el('rigPreview').textContent,/Boilies 20 mm/);assert.match(el('setupForm').textContent,/100 %/);assert.equal(el('setupApply').disabled,false);el('setupApply').click();assert.equal(b.applied.bait,'boilie20');
 });
+
+test('switching rod drafts preserves independent choices and closing without apply discards both',async()=>{
+ const {FishingSession}=await import('../src/session.js');const dom=new JSDOM(fs.readFileSync(new URL('../index.html',import.meta.url),'utf8'),{url:'https://example.test'});globalThis.document=dom.window.document;
+ const game=new FishingSession();game.enableSecond();const p=new Preparation({game,onApply:()=>{},onClose:()=>p.close()});p.open();
+ click('[data-setup-rod="0"]');click('[data-tab="bait"]');click('[data-bait="boilie"]');assert.equal(p.draft.rig,'hair');
+ click('[data-setup-rod="1"]');assert.equal(p.draft.bait,'corn');click('[data-tab="assembly"]');choose('rig','spring',dom);
+ click('[data-setup-rod="0"]');assert.equal(p.draft.bait,'boilie');assert.equal(p.draft.rig,'hair');
+ click('[data-setup-rod="1"]');assert.equal(p.draft.rig,'spring');assert.equal(p.draft.bait,'corn');
+ el('setupClose').click();assert.equal(game.rods[0].loadout.bait,'corn');assert.equal(game.rods[1].loadout.rig,'running');p.open();assert.equal(p.draft.rig,'running');
+});

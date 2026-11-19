@@ -51,3 +51,17 @@ Prompty pro extrakci: zachovat skutečný fotografovaný prut, naviják a ruku, 
 `equipment/resting-feeder.webp` a `equipment/held-feeder.webp`: nové syntetické fotorealistické průhledné podklady vytvořené vestavěným image_gen, 1024 × 1536, převod do WebP se zachováním alfa. Sdílíme pod CC BY-SA 4.0. Nenahrazují konkrétní výrobkové fotografie a nevyjadřují přesný model z katalogu. Odložený prut, naviják a trojnožka jsou jeden celek; v ruce má celek shodný vzhled bez podpěry. Za běhu se deformuje horní část prutu, ostatní součásti zůstávají společné.
 
 Finální zadání: fotorealistický štíhlý grafitový feederový prut s jemnou oranžovou špičkou, korková rukojeť, černo-stříbrný naviják mechanicky spojený s prutem, kompaktní nízká trojnožka, pohled sedícího rybáře shora šikmo k vodě. Kompletní předmět na průhledném pozadí, měkké zatažené světlo, chladné tlumené barvy, bez značek, krajiny a podlahy. Dodatečné zadání: odstranit mlžný lem, zachovat přesnou geometrii. Varianta v ruce: zachovat prut a naviják, odstranit trojnožku a přidat anatomicky správnou pravou ruku vstupující z pravého dolního okraje. Výstupy nejsou skutečné fotografie; označeno v zápatí a deníku. Původní CC0 výřez 0.8 zůstává jen pro záložní vykreslení při chybě nového podkladu.
+
+## Nové vody a úlovky — 0.12
+
+Všechny fotografie jsou skutečné, bez generativního překreslení. Zmenšení na max. 2400 px (prostředí) / 1200 px (ryby), WebP. Za běhu se mění ořez a animuje hladina, doplňuje se společné ilustrační AI molo a náčiní. Licence a autor jsou v zápatí, kartě revíru a deníku; u ryb na kartě úlovku.
+
+| Soubor | Autor / zdroj | Použitá licence | Poznámka |
+| --- | --- | --- | --- |
+| venues/vlkov.webp | Czeva, [Veselské pískovny, Vlkovská pískovna, angler 01.jpg](https://commons.wikimedia.org/wiki/File:Veselsk%C3%A9_p%C3%ADskovny,_Vlkovsk%C3%A1_p%C3%ADskovna,_angler_01.jpg), 27. 10. 2019 | CC BY-SA 4.0, https://creativecommons.org/licenses/by-sa/4.0/ | Původní fotografie pískovny. Ve hře výřez horních 52 % snímku, původní rybář mimo herní výřez. |
+| venues/jarosov-illustration.webp | Pavel Hrdlička, Wikipedia, [Jarošov nad Nežárkou, Matějovec, small pond.jpg](https://commons.wikimedia.org/wiki/File:Jaro%C5%A1ov_nad_Ne%C5%BE%C3%A1rkou,_Mat%C4%9Bjovec,_small_pond.jpg), 30. 7. 2015 | CC BY-SA 4.0, https://creativecommons.org/licenses/by-sa/4.0/ | **Jiný rybník v Matějovci. Není to cílová Malá vodní nádrž v Jarošově.** Ilustrační náhrada s viditelným označením. |
+| fish/amur.webp | Dezidor, [Ctenopharyngodon idella.jpg](https://commons.wikimedia.org/wiki/File:Ctenopharyngodon_idella.jpg) | CC BY 3.0, https://creativecommons.org/licenses/by/3.0/ | Ilustrační fotografie druhu. |
+| fish/roach.webp | Piet Spaans, [RutilusRutilus.JPG](https://commons.wikimedia.org/wiki/File:RutilusRutilus.JPG) | CC BY-SA 2.5, https://creativecommons.org/licenses/by-sa/2.5/ | Ilustrační fotografie druhu. |
+| fish/crucian.webp | Jiří Zelenka / Pohled 111, [Carassius carassius CZ 01.jpg](https://commons.wikimedia.org/wiki/File:Carassius_carassius_CZ_01.jpg) | CC BY-SA 4.0, https://creativecommons.org/licenses/by-sa/4.0/ | Ukázka karase obecného. Zdroje osádky říkají pouze „karas“; ve hře neurčujeme místní druh. |
+
+Upravené podklady pod BY-SA i kompozity sdílíme pod odpovídající uvedenou licencí. Autoři fotografií ani správci vod projekt nezaštiťují. Zdroje rybích druhů a jejich omezení jsou v `docs/VENUES.md` a v kartách výběru vody.

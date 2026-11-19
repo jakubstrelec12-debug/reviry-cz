@@ -1,5 +1,6 @@
-import {equipmentArt} from './equipment-art.js?v=0.11.1';
-import {METHODS,RODS,RIGS,BAITS,FEEDS,methodPreset,validateLoadout,setupSummary,speciesWeights,chooseBait,baitChances,LINE_DIAMETERS,LINE_PRODUCT,lineName,BAIT_FAMILIES,feedAllowed} from './tackle.js?v=0.11.1';
+import {getVenue,SPECIES_NAMES,venueChances} from './venues.js?v=0.12.0';
+import {equipmentArt} from './equipment-art.js?v=0.12.0';
+import {METHODS,RODS,RIGS,BAITS,FEEDS,methodPreset,validateLoadout,setupSummary,speciesWeights,chooseBait,baitChances,LINE_DIAMETERS,LINE_PRODUCT,lineName,BAIT_FAMILIES,feedAllowed} from './tackle.js?v=0.12.0';
 const $=id=>document.getElementById(id);
 const fields={
  rod:['Prut',false],rig:['Montáž',false],line:['Kmenový vlasec',true],hook:['Háček',true],leader:['Návazec',true],weight:['Zátěž',true],bait:['Nástraha na háček',false],feed:['Krmení',false],feedPortion:['Jedna dávka zakrmení',true],
@@ -24,16 +25,18 @@ export class Preparation {
   if(key==='rig'){if(!RIGS[this.draft.rig].baits.includes(this.draft.bait))this.draft.bait=RIGS[this.draft.rig].baits[0];if(this.draft.rig==='method')this.draft.leader=Math.min(20,this.draft.leader);if(!feedAllowed(this.draft,this.draft.feed)||(RIGS[this.draft.rig].feeder&&this.draft.feed==='none'))this.draft.feed='groundbait';}
   this.render();const next=$('setupForm').querySelector(`[name="${key}"]`);next?.focus();
  });
- $('setupApply').onclick=()=>{const errors=validateLoadout(this.draft);if(errors.length)return;this.onApply({...this.draft});};
+ $('setupRodPicker').addEventListener('click',e=>{const b=e.target.closest('[data-setup-rod]');if(!b||b.disabled)return;this.drafts[this.editIndex]={...this.draft};const index=Number(b.dataset.setupRod);if(!this.game.select(index))return;this.editIndex=index;this.draft={...this.drafts[index]};this.baitFilter='all';this.render();$('setupRodPicker').querySelector(`[data-setup-rod="${index}"]`).focus();});
+ $('setupApply').onclick=()=>{this.drafts[this.editIndex]={...this.draft};const changes=this.changes();if(changes.some(c=>validateLoadout(c.loadout).length))return;this.onApply({...this.draft},changes);};
  $('setupClose').onclick=()=>this.onClose();
  $('setupOverlay').addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();this.onClose();}if(e.key==='Tab'){
   const focusable=[...$('setupOverlay').querySelectorAll('button:not(:disabled),select,input,a[href]')].filter(el=>el.offsetParent!==null),first=focusable[0],last=focusable.at(-1);
   if(e.shiftKey&&document.activeElement===first){last.focus();e.preventDefault();}else if(!e.shiftKey&&document.activeElement===last){first.focus();e.preventDefault();}
  }});
  }
- open(){this.returnFocus=document.activeElement;this.opened=true;this.draft={...this.game.loadout};this.tab='method';this.assemblyPane='rig';this.baitFilter='all';$('setupOverlay').classList.remove('hidden');this.render();$('setupClose').focus();}
+ open(){this.returnFocus=document.activeElement;this.opened=true;this.editIndex=this.game.activeIndex||0;this.originals=(this.game.enabledRods||[this.game]).map(r=>({...r.loadout}));this.drafts=this.originals.map(v=>({...v}));this.draft={...this.drafts[this.editIndex]};this.tab='method';this.assemblyPane='rig';this.baitFilter='all';$('setupOverlay').classList.remove('hidden');this.render();$('setupClose').focus();}
+ changes(){return this.drafts.map((loadout,index)=>({index,loadout:{...loadout}})).filter(c=>!this.game.secondEnabled||JSON.stringify(c.loadout)!==JSON.stringify(this.originals[c.index]));}
  close(){this.opened=false;$('setupOverlay').classList.add('hidden');this.returnFocus?.focus();}
- render(){const v=this.draft,m=METHODS[v.method],rig=RIGS[v.rig];$('setupTitle').textContent=`Prut ${(this.game.activeIndex||0)+1} · Připrav si lov.`;
+ render(){this.drafts[this.editIndex]={...this.draft};const picker=$('setupRodPicker');picker.classList.toggle('hidden',!this.game.secondEnabled);if(this.game.secondEnabled){picker.innerHTML=this.drafts.map((d,i)=>`<button type="button" data-setup-rod="${i}" aria-pressed="${i===this.editIndex}" class="${i===this.editIndex?'selected':''}" ${['held','fight','casting','flying','landed'].includes(this.game.phase)&&i!==this.editIndex?'disabled':''}><strong>PRUT ${i+1}</strong><span>${RIGS[d.rig].name}</span><small>${BAITS[d.bait].name}${JSON.stringify(d)!==JSON.stringify(this.originals[i])?' · změněno':''}</small></button>`).join('');}const v=this.draft,m=METHODS[v.method],rig=RIGS[v.rig];$('setupTitle').textContent=`Prut ${(this.game.activeIndex||0)+1} · Připrav si lov.`;
  for(const button of $('setupTabs').children){button.classList.toggle('active',button.dataset.tab===this.tab);button.setAttribute('aria-selected',String(button.dataset.tab===this.tab));button.tabIndex=button.dataset.tab===this.tab?0:-1;}
  let html='';
  if(this.tab==='method')html=`<div class="method-grid">${Object.entries(METHODS).map(([id,method],i)=>`<button type="button" data-method="${id}" class="method-card ${id===v.method?'selected':''}" ${id==='float'&&this.game.secondEnabled?'disabled':''} aria-pressed="${id===v.method}"><span class="method-number">0${i+1}</span><strong>${method.name}</strong><small>${method.subtitle}</small><span class="method-check">${id===v.method?'VYBRÁNO':'VYBRAT'}</span></button>`).join('')}</div><p class="method-description">${m.description}${this.game.secondEnabled?' Plavaná je dostupná po složení druhého prutu.':''}</p><div class="setup-shortcuts"><button type="button" class="setup-next" id="toAssembly">Sestavit montáž →</button><button type="button" class="setup-next" data-quick-feeder>Položená s krmítkem →</button></div>`;
@@ -44,11 +47,11 @@ export class Preparation {
   if(this.assemblyPane==='rod')cards=`<div class="product-grid">${m.rods.map(id=>`<button type="button" data-gear="rod" data-value="${id}" class="product-card ${id===v.rod?'selected':''}" aria-pressed="${id===v.rod}">${equipmentArt('rod',id)}<span>${RODS[id].brand}</span><strong>${RODS[id].model}</strong><small>${RODS[id].name.split('·').slice(1).join('·')}</small></button>`).join('')}</div><p class="setup-small">Herní ilustrace typu vybavení. <a href="${RODS[v.rod].source}" target="_blank" rel="noopener">Produkt výrobce / prodejce ↗</a></p>`;
   if(this.assemblyPane==='line')cards=`<div class="line-product-heading">${equipmentArt('line','line')}<div><span>${LINE_PRODUCT.brand}</span><strong>${LINE_PRODUCT.model}</strong><small>Návin ${LINE_PRODUCT.length} m</small></div></div><div class="diameter-grid">${LINE_DIAMETERS.map(n=>`<button type="button" data-gear="line" data-value="${n}" class="${n===v.line?'selected':''}" aria-pressed="${n===v.line}">${n.toFixed(3)}<small>mm</small></button>`).join('')}</div><p class="setup-small"><a href="${LINE_PRODUCT.source}" target="_blank" rel="noopener">Ověřená produktová řada ↗</a></p>`;
   const lines=[...LINE_DIAMETERS,...[.16,.20,.25,.30,.35]];
-  html=tabs+cards+`<details class="assembly-details"><summary>Parametry montáže a přesné nastavení</summary><div class="tackle-fields">${select('rod',v.rod,m.rods.map(id=>[id,RODS[id].name]))}${select('rig',v.rig,m.rigs.map(id=>[id,RIGS[id].name]))}${select('line',v.line,lines.map(n=>[n,lineName(n)]))}${select('hook',v.hook,[6,8,10,12,14].map(n=>[n,`č. ${n}`]))}${select('leader',v.leader,[10,20,40,60].map(n=>[n,`${n} cm`]))}${select('weight',v.weight,m.weights.map(n=>[n,`${n} g`]))}</div></details><p class="method-description">${rig.detail}</p>${v.method==='float'?`<label class="depth-control" for="tackle-depth">Hloubka pod splávkem <b>${v.depth.toFixed(2)} m</b><input id="tackle-depth" name="depth" type="range" min="0.5" max="3" step="0.25" value="${v.depth}"></label><p class="setup-small">Herní hloubka místa je 2 m. Nejde o skutečné měření dna Vajgaru.</p>`:''}`;
+  html=tabs+cards+`<details class="assembly-details"><summary>Parametry montáže a přesné nastavení</summary><div class="tackle-fields">${select('rod',v.rod,m.rods.map(id=>[id,RODS[id].name]))}${select('rig',v.rig,m.rigs.map(id=>[id,RIGS[id].name]))}${select('line',v.line,lines.map(n=>[n,lineName(n)]))}${select('hook',v.hook,[6,8,10,12,14].map(n=>[n,`č. ${n}`]))}${select('leader',v.leader,[10,20,40,60].map(n=>[n,`${n} cm`]))}${select('weight',v.weight,m.weights.map(n=>[n,`${n} g`]))}</div></details><p class="method-description">${rig.detail}</p>${v.method==='float'?`<label class="depth-control" for="tackle-depth">Hloubka pod splávkem <b>${v.depth.toFixed(2)} m</b><input id="tackle-depth" name="depth" type="range" min="0.5" max="3" step="0.25" value="${v.depth}"></label><p class="setup-small">Herní hloubka místa je 2 m. Nejde o skutečné měření dna vybraného revíru.</p>`:''}`;
  }
 
  if(this.tab==='bait'){
-  const available=Object.keys(BAITS).filter(id=>m.rigs.some(r=>RIGS[r].baits.includes(id))),chances=baitChances(v),names=['Kapr obecný','Lín obecný','Cejn velký'];
+  const available=Object.keys(BAITS).filter(id=>m.rigs.some(r=>RIGS[r].baits.includes(id))),chances=venueChances(v,this.game.venueId),names=getVenue(this.game.venueId).playable.map(id=>SPECIES_NAMES[id]);
   const families=Object.entries(BAIT_FAMILIES).filter(([id])=>id==='all'||available.some(key=>BAITS[key].family===id));
   if(!families.some(([id])=>id===this.baitFilter))this.baitFilter='all';
   const ordered=available.filter(id=>this.baitFilter==='all'||BAITS[id].family===this.baitFilter);
@@ -62,7 +65,7 @@ export class Preparation {
  if($('toAssembly'))$('toAssembly').onclick=()=>{this.tab='assembly';this.render();};
  $('rigPreview').innerHTML=rigDiagram(v);$('setupSummary').textContent=setupSummary(v);$('setupRod').textContent=RODS[v.rod].name;
  $('setupPreviewName').textContent=RIGS[v.rig].name;
- const errors=validateLoadout(v);$('setupErrors').textContent=errors.join(' ');$('setupApply').disabled=errors.length>0;
+ const errors=this.changes().flatMap(c=>validateLoadout(c.loadout).map(e=>this.game.secondEnabled?`Prut ${c.index+1}: ${e}`:e));$('setupErrors').textContent=errors.join(' ');$('setupApply').disabled=errors.length>0;$('setupApply').textContent=this.game.secondEnabled?'POUŽÍT SESTAVY OBOU PRUTŮ':'POUŽÍT SESTAVU A CHYTAT';
  $('setupApply').textContent=['waiting','bite','held'].includes(this.game.phase)?'STÁHNOUT A POUŽÍT SESTAVU':'POUŽÍT SESTAVU A CHYTAT';
  }
 }

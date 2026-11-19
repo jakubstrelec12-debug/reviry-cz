@@ -24,3 +24,13 @@ test('shared journal retains catches from either rod and active setup restores s
  const saved=s.exportSetup(),restored=new FishingSession();assert.ok(restored.restoreSetup(saved));assert.equal(restored.enabledRods.length,2);assert.equal(restored.rods[1].loadout.method,'feeder');assert.equal(restored.rods[0].phase,'ready');
  assert.equal(restored.restoreSetup({loadouts:[DEFAULT_LOADOUT,methodPreset('float')]}),false);
 });
+
+test('editing two loadouts is validated before changing either rod and leaves unchanged casts alone',()=>{
+ const s=new FishingSession(()=>.1);cast(s);s.enableSecond();
+ const before=s.rods.map(r=>({...r.loadout}));
+ assert.equal(s.applyLoadouts([{index:0,loadout:{...DEFAULT_LOADOUT,rig:'spring',feed:'groundbait'}},{index:1,loadout:{...DEFAULT_LOADOUT,bait:'invalid'}}]),false);
+ assert.deepEqual(s.rods.map(r=>r.loadout),before);assert.equal(s.rods[0].phase,'waiting');
+ assert.ok(s.applyLoadouts([{index:1,loadout:{...DEFAULT_LOADOUT,rig:'spring',feed:'groundbait'}}]));
+ assert.equal(s.rods[0].phase,'waiting');assert.equal(s.rods[0].loadout.rig,'running');assert.equal(s.rods[1].loadout.rig,'spring');
+ assert.equal(s.applyLoadouts([{index:0,loadout:methodPreset('float')}]),false);
+});

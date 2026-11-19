@@ -1,7 +1,8 @@
-import {biteMotion} from './bite-motion.js?v=0.11.1';
-import {RODS,RIGS} from './tackle.js?v=0.11.1';
+import {getVenue} from './venues.js?v=0.12.0';
+import {biteMotion} from './bite-motion.js?v=0.12.0';
+import {RODS,RIGS} from './tackle.js?v=0.12.0';
 
-export const PHOTO={src:'assets/vajgar-photograph.webp',author:'Wwery',title:'Pohled na Jindřichův Hradec přes rybník Vajgar',source:'https://commons.wikimedia.org/wiki/File:Pohled_na_Jind%C5%99ich%C5%AFv_Hradec_p%C5%99es_rybn%C3%ADk_Vajgar.jpg',license:'CC BY-SA 4.0',licenseUrl:'https://creativecommons.org/licenses/by-sa/4.0/',waterStart:.575};
+export const PHOTO=getVenue('vajgar').photo;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 export function photoCrop(iw,ih,w,h,yaw=0,pitch=0){
  const scale=Math.max(w/iw,h/ih),sw=w/scale,sh=h/scale;
@@ -37,11 +38,12 @@ function point(a,b,c,t){const u=1-t;return {x:u*u*a.x+2*u*t*b.x+t*t*c.x,y:u*u*a.
 export class LakeScene{
  constructor(canvas,game){
   this.canvas=canvas;this.game=game;this.ctx=canvas.getContext('2d',{alpha:false});if(!this.ctx)throw new Error('Canvas 2D není dostupný.');
-  this.clock=0;this.yaw=0;this.pitch=0;this.castYaw=0;this.pose=0;this.assetWarnings=[];this.photo=PHOTO;this.geoAccurate=false;this.ripples=[];this.feedThrow=null;this.poseByRod=[0,0];this.inset={};this.signalCanvas=null;this.signalVisible=true;this.signals=[];this.metrics={engine:'photographic-2d',drawImages:0};
+  this.clock=0;this.yaw=0;this.pitch=0;this.castYaw=0;this.pose=0;this.assetWarnings=[];this.photo=getVenue(game.venueId).photo;this.geoAccurate=false;this.ripples=[];this.feedThrow=null;this.poseByRod=[0,0];this.inset={};this.signalCanvas=null;this.signalVisible=true;this.signals=[];this.metrics={engine:'photographic-2d',drawImages:0};
   try{this.high=localStorage.getItem('reviry-quality')!=='low';}catch{this.high=true;}
   this.background=document.createElement('canvas');this.bctx=this.background.getContext('2d');this.lastView='';this.bindLook();this.onResize=()=>this.resize();window.addEventListener('resize',this.onResize);
  }
- async init(){this.image=await loadImage(PHOTO.src);this.equipment={};await Promise.all([['rod','assets/equipment/rod-hand.webp'],['float','assets/equipment/waggler.webp'],['deck','assets/equipment/fishing-deck.webp'],['resting','assets/equipment/resting-feeder.webp'],['held','assets/equipment/held-feeder.webp']].map(async([key,path])=>{try{this.equipment[key]=await loadImage(path);}catch{this.assetWarnings.push(path);}}));this.resize();this.render(0);return this;}
+ async init(){this.image=await loadImage(this.photo.src);this.equipment={};await Promise.all([['rod','assets/equipment/rod-hand.webp'],['float','assets/equipment/waggler.webp'],['deck','assets/equipment/fishing-deck.webp'],['resting','assets/equipment/resting-feeder.webp'],['held','assets/equipment/held-feeder.webp']].map(async([key,path])=>{try{this.equipment[key]=await loadImage(path);}catch{this.assetWarnings.push(path);}}));this.resize();this.render(0);return this;}
+ async setVenue(id){const photo=getVenue(id).photo,image=await loadImage(photo.src);this.photo=photo;this.image=image;this.yaw=0;this.pitch=0;this.ripples=[];this.feedThrow=null;this.lastView='';this.render(0);}
  resize(){this.width=innerWidth;this.height=innerHeight;this.ratio=Math.min(devicePixelRatio||1,this.high?1.75:1);for(const c of [this.canvas,this.background]){c.width=Math.round(this.width*this.ratio);c.height=Math.round(this.height*this.ratio);}this.ctx.setTransform(this.ratio,0,0,this.ratio,0,0);this.bctx.setTransform(this.ratio,0,0,this.ratio,0,0);this.lastView='';}
  setQuality(high){this.high=high;try{localStorage.setItem('reviry-quality',high?'high':'low');}catch{}this.resize();}
  bindLook(){let pointer=null,lastX=0,lastY=0;
@@ -57,13 +59,13 @@ export class LakeScene{
  splash(index){const target=this.targets?.[index]||this.target;if(target)this.ripples.push({...target,time:this.clock});this.ripples=this.ripples.slice(-6);}
  scatterFeed(index){const target=this.targets?.[index]||this.target;if(target)this.feedThrow={time:this.clock,start:{x:this.width*.25,y:this.height},end:{...target}};}
  cachePhotograph(){
-  const key=[this.yaw.toFixed(3),this.pitch.toFixed(3),this.width,this.height].join('/');if(key===this.lastView)return;
+  const key=[this.yaw.toFixed(3),this.pitch.toFixed(3),this.width,this.height,this.photo.src].join('/');if(key===this.lastView)return;
   if(this.equipment.deck){const d=this.equipment.deck;this.deckCrop=photoCrop(d.width,d.height,this.width,this.height,this.yaw*.25,this.pitch*.25);this.shoreTop=clamp((d.height*.739-this.deckCrop.sy)*this.deckCrop.scale,0,this.height);}else this.shoreTop=this.height;
   // Frame the actual visible photograph above the pier, not the hidden area below it.
   const viewHeight=this.equipment.deck?this.height*.82:this.height,photoY=this.equipment.deck?this.shoreTop+8-viewHeight:0;
-  this.crop=photoCrop(this.image.width,this.image.height,this.width,viewHeight,this.yaw,this.pitch);const p=this.crop;
+  const [rx,ry,rw,rh]=this.photo.crop||[0,0,1,1];this.crop=photoCrop(this.image.width*rw,this.image.height*rh,this.width,viewHeight,this.yaw,this.pitch);const p=this.crop;p.sx+=this.image.width*rx;p.sy+=this.image.height*ry;
   this.bctx.fillStyle='#1c2927';this.bctx.fillRect(0,0,this.width,this.height);this.bctx.drawImage(this.image,p.sx,p.sy,p.sw,p.sh,0,photoY,this.width,viewHeight);
-  this.waterTop=clamp((this.image.height*PHOTO.waterStart-p.sy)*p.scale+photoY,0,this.height);this.lastView=key;
+  this.waterTop=clamp((this.image.height*this.photo.waterStart-p.sy)*p.scale+photoY,0,this.height);this.lastView=key;
  }
  ellipse(x,y,rx,ry,fill,stroke=null,width=1){const c=this.ctx;c.beginPath();c.ellipse(x,y,Math.max(.1,rx),Math.max(.1,ry),0,0,Math.PI*2);if(fill){c.fillStyle=fill;c.fill();}if(stroke){c.strokeStyle=stroke;c.lineWidth=width;c.stroke();}}
  line(points,color,width=1){const c=this.ctx;c.beginPath();c.moveTo(points[0].x,points[0].y);for(const p of points.slice(1))c.lineTo(p.x,p.y);c.strokeStyle=color;c.lineWidth=width;c.lineCap='round';c.stroke();}
