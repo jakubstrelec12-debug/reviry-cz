@@ -2,11 +2,11 @@
 
 Rybářská hra pro Safari na iPhonu. Výhled nově tvoří **skutečná fotografie Vajgaru** s animovanou hladinou, prutem, čihátkem, náhozem, splávkem a krmením. Zjednodušená 3D zástavba se v hlavní hře nepoužívá. Vykreslování běží přes Canvas 2D a nepotřebuje WebGL.
 
-**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.14.0
+**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.14.1
 
 Nejlépe na šířku. Všechny herní fotografie jsou přiložené lokálně. HD / ECO mění rozlišení a jemnost animace vody. Fotografie není 360° panorama: tažením jde pouze mírně posouvat výhled a směr náhozu. Nejde o volně průchozí 3D svět.
 
-## Průběh lovu — 0.14.0
+## Průběh lovu — 0.14.1
 
 Výchozí režim omezuje nápovědy: při záběru nevyskakuje výzva k záseku, druhý prut neposílá oznámení a ryba nepřiznává přesné procento únavy. V nabídce **☰ → Průvodce** lze zapnout dosavadní pomoc. Ovládání a optické detaily zůstávají dostupné, oba pruty viditelné. Náhled ukazuje skutečný pohyb čihátka / špičky / splávku; nepřebarvuje se podle skryté přítomnosti ryby.
 

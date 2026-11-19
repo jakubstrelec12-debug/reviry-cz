@@ -40,7 +40,7 @@ test('app flow: prepare float tackle, cast, strike, land, show real photo, store
  // Default immersive controls can be toggled without replacing a cast.
  $('guideMode').click();assert.equal(document.body.classList.contains('immersive'),true);
  $('action').dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:' ',bubbles:true}));$('action').dispatchEvent(new dom.window.KeyboardEvent('keyup',{key:' ',bubbles:true}));for(let i=0;i<30;i++)tick();
- assert.equal(state().phase,'waiting');assert.equal($('action').disabled,false);assert.equal($('action').textContent,'ZASEKNOUT');assert.equal($('status').textContent,'');assert.equal($('earlyStrike').classList.contains('hidden'),true);
+ assert.equal(state().phase,'waiting');assert.equal($('action').disabled,false);assert.notEqual(dom.window.getComputedStyle($('action')).display,'none');assert.equal($('action').textContent,'ZASEKNOUT');assert.equal($('status').textContent,'');assert.equal($('earlyStrike').classList.contains('hidden'),true);
  $('guideMode').click();assert.equal(state().phase,'waiting');assert.equal(dom.window.localStorage.getItem('reviry-guide'),'on');$('retrieve').click();tick();
 
  $('menu').click();assert.equal(state().paused,true);assert.ok($('catches').querySelector('img'));$('closeDrawer').click();assert.equal(state().paused,false);

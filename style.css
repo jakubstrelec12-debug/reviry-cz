@@ -112,3 +112,5 @@ body:is([data-phase=waiting],[data-phase=bite],[data-phase=held],[data-phase=fig
 body.immersive:is([data-phase="waiting"],[data-phase="bite"],[data-phase="fight"]) .status-block{display:none}body.immersive .fight-stats>span:nth-child(2){display:none}body.immersive #crosshair,body.immersive #lookHint{display:none}body.immersive #signalState{font-weight:400}body.immersive .rod-monitor{background:#142e2bbf;backdrop-filter:blur(8px)}#guideMode{max-width:none;margin:10px 8px 10px 0}
 
 body.immersive .rod-monitor{width:90px;padding:6px;border-color:#9fb49b38;background:#122c2b99}body.immersive .rod-monitor.selected{border-color:#d1bc81a6}body.immersive .rod-monitor canvas{width:76px;height:57px}body.immersive .monitor-action{display:none}body.immersive .monitor-state{font-size:8px;min-height:20px}body.immersive .rod-monitor.empty .monitor-state{min-height:0}
+
+body.immersive[data-phase="waiting"] #action{display:block}
