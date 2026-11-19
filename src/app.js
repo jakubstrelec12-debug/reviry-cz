@@ -1,12 +1,17 @@
-import {TripPlanner} from './trip-planner.js?v=0.13.0';
-import {VENUES,STOCK_SOURCES,SPECIES_NAMES,getVenue} from './venues.js?v=0.13.0';
-import {biteMotion,signalCaption} from './bite-motion.js?v=0.13.0';
-import {Preparation} from './preparation.js?v=0.13.0';
-import {METHODS,BAITS,FEEDS,setupSummary,validateLoadout} from './tackle.js?v=0.13.0';
-import {showCatchPhoto,photoFor} from './fish-photos.js?v=0.13.0';
-import {FishingSession as Fishing} from './session.js?v=0.13.0';
-import {LakeScene} from './photo-scene.js?v=0.13.0';
+import {alarmStep} from './encounter.js?v=0.14.0';
+import {TripPlanner} from './trip-planner.js?v=0.14.0';
+import {VENUES,STOCK_SOURCES,SPECIES_NAMES,getVenue} from './venues.js?v=0.14.0';
+import {biteMotion,signalCaption} from './bite-motion.js?v=0.14.0';
+import {Preparation} from './preparation.js?v=0.14.0';
+import {METHODS,BAITS,FEEDS,setupSummary,validateLoadout} from './tackle.js?v=0.14.0';
+import {showCatchPhoto,photoFor} from './fish-photos.js?v=0.14.0';
+import {FishingSession as Fishing} from './session.js?v=0.14.0';
+import {LakeScene} from './photo-scene.js?v=0.14.0';
 const $=id=>document.getElementById(id);const game=new Fishing();let lake;let last=performance.now(),started=false,drawerOpen=false,audio=null,soundOn=false,toastTimer,venueOpen=false,venueLoading=false;
+let guideOn=false;try{guideOn=localStorage.getItem('reviry-guide')==='on';}catch{}
+function refreshGuide(){document.body.classList.toggle('immersive',!guideOn);$('guideMode').textContent=guideOn?'Průvodce: zap.':'Průvodce: vyp.';$('guideMode').setAttribute('aria-pressed',String(guideOn));}
+$('guideMode').onclick=()=>{guideOn=!guideOn;try{localStorage.setItem('reviry-guide',guideOn?'on':'off');}catch{}refreshGuide();renderedPhase='';renderedDock='';};refreshGuide();
+const caption=rod=>guideOn?signalCaption(rod):signalCaption(rod).replace(/ · zasekni/g,'');
 const setHidden=(id,hidden)=>$(id).classList.toggle('hidden',hidden);
 function toast(message){$('toast').textContent=message;setHidden('toast',false);clearTimeout(toastTimer);toastTimer=setTimeout(()=>setHidden('toast',true),4000);}
 function setPause(){game.paused=!started||drawerOpen||venueOpen||tripPlanner.opened||preparation.opened||document.hidden||game.phase==='landed';game.reeling=false;game.lifting=false;}
@@ -15,7 +20,7 @@ function saveJournal(){try{localStorage.setItem('reviry-vajgar-journal',JSON.str
 function venueDetails(v){return `<p>${v.evidence}</p><p><strong>Ve hře:</strong> ${v.playable.map(id=>SPECIES_NAMES[id]).join(', ')}.</p><p><strong>Další údaje ve zdrojích:</strong> ${v.reported.join(', ')}.</p><p>${v.photo.note} Autor: <a href="${v.photo.source}" target="_blank" rel="noopener">${v.photo.author}</a>, <a href="${v.photo.licenseUrl}" target="_blank" rel="noopener">${v.photo.license}</a>. ${v.photo.external?'Externí originál se načítá od vydavatele, není zahrnutý do souborů hry.':'Zmenšení a WebP.'} Ořez, animace a rozšíření hladiny, společné AI popředí.</p><ul>${v.sources.map(id=>{const s=STOCK_SOURCES[id];return `<li><a href="${s.url}" target="_blank" rel="noopener">${s.title}</a><br>${s.scope}</li>`;}).join('')}</ul>`;}
 function updateVenue(){
  const v=getVenue(game.venueId),p=lake?.venueId===game.venueId?lake.photo:v.photo;document.title=`REVÍRY · ${v.name}`;$('locationName').textContent=v.short;$('locationRegion').textContent=v.region.toUpperCase();$('world').setAttribute('aria-label',`Revír ${v.name} · ${p.note}`);
- $('sceneNote').replaceChildren(document.createTextNode(`${v.short} / ${p.verified?'FOTOGRAFICKÝ REVÍR':'ILUSTRAČNÍ PROSTŘEDÍ'} `));const version=document.createElement('span');version.textContent='0.13.0';$('sceneNote').append(version);
+ $('sceneNote').replaceChildren(document.createTextNode(`${v.short} / ${p.verified?'FOTOGRAFICKÝ REVÍR':'ILUSTRAČNÍ PROSTŘEDÍ'} `));const version=document.createElement('span');version.textContent='0.14.0';$('sceneNote').append(version);
  $('welcomeTitle').textContent=v.intro;$('venueEvidence').innerHTML=venueDetails({...v,photo:p});$('venuePhotoNotice').textContent=p.externalUnavailable?'Fotografie Jarošova se nenačetla · dočasně ILUSTRAČNÍ MATĚJOVEC':'ILUSTRAČNÍ MATĚJOVEC · fotografie cílové nádrže zatím chybí';setHidden('venuePhotoNotice',p.verified);document.body.classList.toggle('illustrative-venue',!p.verified);
  $('photoCredit').innerHTML=`${p.verified?'':'<b>ILUSTRAČNÍ MATĚJOVEC · </b>'}<a href="${p.source}" target="_blank" rel="noopener">Foto: ${p.author}</a> · <a href="${p.licenseUrl}" target="_blank" rel="noopener">${p.license}</a><span> · ořez / rozšířená hladina / AI náčiní a popředí</span>`;updateTrip();
 }
@@ -37,8 +42,9 @@ function renderJournal(){const container=$('catches');container.replaceChildren(
 function ensureAudio(){if(audio)return;const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)return;audio=new Audio();const buffer=audio.createBuffer(1,audio.sampleRate*3,audio.sampleRate);const channel=buffer.getChannelData(0);let last=0;for(let i=0;i<channel.length;i++){last=(last+(Math.random()*2-1)*.035)/1.025;channel[i]=last;}
  const noise=audio.createBufferSource();noise.buffer=buffer;noise.loop=true;const filter=audio.createBiquadFilter();filter.type='lowpass';filter.frequency.value=850;const gain=audio.createGain();gain.gain.value=.10;noise.connect(filter).connect(gain).connect(audio.destination);noise.start();}
 async function toggleSound(){ensureAudio();if(!audio){toast('Zvuk není v tomto prohlížeči dostupný.');return;}soundOn=!soundOn;if(soundOn)await audio.resume();else await audio.suspend();$('sound').textContent=soundOn?'Zvuk zap.':'Zvuk vyp.';$('sound').setAttribute('aria-pressed',String(soundOn));}
-function tickSound(){if(!audio||!soundOn||audio.state!=='running')return;const o=audio.createOscillator(),g=audio.createGain();o.type='sine';o.frequency.setValueAtTime(800,audio.currentTime);o.frequency.exponentialRampToValueAtTime(360,audio.currentTime+.04);g.gain.setValueAtTime(.025,audio.currentTime);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.05);o.connect(g).connect(audio.destination);o.start();o.stop(audio.currentTime+.06);}
-let lastTick=0;
+function tickSound(index=0,drop=false,reel=false){if(!audio||!soundOn||audio.state!=='running')return;const o=audio.createOscillator(),g=audio.createGain();o.type=reel?'triangle':'sine';const duration=reel?.022:.11;o.frequency.setValueAtTime(reel?140:(drop?740:1120)+index*130,audio.currentTime);g.gain.setValueAtTime(reel?.008:.025,audio.currentTime);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+duration);o.connect(g).connect(audio.destination);o.start();o.stop(audio.currentTime+duration+.01);}
+
+const alarmStates=new Map();let lastReelTick=0;
 const phaseText={ready:['POLOŽENÁ · MECHANICKÉ ČIHÁTKO','Klid před záběrem.','Podrž NAHODIT, zvol sílu a pusť.','NAHODIT','podrž a pusť'],casting:['NÁHOZ','Najdi správnou vzdálenost.','Uvolni tlačítko a nahoď.','PUSTIT','uvolni pro nához'],flying:['NÁHOZ','Nástraha míří na místo.','Sleduj dopad na hladinu.','LETÍ…',''],waiting:['NÁSTRAHA VE VODĚ','Teď jen ty a voda.','Sleduj čihátko pod prutem. Záběr chvíli potrvá.','ČEKÁM NA ZÁBĚR',''],bite:['ZÁBĚR · ČIHÁTKO SE HÝBE','Něco je na nástraze.','Vezmi prut do ruky. Pak přijde zásek.','VZÍT PRUT','klepni'],held:['PRUT V RUCE','Teď zasekni.','Zvedni špičku a napni vlasec.','ZASEKNOUT','klepni'],fight:['ZDOLÁVÁNÍ','Drž kontakt s rybou.','Při silném tahu povol brzdu a pusť navíjení.','NAVÍJET','drž tlačítko'],landed:['ÚLOVEK','Podařilo se.','Ryba je bezpečně v podběráku.','DALŠÍ NÁHOZ',''],escaped:['RYBA UNIKLA','Tak příště.','','ZKUSIT ZNOVU','podrž a pusť']};
 const strikeLabels={empty:['NEPLATNÝ ZÁSEK','Zásek do prázdna.','Naprázdno'],early:['PŘEDČASNÝ ZÁSEK','Zasekl jsi příliš brzy.','Brzký zásek'],late:['POZDNÍ ZÁSEK','Zasekl jsi pozdě.','Pozdní zásek'],slack:['CHYBĚL KONTAKT','Vlasec byl povolený.','Bez kontaktu'],missed:['ZMEŠKANÝ ZÁBĚR','Ryba nástrahu pustila.','Zmeškaný záběr']};
 let renderedPhase='',renderedDock='';
@@ -46,9 +52,9 @@ function saveSetup(){try{localStorage.setItem('reviry-session-setup',JSON.string
 function updateRodDock(){
  const key=game.enabledRods.map(r=>r.phase+'/'+r.loadout.method+'/'+(r.result?.strike?.outcome||'')).join('|')+game.activeIndex;
  if(key===renderedDock)return;renderedDock=key;
- const labels={ready:'Připraven',casting:'Nához',flying:'Nához',waiting:'Ve vodě',bite:'ZÁBĚR!',held:'V ruce',fight:'Zdolávání',landed:'Úlovek',escaped:'Unikla'};
+ const labels={ready:'Připraven',casting:'Nához',flying:'Nához',waiting:'Ve vodě',bite:guideOn?'ZÁBĚR!':'Ve vodě',held:'V ruce',fight:'Zdolávání',landed:'Úlovek',escaped:'Unikla'};
  const locked=['casting','flying','held','fight','landed'].includes(game.phase);
- $('rodDock').innerHTML=game.enabledRods.map((r,i)=>`<button type="button" data-rod="${i}" class="rod-tab ${i===game.activeIndex?'selected':''} ${r.phase==='bite'?'bite':''}" ${locked&&i!==game.activeIndex?'disabled':''} aria-pressed="${i===game.activeIndex}"><strong>PRUT ${i+1}</strong><span>${r.phase==='escaped'&&strikeLabels[r.result?.strike?.outcome]?strikeLabels[r.result.strike.outcome][2]:labels[r.phase]}</span></button>`).join('')+(game.secondEnabled?`<button id="foldRod" class="rod-extra" ${locked?'disabled':''}>Složit 2. prut</button>`:game.loadout.method!=='float'?`<button id="addRod" class="rod-extra" ${locked?'disabled':''}>+ Druhý prut</button>`:'');
+ $('rodDock').innerHTML=game.enabledRods.map((r,i)=>`<button type="button" data-rod="${i}" class="rod-tab ${i===game.activeIndex?'selected':''} ${r.phase==='bite'&&guideOn?'bite':''}" ${locked&&i!==game.activeIndex?'disabled':''} aria-pressed="${i===game.activeIndex}"><strong>PRUT ${i+1}</strong><span>${r.phase==='escaped'&&strikeLabels[r.result?.strike?.outcome]?strikeLabels[r.result.strike.outcome][2]:labels[r.phase]}</span></button>`).join('')+(game.secondEnabled?`<button id="foldRod" class="rod-extra" ${locked?'disabled':''}>Složit 2. prut</button>`:game.loadout.method!=='float'?`<button id="addRod" class="rod-extra" ${locked?'disabled':''}>+ Druhý prut</button>`:'');
 }
 let monitorCount=0;
 function updateRodSignals(){
@@ -61,24 +67,24 @@ function updateRodSignals(){
  const locked=['casting','flying','held','fight','landed'].includes(game.phase);
  [...$('rodSignals').children].forEach((card,i)=>{
   const rod=game.rods[i],motion=biteMotion(rod,rod.time),active=i===game.activeIndex,inWater=['waiting','bite','held'].includes(rod.phase);
-  card.classList.toggle('selected',active);card.classList.toggle('bite',rod.phase==='bite');card.classList.toggle('empty',!inWater);card.disabled=locked&&!active;card.setAttribute('aria-pressed',String(active));
-  const action=rod.phase==='bite'?`Vzít prut ${i+1}`:active?'Vybraný prut':`Sledovat prut ${i+1}`;
-  card.setAttribute('aria-label',`${action} · ${inWater?signalCaption(rod):rod.phase==='ready'?'Připraven k náhozu':rod.phase==='escaped'?'Zmeškaný záběr':rod.phase==='fight'?'Zdolávání':'Nához'}`);
-  card.querySelector('.monitor-state').textContent=inWater?signalCaption(rod):rod.phase==='ready'?'Připraven k náhozu':rod.phase==='escaped'?'Zmeškaný záběr':rod.phase==='fight'?'Zdolávání':'Nához';
+  card.classList.toggle('selected',active);card.classList.toggle('bite',guideOn&&rod.phase==='bite');card.classList.toggle('empty',!inWater);card.disabled=locked&&!active;card.setAttribute('aria-pressed',String(active));
+  const action=guideOn&&rod.phase==='bite'?`Vzít prut ${i+1}`:active?'Vybraný prut':`Sledovat prut ${i+1}`;
+  card.setAttribute('aria-label',`${action} · ${inWater?caption(rod):rod.phase==='ready'?'Připraven k náhozu':rod.phase==='escaped'?'Zmeškaný záběr':rod.phase==='fight'?'Zdolávání':'Nához'}`);
+  card.querySelector('.monitor-state').textContent=inWater?caption(rod):rod.phase==='ready'?'Připraven k náhozu':rod.phase==='escaped'?'Zmeškaný záběr':rod.phase==='fight'?'Zdolávání':'Nához';
   card.querySelector('.monitor-action').textContent=card.disabled?'Druhý prut je v ruce':action;
  });
 }
 $('rodSignals').addEventListener('click',e=>{
  const card=e.target.closest('[data-signal-rod]');if(!card||game.paused)return;
  if(!game.select(Number(card.dataset.signalRod))){toast('Nejprve dokonči práci s prutem v ruce.');return;}
- if(game.phase==='bite')game.grab();renderedPhase='';renderedDock='';saveSetup();
+ if(game.phase==='bite'&&guideOn)game.grab();renderedPhase='';renderedDock='';saveSetup();
 });
 $('signalToggle').onclick=()=>{const expanded=$('signalFocus').classList.toggle('expanded');$('signalToggle').setAttribute('aria-expanded',String(expanded));$('signalToggle').setAttribute('aria-label',expanded?'Skrýt optický detail':'Zvětšit signalizaci');};
 $('rodDock').addEventListener('click',e=>{const button=e.target.closest('[data-rod]');if(button){if(!game.select(Number(button.dataset.rod)))toast('Nejprve dokonči práci s prutem v ruce.');}else if(e.target.closest('#addRod')){game.enableSecond();}else if(e.target.closest('#foldRod')){if(!game.foldSecond())toast('Druhý prut nejprve bezpečně stáhni.');}renderedPhase='';renderedDock='';saveSetup();});
 function updateUI(){const p=game.phase,t=phaseText[p],method=METHODS[game.loadout.method],isFloat=game.loadout.method==='float';const indicator=game.loadout.indicator||'bobbin',signalName=isFloat?'Splávek':game.loadout.method==='feeder'?'Špička':indicator==='electronic'?'Elektronický hlásič + swinger':indicator==='swinger'?'Swinger':'Čihátko';if(p!==renderedPhase){$('drag').value=String(Math.round(game.drag*100));$('dragValue').textContent=`${Math.round(game.drag*100)} %`;document.body.dataset.phase=p;$('eyebrow').textContent=p==='ready'?`${method.name.toUpperCase()} · ${signalName.toUpperCase()}`:p==='bite'?`ZÁBĚR · ${signalName.toUpperCase()}`:t[0];$('status').textContent=t[1];$('hint').textContent=p==='escaped'?game.result.reason:p==='waiting'?`Sleduj ${signalName.toLowerCase()}. Nástraha: ${BAITS[game.loadout.bait].name}.`:p==='bite'?(isFloat?'Splávek se potápí. Teď zasekni.':'Vezmi prut a potom zasekni.'):t[2];$('action').replaceChildren(document.createTextNode(p==='bite'&&isFloat?'ZASEKNOUT':t[3]));if(t[4]){const span=document.createElement('span');span.textContent=t[4];$('action').append(span);}$('action').disabled=['flying','waiting','landed'].includes(p);setHidden('fightPanel',p!=='fight');setHidden('lift',p!=='fight');setHidden('net',p!=='fight');setHidden('retrieve',!['waiting','bite','held'].includes(p));setHidden('castMeter',p!=='casting');renderedPhase=p;}
  updateRodDock();updateRodSignals();
  const showSignal=['waiting','bite'].includes(p)||(p==='held'&&game.loadout.method==='feeder'),motion=biteMotion(game,game.time);setHidden('signalFocus',!showSignal||game.secondEnabled);
- $('signalTitle').textContent=`${signalName} · ${game.activeIndex+1}`;$('signalState').textContent=signalCaption(game);
+ $('signalTitle').textContent=`${signalName} · ${game.activeIndex+1}`;$('signalState').textContent=caption(game);
  $('signalFocus').classList.toggle('bite',motion.stage==='run');$('signalFocus').classList.toggle('touch',motion.stage==='touch');$('signalFocus').classList.toggle('fading',motion.stage==='fading');
  lake?.setSignalVisible?.(showSignal&&$('signalFocus').classList.contains('expanded'));
  setHidden('earlyStrike',p!=='waiting');setHidden('takeUp',p!=='held'||game.slackToTake<=.02);
@@ -96,10 +102,17 @@ function updateUI(){const p=game.phase,t=phaseText[p],method=METHODS[game.loadou
  $('feed').textContent=`ZAKRMIT ${game.loadout.feedPortion} g`;$('feed').disabled=game.loadout.feed==='none'||game.feedStocks[game.loadout.feed]<game.loadout.feedPortion;
  if(p==='casting')$('castFill').style.width=`${game.castPower*100}%`;
  if(p==='fight'){$('distance').textContent=`${game.distance.toFixed(1)} m`;$('stamina').textContent=`${Math.round((1-game.stamina)*100)} %`;$('tensionFill').style.left=`${Math.min(100,game.tension*100)}%`;$('tensionText').textContent=game.tension>.85?'Povol brzdu!':game.tension<.15?'Povolený vlasec':'V pořádku';$('tensionText').style.color=game.tension>.85?'#f4a18a':'#c4d7c7';$('net').disabled=game.distance>4||game.stamina>.22;$('lift').classList.toggle('active',game.lifting);if(game.distance<4&&game.stamina<=.22)$('hint').textContent='Ryba je u břehu a unavená. Teď ji podeber.';else $('hint').textContent=t[2];}
- const alarming=game.enabledRods.some(r=>r.phase==='bite'&&r.loadout.method==='ledger'&&r.loadout.indicator==='electronic');
- if(alarming&&!game.paused&&game.time-lastTick>.6){tickSound();lastTick=game.time;}
+ game.enabledRods.forEach((r,index)=>{const lift=biteMotion(r,r.time).ledgerLift,next=alarmStep(r,alarmStates.get(index),lift);alarmStates.set(index,next.state);if(next.pulse)tickSound(index,lift>0);});
+ if(!game.paused&&game.phase==='fight'&&game.reeling&&game.time-lastReelTick>.18){tickSound(0,false,true);lastReelTick=game.time;}
+ if(!guideOn){
+  setHidden('earlyStrike',true);
+  if(['waiting','bite'].includes(p)){$('status').textContent='';$('hint').textContent='';$('eyebrow').textContent='';$('action').disabled=false;$('action').textContent=isFloat?'ZASEKNOUT':'VZÍT PRUT';}
+  if(p==='held'){$('eyebrow').textContent='PRUT V RUCE';$('status').textContent='Prut v ruce.';$('hint').textContent=game.slackToTake>.02?'Vlasec je povolený.':'';}
+  if(p==='fight'){$('status').textContent='';$('hint').textContent='';}
+ }
+
 }
-function actionDown(e){e.preventDefault();if(game.paused)return;const p=game.phase;if(['ready','escaped'].includes(p)){game.startCast();}else if(p==='bite'){if(game.loadout.method==='float')game.strike();else game.grab();}else if(p==='held'){game.strike();}else if(p==='fight'){game.reeling=true;}}
+function actionDown(e){e.preventDefault();if(game.paused)return;const p=game.phase;if(['ready','escaped'].includes(p)){game.startCast();}else if(p==='waiting'&&!guideOn){if(game.loadout.method==='float')game.strike();else game.grab();}else if(p==='bite'){if(game.loadout.method==='float')game.strike();else game.grab();}else if(p==='held'){game.strike();}else if(p==='fight'){game.reeling=true;}}
 function actionUp(e){e.preventDefault();if(game.phase==='casting')game.releaseCast();game.reeling=false;}
 $('action').addEventListener('pointerdown',e=>{if(e.button!==0)return;$('action').setPointerCapture(e.pointerId);actionDown(e);});$('action').addEventListener('pointerup',actionUp);$('action').addEventListener('pointercancel',e=>{if(game.phase==='casting'){game.phase='ready';game.emit('cast-cancel');}game.reeling=false;});$('action').addEventListener('lostpointercapture',()=>{game.reeling=false;});
 $('action').addEventListener('keydown',e=>{if([' ','Enter'].includes(e.key)&&!e.repeat)actionDown(e);});$('action').addEventListener('keyup',e=>{if([' ','Enter'].includes(e.key))actionUp(e);});
@@ -134,13 +147,13 @@ game.onEvent=(event,data)=>{
  if(event==='cast'){lake?.setCastDirection(index);rod.castAngle=lake?.yaw||0;}
  if(event==='splash')lake?.splash(index);
  if(event==='feed'){lake?.scatterFeed(index);toast(`${prefix}Zakrmil jsi ${rod.loadout.feedPortion} g. Zbývá ${rod.feedStocks[rod.loadout.feed]} g.`);}
- if(event==='bite'){if(index!==game.activeIndex)toast(prefix+(rod.loadout.method==='float'?'Splávek! Zasekni.':rod.loadout.method==='feeder'?'Špička se ohýbá! Vezmi prut a zasekni.':'Čihátko! Vezmi prut a zasekni.'));navigator.vibrate?.([60,80,60]);}
- if(event==='hooked'){toast(prefix+(data.strike?.quality<.8?'Slabší zásek. Udržuj napnutý vlasec.':'Čistý zásek. Drž NAVÍJET a hlídej napětí.'));navigator.vibrate?.(80);}
+ if(event==='bite'&&guideOn){if(index!==game.activeIndex)toast(prefix+(rod.loadout.method==='float'?'Splávek! Zasekni.':rod.loadout.method==='feeder'?'Špička se ohýbá! Vezmi prut a zasekni.':'Čihátko! Vezmi prut a zasekni.'));navigator.vibrate?.([60,80,60]);}
+ if(event==='hooked'&&guideOn){toast(prefix+(data.strike?.quality<.8?'Slabší zásek. Udržuj napnutý vlasec.':'Čistý zásek. Drž NAVÍJET a hlídej napětí.'));navigator.vibrate?.(80);}
  if(event==='escaped')toast(prefix+data.reason);
  if(event==='landed'){$('catchVenueTitle').textContent='ÚLOVEK · '+getVenue(data.venueId).short;showCatchPhoto(data,$('fishIllustration'),$('fishPhotoCredit'));$('catchSetup').textContent=getVenue(data.venueId).name+' · '+setupSummary(data.loadout)+(data.trip?' · Výprava '+data.trip.date+' '+data.trip.time:'')+(data.strike?' · Zásek: '+(data.strike.quality>=.8?'čistý kontakt':'slabší kontakt'):'');$('fishName').textContent=data.name;$('fishWeight').textContent=data.weight.toLocaleString('cs-CZ');$('fishLength').textContent=data.length;setHidden('catchOverlay',false);saveJournal();setPause();}
 };
 async function boot(){loadJournal();try{const session=JSON.parse(localStorage.getItem('reviry-session-setup')||'null');if(!game.restoreSetup(session)){const saved=JSON.parse(localStorage.getItem('reviry-loadout')||'null');if(saved&&validateLoadout(saved).length===0)game.setLoadout(saved);}}catch{}updateVenue();updateTrip();setPause();try{lake=await new LakeScene($('world'),game).init();lake.setSignalCanvas?.($('signalCanvas'));updateVenue();$('wideView').textContent=lake.wideView?'Širší záběr: zap.':'Širší záběr: vyp.';$('wideView').setAttribute('aria-pressed',String(lake.wideView));$('quality').textContent=lake.high?'HD':'ECO';$('geoCredit').textContent='Původ prostředí a zdroje osádky vybraného revíru jsou uvedeny níže. Fotografie je doplněna o pohyb vody a vybavení. Hlavní prut s navijákem, trojnožka a varianta v ruce jsou vytvořené pomocí AI. Splávek je upravená fotografie Geotek (CC BY-SA 3.0). Grafika je ilustrační a nemusí odpovídat vybranému modelu. Odložený prut s navijákem a trojnožkou tvoří společný syntetický fotorealistický podklad; popředí stanoviště je také vytvořené pomocí AI. Jde o fotografický pohled s omezeným posunem kamery. Hloubky a chování ryb jsou herní model.';setHidden('loading',true);if(lake.assetWarnings.length)toast('Část grafických podkladů se nenačetla. Zkus obnovit stránku.');requestAnimationFrame(frame);}catch(error){fatal(error);}}
 function frame(now){const dt=Math.min(.25,Math.max(0,(now-last)/1000));last=now;try{game.advance(dt);updateUI();document.documentElement.style.setProperty('--station-note-top',`${$('rodDock').getBoundingClientRect().bottom+16}px`);document.documentElement.style.setProperty('--fishing-hud-height',`${window.innerHeight-$('fishingUI').getBoundingClientRect().top}px`);lake.setUiBounds?.({hudTop:$('fishingUI').getBoundingClientRect().top,headerBottom:Math.max(document.querySelector('header').getBoundingClientRect().bottom,$('rodDock').getBoundingClientRect().bottom)});if(!document.hidden)lake.render(game.paused?0:dt);}catch(error){fatal(error);return;}requestAnimationFrame(frame);}
 // Diagnostics expose observable state only; normal play never depends on this interface.
-window.reviry={getState:()=>({venueId:game.venueId,activeRod:game.activeIndex+1,rodCount:game.enabledRods.length,rods:game.enabledRods.map(r=>({phase:r.phase,loadout:{...r.loadout},distance:r.distance})),phase:game.phase,loadout:{...game.loadout},trip:{...game.trip},feedBonus:game.feedBonus,feedStocks:{...game.feedStocks},distance:game.distance,stamina:game.stamina,tension:game.tension,catches:game.journal.length,paused:game.paused,engine:lake?.metrics?.engine,assetWarnings:lake?.assetWarnings,drawImages:lake?.metrics?.drawImages}),version:'0.13.0'};
+window.reviry={getState:()=>({venueId:game.venueId,activeRod:game.activeIndex+1,rodCount:game.enabledRods.length,rods:game.enabledRods.map(r=>({phase:r.phase,loadout:{...r.loadout},distance:r.distance})),phase:game.phase,loadout:{...game.loadout},trip:{...game.trip},feedBonus:game.feedBonus,feedStocks:{...game.feedStocks},distance:game.distance,stamina:game.stamina,tension:game.tension,catches:game.journal.length,paused:game.paused,engine:lake?.metrics?.engine,assetWarnings:lake?.assetWarnings,drawImages:lake?.metrics?.drawImages}),version:'0.14.0'};
 boot();

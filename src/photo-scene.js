@@ -1,7 +1,7 @@
-import {tripConditions} from './trip.js?v=0.13.0';
-import {getVenue} from './venues.js?v=0.13.0';
-import {biteMotion} from './bite-motion.js?v=0.13.0';
-import {RODS,RIGS} from './tackle.js?v=0.13.0';
+import {tripConditions} from './trip.js?v=0.14.0';
+import {getVenue} from './venues.js?v=0.14.0';
+import {biteMotion} from './bite-motion.js?v=0.14.0';
+import {RODS,RIGS} from './tackle.js?v=0.14.0';
 
 export const PHOTO=getVenue('vajgar').photo;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -171,7 +171,7 @@ export class LakeScene{
    this.ellipse(indicator.x,indicator.y,3.5,7,type==='bobbin'?grad:'#72b8c6','#28332b',.6);
    if(type==='bobbin')this.line([{x:indicator.x,y:indicator.y+7},tether],'rgba(100,115,94,.6)',.55);
    if(type==='electronic'){
-    const alarm=at(.43,.72),lit=g.phase==='bite'&&Math.sin(this.clock*12)>0;
+    const alarm=at(.43,.72),lit=Math.abs(biteMotion(g,this.clock).ledgerLift)>1&&Math.sin(this.clock*12)>0;
     c.fillStyle='#263035';c.strokeStyle='#8b9994';c.lineWidth=.7;c.beginPath();c.roundRect(alarm.x-5,alarm.y-8,10,17,3);c.fill();c.stroke();
     this.ellipse(alarm.x,alarm.y-3,1.8,1.8,lit?'#7fe2ff':'#355661');
    }
@@ -184,12 +184,16 @@ export class LakeScene{
   return true;
  }
  drawFish(){const g=this.game;if(g.phase!=='fight'||g.distance>8)return;
-  const c=this.ctx,p=this.target,s=clamp(8/g.distance,.9,2.2)*(g.fish?.length||50)/60;
-  c.save();c.translate(p.x,p.y);c.rotate(Math.sin(this.clock*1.7)*.2);c.scale(s,s*.42);c.globalAlpha=.55;
-  const gradient=c.createLinearGradient(0,-8,0,8);gradient.addColorStop(0,'#293d30');gradient.addColorStop(.45,g.fish?.id==='bream'?'#b0afa0':'#a59057');gradient.addColorStop(1,'#5e7154');
-  this.ellipse(0,0,22,8,gradient);c.fillStyle='#616e4b';c.beginPath();c.moveTo(-19,0);c.lineTo(-31+Math.sin(this.clock*9)*2,-9);c.lineTo(-28,0);c.lineTo(-31+Math.sin(this.clock*9)*2,9);c.closePath();c.fill();c.restore();
-  this.ellipse(p.x,p.y,35+Math.sin(this.clock*4)*4,5,null,'rgba(223,236,222,.35)',1);
+  const c=this.ctx,p=this.target,s=clamp(8/g.distance,.9,2.2)*(g.fish?.length||50)/60,turn=(g.fishBearing||0)*2+Math.sin(g.elapsed*.8)*.08;
+  // Underwater silhouette and a brief flank flash; no exposed cartoon fish on the surface.
+  c.save();c.translate(p.x,p.y+2);c.rotate(turn);c.scale(s,s*.37);c.filter='blur(1.1px)';c.globalAlpha=.21;
+  const body=c.createLinearGradient(0,-9,0,9);body.addColorStop(0,'#182f29');body.addColorStop(.5,'#45513e');body.addColorStop(1,'#253d32');
+  c.fillStyle=body;c.beginPath();c.moveTo(21,0);c.bezierCurveTo(7,-13,-13,-9,-20,0);c.bezierCurveTo(-13,9,7,13,21,0);c.fill();
+  c.beginPath();c.moveTo(-18,0);c.lineTo(-28,-7);c.quadraticCurveTo(-25,0,-28,7);c.closePath();c.fill();
+  const flash=Math.pow(Math.max(0,Math.sin(g.elapsed*1.7)),10)*.27;c.globalAlpha=flash;this.ellipse(3,0,12,3,'#d0c7a8');c.restore();
+  this.ellipse(p.x,p.y,23+Math.sin(g.elapsed*2.2)*3,3.2,null,'rgba(214,230,218,.18)',.7);
  }
+
  drawRig(){const c=this.ctx,g=this.game,w=this.width,h=this.height,method=g.loadout.method,floating=method==='float',fighting=g.phase==='fight',held=g.phase==='held',casting=g.phase==='casting',flying=g.phase==='flying';
   const hand=floating||fighting||held||casting||flying||g.time-g.lastStrikeAt<.55;if(hand&&this.drawPhotoHeld())return;if(!hand&&this.drawPhotoResting())return;const layout=gearLayout(w,h,{...this.inset,index:this.drawIndex,count:this.drawCount,pose:this.pose,waterTop:this.waterTop});const {base,size}=layout;let tip={...layout.tip};
   if(casting){tip.x+=w*g.castPower*.14;tip.y-=h*g.castPower*.15;}
@@ -251,7 +255,7 @@ export class LakeScene{
   for(let i=0;i<rods.length;i++){
    const g=rods[i];this.game=g;this.drawIndex=i;
    const strikePulse=Math.max(0,1-(g.time-g.lastStrikeAt)/.55);const targetPose=Math.max(['held','fight'].includes(g.phase)?g.lifting?.9:.5:0,strikePulse*.85);this.poseByRod[i]=mix(this.poseByRod[i],targetPose,1-Math.exp(-Math.max(0,dt)*8));this.pose=this.poseByRod[i];
-   this.target=waterPoint(this.width,this.height,this.waterTop,g.distance||30,(g.castAngle||0)-this.yaw+(rods.length>1?(i===0?-.05:.05):0),this.equipment.deck?this.shoreTop:null);if(g.loadout.method==='float')this.target.x-=this.width*.12;this.targets.push({...this.target});
+   this.target=waterPoint(this.width,this.height,this.waterTop,g.distance||30,(g.phase==='fight'?(g.fishBearing??g.castAngle):g.castAngle||0)-this.yaw+(rods.length>1?(i===0?-.05:.05):0),this.equipment.deck?this.shoreTop:null);if(g.loadout.method==='float')this.target.x-=this.width*.12;this.targets.push({...this.target});
    this.drawFish();if(g.loadout.method==='float'&&['waiting','bite'].includes(g.phase))this.drawFloat(this.target,false);this.drawRig();
   }
   this.game=session;this.target=this.targets[active];this.drawLighting();

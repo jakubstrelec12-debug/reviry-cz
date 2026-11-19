@@ -1,7 +1,7 @@
-import {DEFAULT_TRIP,validTrip} from './trip.js?v=0.13.0';
-import {VENUES} from './venues.js?v=0.13.0';
-import {Fishing} from './fishing.js?v=0.13.0';
-import {cleanLoadout,validateLoadout,createFeedStocks} from './tackle.js?v=0.13.0';
+import {DEFAULT_TRIP,validTrip} from './trip.js?v=0.14.0';
+import {VENUES} from './venues.js?v=0.14.0';
+import {Fishing} from './fishing.js?v=0.14.0';
+import {cleanLoadout,validateLoadout,createFeedStocks} from './tackle.js?v=0.14.0';
 const LOCKED=['casting','flying','held','fight','landed'];
 export class FishingSession{
  constructor(random=Math.random){
@@ -38,5 +38,5 @@ export class FishingSession{
  exportSetup(){return {trip:{...this.trip},venueId:this.venueId,secondEnabled:this.secondEnabled,activeIndex:this.activeIndex,loadouts:this.enabledRods.map(r=>({...r.loadout}))};}
  restoreSetup(value){if(!value||!Array.isArray(value.loadouts))return false;if(value.trip!==undefined&&!validTrip(value.trip))return false;const list=value.loadouts;if(!list.length||list.length>2||list.some(v=>validateLoadout(v).length)||list.length===2&&list.some(v=>v.method==='float'))return false;list.forEach((v,i)=>this.rods[i].loadout=cleanLoadout(v));this.rods.forEach(r=>r.trip={...(value.trip||DEFAULT_TRIP)});this.rods.forEach(r=>r.venueId=Object.hasOwn(VENUES,value.venueId)?value.venueId:'vajgar');this.secondEnabled=list.length===2;this.activeIndex=value.activeIndex===1&&this.secondEnabled?1:0;return true;}
 }
-for(const key of ['phase','time','elapsed','castPower','distance','throwDistance','castAngle','loadout','feedStocks','feedSpot','feedBonus','drag','tension','stamina','reeling','lifting','biteStyle','biteWindow','slackToTake','hookQuality','lastStrikeAt','lastStrike','biteIn','biteElapsed','fish','result'])Object.defineProperty(FishingSession.prototype,key,{get(){return this.active[key];},set(value){this.active[key]=value;}});
+for(const key of ['phase','time','elapsed','castPower','distance','throwDistance','castAngle','loadout','feedStocks','feedSpot','feedBonus','drag','tension','stamina','reeling','lifting','biteStyle','probe','run','fishBearing','biteWindow','slackToTake','hookQuality','lastStrikeAt','lastStrike','biteIn','biteElapsed','fish','result'])Object.defineProperty(FishingSession.prototype,key,{get(){return this.active[key];},set(value){this.active[key]=value;}});
 for(const name of ['startCast','releaseCast','grab','strike','net','lose','retrieve','feed','emit'])FishingSession.prototype[name]=function(...args){return this.active[name](...args);};

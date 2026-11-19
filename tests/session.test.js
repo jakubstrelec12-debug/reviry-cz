@@ -10,8 +10,8 @@ test('two independent rods keep their casts and bait while player switches',()=>
  s.setLoadout({...DEFAULT_LOADOUT,rig:'spring',feed:'groundbait'});cast(s);assert.equal(s.rods[0].phase,'waiting');assert.ok(s.enableSecond());
  s.setLoadout({...methodPreset('feeder'),bait:'worm'});cast(s);assert.equal(s.rods[0].phase,'waiting');assert.equal(s.rods[1].phase,'waiting');assert.equal(s.rods[0].loadout.bait,'corn');assert.equal(s.rods[1].loadout.bait,'worm');
  assert.equal(s.feedStocks.groundbait,960);assert.equal(s.rods[0].feedStocks,s.rods[1].feedStocks);
- s.select(0);step(s,9);assert.equal(s.rods[0].phase,'bite');assert.equal(s.rods[1].phase,'bite');assert.ok(events.some(([e,i])=>e==='bite'&&i===1));
- s.grab();s.reeling=true;while(s.slackToTake>.02)s.advance(.05);s.reeling=false;assert.ok(s.strike());assert.equal(s.select(1),false);assert.equal(s.foldSecond(),false);
+ s.select(0);for(let i=0;i<2000&&!s.rods.every(r=>r.phase==='bite');i++)step(s,.05);assert.equal(s.rods[0].phase,'bite');assert.equal(s.rods[1].phase,'bite');assert.ok(events.some(([e,i])=>e==='bite'&&i===1));
+ s.grab();s.reeling=true;while(s.slackToTake>.02)s.advance(.05);s.reeling=false;while(s.biteElapsed<s.biteWindow.openAt+.5)step(s,.05);assert.ok(s.strike());assert.equal(s.select(1),false);assert.equal(s.foldSecond(),false);
  s.paused=true;const clocks=s.rods.map(r=>r.time);step(s,100);assert.deepEqual(s.rods.map(r=>r.time),clocks);
 });
 test('float cannot add a second rod, nor replace a rod in a two-rod session',()=>{

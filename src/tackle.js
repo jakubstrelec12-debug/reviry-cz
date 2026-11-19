@@ -122,7 +122,7 @@ export function speciesWeights(loadout,feedBonus=0){
 }
 export function biteDelay(loadout,random,feedBonus=0){
  const depthFit=loadout.method==='float'?1+Math.abs(loadout.depth-2)*.45:1;
- return (7+random*12)*depthFit/((1+feedBonus*.7)*(BAITS[loadout.bait].speed||1));
+ return (18-Math.log(1-Math.max(0,Math.min(.995,random)))*55)*depthFit/((1+feedBonus*.7)*(BAITS[loadout.bait].speed||1));
 }
 export function setupSummary(v){return `${METHODS[v.method].name} · ${RIGS[v.rig].name} · ${BAITS[v.bait].name}${v.method==='ledger'?' · '+indicatorName(v):''}`;}
 

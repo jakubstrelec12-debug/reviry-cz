@@ -108,6 +108,7 @@ test('both optical views render independent simultaneous bites without changing 
  const scene=await new LakeScene(canvas,session).init(),a=createCanvas(240,180),b=createCanvas(240,180);scene.setUiBounds({hudTop:570,headerBottom:126});scene.setSignalViews([{index:0,canvas:a},{index:1,canvas:b}]);scene.render(0);
  assert.equal(scene.signals.length,2);assert.ok(Math.abs(scene.signals[0].x-scene.signals[1].x)>100);
  const left=a.toBuffer('image/png'),right=b.toBuffer('image/png'),clocks=session.rods.map(r=>r.time);
+ session.rods[0].probe={at:-.27,duration:2.3,power:4,seed:.3};scene.render(0);assert.notDeepEqual(a.toBuffer('image/png'),left);assert.deepEqual(b.toBuffer('image/png'),right);session.rods[0].probe=null;
  session.rods[0].phase='bite';session.rods[0].elapsed=3;session.rods[0].biteStyle='pull';scene.render(0);
  assert.notDeepEqual(a.toBuffer('image/png'),left);assert.deepEqual(b.toBuffer('image/png'),right);
  assert.deepEqual(session.rods.map(r=>r.time),clocks);assert.equal(scene.game,session);scene.dispose();

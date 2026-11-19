@@ -1,3 +1,4 @@
+import {alarmStep} from '../src/encounter.js';
 import {TripPlanner} from '../src/trip-planner.js';
 import {VENUES,STOCK_SOURCES,SPECIES_NAMES,getVenue} from '../src/venues.js';
 import {test} from 'node:test';
@@ -13,10 +14,10 @@ import {showCatchPhoto,photoFor} from '../src/fish-photos.js';
 // Real DOM handlers and game model; renderer is tested separately with native Canvas 2D.
 test('app flow: prepare float tackle, cast, strike, land, show real photo, store journal and persist setup',async()=>{
  const dom=new JSDOM(fs.readFileSync(new URL('../index.html',import.meta.url),'utf8'),{url:'https://example.test',pretendToBeVisual:true}),document=dom.window.document;
- globalThis.document=document;let frame,now=performance.now();
+ dom.window.localStorage.setItem('reviry-guide','on');globalThis.document=document;let frame,now=performance.now();
  class LakeStub{constructor(){this.high=true;this.assetWarnings=[];this.geoAccurate=true;this.yaw=0;this.renderer={info:{render:{calls:0,triangles:0}}};}async init(){return this;}render(){}setCastDirection(){}splash(){}scatterFeed(){}}
  const code=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8').replace(/^import .*;\n/gm,'');
- new Function('TripPlanner','VENUES','STOCK_SOURCES','SPECIES_NAMES','getVenue','biteMotion','signalCaption','Preparation','METHODS','BAITS','FEEDS','setupSummary','validateLoadout','showCatchPhoto','photoFor','Fishing','LakeScene','window','document','localStorage','navigator','requestAnimationFrame','setTimeout','clearTimeout',code)(TripPlanner,VENUES,STOCK_SOURCES,SPECIES_NAMES,getVenue,biteMotion,signalCaption,Preparation,tackle.METHODS,tackle.BAITS,tackle.FEEDS,tackle.setupSummary,tackle.validateLoadout,showCatchPhoto,photoFor,class extends Fishing{constructor(){super(()=>.1);}},LakeStub,dom.window,document,dom.window.localStorage,dom.window.navigator,callback=>{frame=callback;},()=>0,()=>{});
+ new Function('alarmStep','TripPlanner','VENUES','STOCK_SOURCES','SPECIES_NAMES','getVenue','biteMotion','signalCaption','Preparation','METHODS','BAITS','FEEDS','setupSummary','validateLoadout','showCatchPhoto','photoFor','Fishing','LakeScene','window','document','localStorage','navigator','requestAnimationFrame','setTimeout','clearTimeout',code)(alarmStep,TripPlanner,VENUES,STOCK_SOURCES,SPECIES_NAMES,getVenue,biteMotion,signalCaption,Preparation,tackle.METHODS,tackle.BAITS,tackle.FEEDS,tackle.setupSummary,tackle.validateLoadout,showCatchPhoto,photoFor,class extends Fishing{constructor(){super(()=>.1);}},LakeStub,dom.window,document,dom.window.localStorage,dom.window.navigator,callback=>{frame=callback;},()=>0,()=>{});
  await new Promise(setImmediate);
  const $=id=>document.getElementById(id),tick=()=>{now+=50;frame(now);},state=()=>dom.window.reviry.getState();
  assert.equal($('fatal').classList.contains('hidden'),true);assert.equal(state().paused,true);
@@ -36,6 +37,12 @@ test('app flow: prepare float tackle, cast, strike, land, show real photo, store
  assert.match($('fishIllustration').getAttribute('src'),/assets\/fish\/.*\.webp$/);assert.match($('fishPhotoCredit').textContent,/Ilustrační fotografie druhu/);assert.match($('catchSetup').textContent,/Plavaná/);
  const journal=JSON.parse(dom.window.localStorage.getItem('reviry-vajgar-journal'));assert.equal(journal.length,1);assert.equal(journal[0].loadout.method,'float');assert.equal(journal[0].venueId,'jarosov');assert.equal(journal[0].trip.time,'12:00');assert.equal(JSON.parse(dom.window.localStorage.getItem('reviry-loadout')).method,'float');
  $('release').click();tick();assert.equal(state().phase,'ready');assert.equal(state().paused,false);
+ // Default immersive controls can be toggled without replacing a cast.
+ $('guideMode').click();assert.equal(document.body.classList.contains('immersive'),true);
+ $('action').dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:' ',bubbles:true}));$('action').dispatchEvent(new dom.window.KeyboardEvent('keyup',{key:' ',bubbles:true}));for(let i=0;i<30;i++)tick();
+ assert.equal(state().phase,'waiting');assert.equal($('action').disabled,false);assert.equal($('action').textContent,'ZASEKNOUT');assert.equal($('status').textContent,'');assert.equal($('earlyStrike').classList.contains('hidden'),true);
+ $('guideMode').click();assert.equal(state().phase,'waiting');assert.equal(dom.window.localStorage.getItem('reviry-guide'),'on');$('retrieve').click();tick();
+
  $('menu').click();assert.equal(state().paused,true);assert.ok($('catches').querySelector('img'));$('closeDrawer').click();assert.equal(state().paused,false);
  // A false strike is reachable through normal UI, without a hidden game mutation.
  $('action').dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:' ',bubbles:true}));$('action').dispatchEvent(new dom.window.KeyboardEvent('keyup',{key:' ',bubbles:true}));for(let i=0;i<30;i++)tick();assert.equal(state().phase,'waiting');assert.equal($('earlyStrike').classList.contains('hidden'),false);$('earlyStrike').click();tick();assert.equal(state().phase,'escaped');assert.match($('hint').textContent,/prázdna/);assert.equal($('status').textContent,'Zásek do prázdna.');assert.match($('rodDock').textContent,/Naprázdno/);
@@ -45,10 +52,10 @@ test('app flow: prepare float tackle, cast, strike, land, show real photo, store
 
 test('two-rod UI keeps both live indicators and lets an inactive bite be picked up and landed',async()=>{
  const dom=new JSDOM(fs.readFileSync(new URL('../index.html',import.meta.url),'utf8'),{url:'https://example.test',pretendToBeVisual:true}),document=dom.window.document;
- globalThis.document=document;let frame,now=performance.now(),views=[];
+ dom.window.localStorage.setItem('reviry-guide','on');globalThis.document=document;let frame,now=performance.now(),views=[];
  class LakeStub{constructor(){this.high=true;this.assetWarnings=[];this.yaw=0;}async init(){return this;}render(){}setCastDirection(){}splash(){}scatterFeed(){}setSignalViews(value){views=value;}}
  const code=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8').replace(/^import .*;\n/gm,'');
- new Function('TripPlanner','VENUES','STOCK_SOURCES','SPECIES_NAMES','getVenue','biteMotion','signalCaption','Preparation','METHODS','BAITS','FEEDS','setupSummary','validateLoadout','showCatchPhoto','photoFor','Fishing','LakeScene','window','document','localStorage','navigator','requestAnimationFrame','setTimeout','clearTimeout',code)(TripPlanner,VENUES,STOCK_SOURCES,SPECIES_NAMES,getVenue,biteMotion,signalCaption,Preparation,tackle.METHODS,tackle.BAITS,tackle.FEEDS,tackle.setupSummary,tackle.validateLoadout,showCatchPhoto,photoFor,class extends Fishing{constructor(){super(()=>.1);}},LakeStub,dom.window,document,dom.window.localStorage,dom.window.navigator,callback=>{frame=callback;},()=>0,()=>{});
+ new Function('alarmStep','TripPlanner','VENUES','STOCK_SOURCES','SPECIES_NAMES','getVenue','biteMotion','signalCaption','Preparation','METHODS','BAITS','FEEDS','setupSummary','validateLoadout','showCatchPhoto','photoFor','Fishing','LakeScene','window','document','localStorage','navigator','requestAnimationFrame','setTimeout','clearTimeout',code)(alarmStep,TripPlanner,VENUES,STOCK_SOURCES,SPECIES_NAMES,getVenue,biteMotion,signalCaption,Preparation,tackle.METHODS,tackle.BAITS,tackle.FEEDS,tackle.setupSummary,tackle.validateLoadout,showCatchPhoto,photoFor,class extends Fishing{constructor(){super(()=>.1);}},LakeStub,dom.window,document,dom.window.localStorage,dom.window.navigator,callback=>{frame=callback;},()=>0,()=>{});
  await new Promise(setImmediate);
  const $=id=>document.getElementById(id),state=()=>dom.window.reviry.getState(),tick=()=>{now+=50;frame(now);},press=(id,type)=>$(id).dispatchEvent(new dom.window.KeyboardEvent(type,{key:' ',bubbles:true})),action=()=>{press('action','keydown');press('action','keyup');},cast=()=>{action();for(let i=0;i<25;i++)tick();};
  $('start').click();$('setupApply').click();tick();cast();$('tackle').click();$('setupAddSecond').click();assert.equal(state().rodCount,1,'adding in preparation is staged until apply');

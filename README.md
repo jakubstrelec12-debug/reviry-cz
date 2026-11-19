@@ -2,9 +2,19 @@
 
 Rybářská hra pro Safari na iPhonu. Výhled nově tvoří **skutečná fotografie Vajgaru** s animovanou hladinou, prutem, čihátkem, náhozem, splávkem a krmením. Zjednodušená 3D zástavba se v hlavní hře nepoužívá. Vykreslování běží přes Canvas 2D a nepotřebuje WebGL.
 
-**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.13.0
+**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.14.0
 
 Nejlépe na šířku. Všechny herní fotografie jsou přiložené lokálně. HD / ECO mění rozlišení a jemnost animace vody. Fotografie není 360° panorama: tažením jde pouze mírně posouvat výhled a směr náhozu. Nejde o volně průchozí 3D svět.
+
+## Průběh lovu — 0.14.0
+
+Výchozí režim omezuje nápovědy: při záběru nevyskakuje výzva k záseku, druhý prut neposílá oznámení a ryba nepřiznává přesné procento únavy. V nabídce **☰ → Průvodce** lze zapnout dosavadní pomoc. Ovládání a optické detaily zůstávají dostupné, oba pruty viditelné. Náhled ukazuje skutečný pohyb čihátka / špičky / splávku; nepřebarvuje se podle skryté přítomnosti ryby.
+
+Náhodná krátká ťuknutí se objevují i bez skutečného braní a sama odeznívají. Položený prut lze kdykoli vzít do ruky; zásek do pouhého ťuknutí nebo bez ryby vyjde naprázdno. Po takovém zvednutí lze prut také stáhnout. Plavaná umožňuje zásek kdykoli. S průvodcem zůstávají starší pomocné ovládací prvky dostupné.
+
+Čekání používá širší náhodné rozdělení; při základní aktivitě začíná kolem 18 sekund a může trvat několik minut. Datum, čas, nástraha a krmení čekání dále ovlivňují. Krátké ťuknutí není příslibem úlovku. Elektronický hlásič pípá podle skutečně vykresleného pohybu indikátoru, nikoli podle přepnutí herního stavu. Mechanické čihátko ani swinger samy nepípají. Pro zvuk zapni **Zvuk**.
+
+Ryba střídá různě dlouhé a silné výpady s uklidněním a mění směr tahu. Únava vychází z odporu sestavy a vyvíjeného úsilí. Pohyb vlasce a ohyb prutu dále sledují napětí; pohyb ryby mění směr vlasce. U břehu se místo kreslené ryby nad vodou ukazuje tlumený podvodní obrys a krátký záblesk boku. Vše zůstává zjednodušenou fotografickou herní scénou.
 
 ## Datum, čas a světlo — 0.13.0
 
