@@ -2,17 +2,21 @@
 
 Rybářská hra pro Safari na iPhonu. Výhled nově tvoří **skutečná fotografie Vajgaru** s animovanou hladinou, prutem, čihátkem, náhozem, splávkem a krmením. Zjednodušená 3D zástavba se v hlavní hře nepoužívá. Vykreslování běží přes Canvas 2D a nepotřebuje WebGL.
 
-**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.12.0
+**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.12.1
 
 Nejlépe na šířku. Všechny herní fotografie jsou přiložené lokálně. HD / ECO mění rozlišení a jemnost animace vody. Fotografie není 360° panorama: tažením jde pouze mírně posouvat výhled a směr náhozu. Nejde o volně průchozí 3D svět.
+
+## Širší pohled — 0.12.1
+
+Jarošov má na výšku automaticky širší záběr skutečné fotografie, bez deformace břehů a staveb. Volné místo nahoře vyplňuje obloha a dole rozšířená hladina z vodní části snímku; nejde o další skutečně vyfotografovanou krajinu. V nabídce **☰ → Širší záběr** lze režim přepnout pro všechny vody. Na šířku zůstává standardní pohled. Nastavení se ukládá.
 
 ## Výběr vody — 0.12
 
 Horní **Revír** nebo **Vybrat revír** na úvodní obrazovce: Vajgar, Malá vodní nádrž Jarošov nad Nežárkou, Vlkovská pískovna. Jarošov má šest hratelných druhů; Vlkovská pět. Další doložené ryby jsou uvedeny v podkladech, dravci se zatím nelosují na dostupné kaprové nástrahy. Každá karta obsahuje zdroje, roky a omezení průkaznosti. Podrobnosti: [docs/VENUES.md](docs/VENUES.md).
 
-**Jarošov má zatím označenou ilustrační fotografii jiného rybníka v Matějovci.** Přesný výhled na cílovou malou vodní nádrž je potřeba doplnit z ověřené fotografie. Vlkovská pískovna používá skutečný geolokovaný snímek této pískovny. Ve hře je zdůrazněno, že výkazy osádky se vztahují k celé soustavě Lužnice 7 B.
+**Jarošov nyní používá skutečnou fotografii této nádrže z reportáže Nachytáno.cz.** Originál se načítá přímo od vydavatele a není součástí repozitáře. Když zdroj neodpoví do 12 sekund, zobrazí se výslovně označená ilustrační náhrada z Matějovce. Vlkovská pískovna používá skutečný geolokovaný snímek této pískovny. Ve hře je zdůrazněno, že výkazy osádky se vztahují k celé soustavě Lužnice 7 B.
 
-## Dva pruty a širší výhled — 0.12.0
+## Dva pruty a širší výhled — 0.12.1
 
 Oba nahozené pruty mají současně vlastní očíslovaný optický náhled čihátka / špičky a stav záběru. Klepnutí na náhled záběru vybere odpovídající prut a vezme ho do ruky; následuje samostatný zásek. Během zdolávání se druhý prut sleduje dál, převzetí je zamčené do odložení prutu v ruce. Náhledy používají tutéž scénu a čas, které vidí hráč.
 
@@ -24,7 +28,7 @@ Odložený prut, naviják a nízká trojnožka tvoří jeden souvislý fotoreali
 
 ## Vlastní sestava pro každý prut
 
-Při dvou prutech otevři **Montáž** a nahoře přepínej **PRUT 1 / PRUT 2**. Každý může mít vlastní techniku položená / feeder, montáž, nástrahu, krmení, prut i vlasec. Přepínač ukazuje montáž a nástrahu obou prutů; rozpracované změny se při přepnutí neztratí. **POUŽÍT SESTAVY OBOU PRUTŮ** uloží změny najednou. Změněný nahozený prut se stáhne pro nové nastražení, nezměněný zůstává ve vodě. Zavření bez použití změny zahodí.
+Druhý prut lze přidat rovnou v přípravě přes **+ DRUHÝ PRUT** (položená nebo feeder). Přidání i rozpracované změny se provedou až potvrzením; zavření dialogu je zahodí. Při dvou prutech otevři **Montáž** a nahoře přepínej **PRUT 1 / PRUT 2**. Každý může mít vlastní techniku položená / feeder, montáž, nástrahu, krmení, prut i vlasec. Přepínač ukazuje montáž a nástrahu obou prutů; rozpracované změny se při přepnutí neztratí. **POUŽÍT SESTAVY OBOU PRUTŮ** uloží změny najednou. Změněný nahozený prut se stáhne pro nové nastražení, nezměněný zůstává ve vodě. Zavření bez použití změny zahodí.
 
 ## Příprava lovu
 

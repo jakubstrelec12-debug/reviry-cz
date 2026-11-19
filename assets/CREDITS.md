@@ -65,3 +65,10 @@ Všechny fotografie jsou skutečné, bez generativního překreslení. Zmenšen�
 | fish/crucian.webp | Jiří Zelenka / Pohled 111, [Carassius carassius CZ 01.jpg](https://commons.wikimedia.org/wiki/File:Carassius_carassius_CZ_01.jpg) | CC BY-SA 4.0, https://creativecommons.org/licenses/by-sa/4.0/ | Ukázka karase obecného. Zdroje osádky říkají pouze „karas“; ve hře neurčujeme místní druh. |
 
 Upravené podklady pod BY-SA i kompozity sdílíme pod odpovídající uvedenou licencí. Autoři fotografií ani správci vod projekt nezaštiťují. Zdroje rybích druhů a jejich omezení jsou v `docs/VENUES.md` a v kartách výběru vody.
+
+
+## Jarošov a široký záběr — 0.12.1
+
+Externí originál `https://nachytano.cz/files/images/jarosov_IX.JPG`, zdrojová reportáž: https://www.nachytano.cz/clanky/mala-vodni-nadrz-jarosov-nad-nezarkou-a2191/ . Vydavatel Nachytáno.cz, fotograf u konkrétního snímku neuveden. **Autorská práva vyhrazena; nejde o CC podklad.** Soubor není přiložený v repozitáři a projekt mu neuděluje novou licenci. Prohlížeč jej načítá od původního zdroje. Za běhu ořez a kompozice s herní hladinou a původním AI popředím. Matějovec je pouze výslovně označená záloha při nedostupnosti externího zdroje, nikoli výchozí prostředí Jarošova.
+
+Širší pohled na výšku zobrazuje více pixelů původní scenérie při jednotném měřítku. Horní volné místo doplňuje barevný přechod oblohy; spodní část tvoří rozšíření vodní textury ze stejného snímku. Břeh, stromy, budovy a molo v dálce zůstávají z původního snímku. Toto rozšíření hladiny není skutečnou další fotografovanou krajinou. Režim lze vypnout v nabídce. Dřívější odkazy na licencované soubory v tomto přehledu zůstávají pro původní podklady a zálohu.

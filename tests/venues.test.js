@@ -11,7 +11,7 @@ import {LakeScene} from '../src/photo-scene.js';
 
 test('venue evidence preserves source dates, group scope and photo uncertainty',()=>{
  assert.equal(VENUES.jarosov.playable.length,6);assert.equal(VENUES.vlkov.playable.length,5);
- assert.equal(VENUES.jarosov.photo.verified,false);assert.match(VENUES.jarosov.photo.note,/Není to fotografie/);
+ assert.equal(VENUES.jarosov.photo.verified,true);assert.equal(VENUES.jarosov.photo.external,true);assert.match(VENUES.jarosov.photo.fallback.note,/Není to fotografie/);
  assert.match(STOCK_SOURCES.vlkov2019.scope,/celý revír/);assert.equal(STOCK_SOURCES.vlkov2019.date,'2019');
  for(const v of Object.values(VENUES))for(const id of v.playable)assert.ok(FISH_PHOTOS[id]);
  for(const v of [VENUES.jarosov,VENUES.vlkov]){assert.ok(v.sources.length>=2);for(const id of v.sources)assert.match(STOCK_SOURCES[id].url,/^https:\/\//);}
@@ -39,13 +39,21 @@ test('travel is shared by both rods, blocked while either is fishing, and retain
 });
 test('local scenery switches atomically, uses its own waterline and stays within source crop',async()=>{
  globalThis.innerWidth=844;globalThis.innerHeight=390;globalThis.devicePixelRatio=1;globalThis.window={addEventListener(){},removeEventListener(){}};globalThis.localStorage={getItem:()=>null,setItem(){}};globalThis.document={createElement:()=>createCanvas(844,390)};
- globalThis.Image=class extends NativeImage{set src(v){super.src=v.startsWith('file:')?fileURLToPath(v):v;}get src(){return super.src;}};
+ globalThis.Image=class extends NativeImage{set src(v){if(v.startsWith('https:')){queueMicrotask(()=>this.onerror(new Error('External image unavailable in offline test')));return;}super.src=v.startsWith('file:')?fileURLToPath(v):v;}get src(){return super.src;}};
  const canvas=createCanvas(844,390);canvas.addEventListener=()=>{};const g=new Fishing(()=>.2),scene=await new LakeScene(canvas,g).init();
  const images=[];
  for(const id of Object.keys(VENUES)){
   await scene.setVenue(id);g.venueId=id;g.phase='waiting';g.distance=30;scene.render(0);const c=scene.crop;
-  assert.equal(scene.photo.src,VENUES[id].photo.src);assert.ok(c.sx>=0&&c.sy>=0&&c.sx+c.sw<=scene.image.width+.01&&c.sy+c.sh<=scene.image.height+.01);
+  assert.equal(scene.photo.src,id==='jarosov'?VENUES.jarosov.photo.fallback.src:VENUES[id].photo.src);if(id==='jarosov')assert.equal(scene.photo.verified,false);assert.ok(c.sx>=0&&c.sy>=0&&c.sx+c.sw<=scene.image.width+.01&&c.sy+c.sh<=scene.image.height+.01);
   assert.ok(scene.target.y>scene.waterTop&&scene.target.y<scene.shoreTop);images.push(canvas.toBuffer('image/png'));
  }
  assert.notDeepEqual(images[0],images[1]);assert.notDeepEqual(images[1],images[2]);scene.dispose();
+});
+
+test('wide portrait view exposes more source pixels without stretching the actual shore photograph',async()=>{
+ globalThis.innerWidth=390;globalThis.innerHeight=650;globalThis.devicePixelRatio=1;globalThis.window={addEventListener(){},removeEventListener(){}};globalThis.localStorage={getItem:()=>null,setItem(){}};globalThis.document={createElement:()=>createCanvas(390,650)};
+ globalThis.Image=class extends NativeImage{set src(v){super.src=v.startsWith('file:')?fileURLToPath(v):v;}get src(){return super.src;}};
+ const canvas=createCanvas(390,650);canvas.addEventListener=()=>{};const scene=await new LakeScene(canvas,new Fishing()).init();
+ scene.setWideView(false);const normal=scene.crop.sw;scene.setWideView(true);assert.ok(scene.crop.sw>normal*1.5);assert.ok(Math.abs(scene.crop.sw-scene.image.width)<1);
+ assert.ok(scene.waterTop>100&&scene.waterTop<scene.shoreTop);assert.equal(scene.crop.scale,390/scene.image.width);const clock=scene.clock;scene.setWideView(false);assert.equal(scene.clock,clock);scene.dispose();
 });

@@ -45,3 +45,12 @@ test('switching rod drafts preserves independent choices and closing without app
  click('[data-setup-rod="1"]');assert.equal(p.draft.rig,'spring');assert.equal(p.draft.bait,'corn');
  el('setupClose').click();assert.equal(game.rods[0].loadout.bait,'corn');assert.equal(game.rods[1].loadout.rig,'running');p.open();assert.equal(p.draft.rig,'running');
 });
+
+test('a second rod can be staged directly in preparation, cancelled, or applied with two different rigs',async()=>{
+ const {FishingSession}=await import('../src/session.js');const {methodPreset}=await import('../src/tackle.js');const dom=new JSDOM(fs.readFileSync(new URL('../index.html',import.meta.url),'utf8'),{url:'https://example.test'});globalThis.document=dom.window.document;
+ const game=new FishingSession();game.setLoadout(methodPreset('float'));const p=new Preparation({game,onApply:(v,c,o)=>{assert.ok(game.applyLoadouts(c,o));game.select(o.activeIndex);p.close();},onClose:()=>p.close()});p.open();
+ assert.equal(el('setupAddSecond').disabled,true);click('[data-method="ledger"]');assert.equal(el('setupAddSecond').disabled,false);el('setupAddSecond').click();assert.equal(game.secondEnabled,false);assert.equal(p.editIndex,1);assert.equal(p.drafts.length,2);
+ el('setupClose').click();assert.equal(game.secondEnabled,false);assert.equal(game.loadout.method,'float');
+ p.open();click('[data-method="ledger"]');el('setupAddSecond').click();click('[data-tab="bait"]');click('[data-bait="boilie"]');el('setupApply').click();
+ assert.equal(game.secondEnabled,true);assert.equal(game.activeIndex,1);assert.equal(game.rods[0].loadout.method,'ledger');assert.equal(game.rods[0].loadout.bait,'corn');assert.equal(game.rods[1].loadout.bait,'boilie');assert.equal(game.rods[1].loadout.rig,'hair');
+});

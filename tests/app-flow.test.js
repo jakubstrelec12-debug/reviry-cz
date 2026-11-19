@@ -20,7 +20,7 @@ test('app flow: prepare float tackle, cast, strike, land, show real photo, store
  const $=id=>document.getElementById(id),tick=()=>{now+=50;frame(now);},state=()=>dom.window.reviry.getState();
  assert.equal($('fatal').classList.contains('hidden'),true);assert.equal(state().paused,true);
  $('waters').click();assert.equal($('venuesOverlay').classList.contains('hidden'),false);document.querySelector('[data-venue="jarosov"]').click();tick();
- assert.equal(state().venueId,'jarosov');assert.equal($('venuePhotoNotice').classList.contains('hidden'),false);assert.match($('venueEvidence').textContent,/2022/);
+ assert.equal(state().venueId,'jarosov');assert.equal($('venuePhotoNotice').classList.contains('hidden'),true);assert.match($('venueEvidence').textContent,/2022/);
  $('start').click();document.querySelector('[data-method="float"]').click();$('setupApply').click();tick();
  assert.equal(state().loadout.method,'float');assert.equal(state().paused,false);
  $('action').dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:' ',bubbles:true}));for(let i=0;i<10;i++)tick();$('action').dispatchEvent(new dom.window.KeyboardEvent('keyup',{key:' ',bubbles:true}));
@@ -50,8 +50,8 @@ test('two-rod UI keeps both live indicators and lets an inactive bite be picked 
  new Function('VENUES','STOCK_SOURCES','SPECIES_NAMES','getVenue','biteMotion','signalCaption','Preparation','METHODS','BAITS','FEEDS','setupSummary','validateLoadout','showCatchPhoto','photoFor','Fishing','LakeScene','window','document','localStorage','navigator','requestAnimationFrame','setTimeout','clearTimeout',code)(VENUES,STOCK_SOURCES,SPECIES_NAMES,getVenue,biteMotion,signalCaption,Preparation,tackle.METHODS,tackle.BAITS,tackle.FEEDS,tackle.setupSummary,tackle.validateLoadout,showCatchPhoto,photoFor,class extends Fishing{constructor(){super(()=>.1);}},LakeStub,dom.window,document,dom.window.localStorage,dom.window.navigator,callback=>{frame=callback;},()=>0,()=>{});
  await new Promise(setImmediate);
  const $=id=>document.getElementById(id),state=()=>dom.window.reviry.getState(),tick=()=>{now+=50;frame(now);},press=(id,type)=>$(id).dispatchEvent(new dom.window.KeyboardEvent(type,{key:' ',bubbles:true})),action=()=>{press('action','keydown');press('action','keyup');},cast=()=>{action();for(let i=0;i<25;i++)tick();};
- $('start').click();$('setupApply').click();tick();cast();$('addRod').click();tick();
- $('tackle').click();assert.equal($('setupRodPicker').classList.contains('hidden'),false);assert.match($('setupApply').textContent,/OBOU PRUTŮ/);
+ $('start').click();$('setupApply').click();tick();cast();$('tackle').click();$('setupAddSecond').click();assert.equal(state().rodCount,1,'adding in preparation is staged until apply');
+ assert.equal($('setupRodPicker').classList.contains('hidden'),false);assert.match($('setupApply').textContent,/OBOU PRUTŮ/);
  document.querySelector('[data-setup-rod="0"]').click();assert.match($('setupSummary').textContent,/Kukuřice/);
  document.querySelector('[data-setup-rod="1"]').click();document.querySelector('[data-tab="bait"]').click();document.querySelector('[data-bait="boilie"]').click();
  document.querySelector('[data-setup-rod="0"]').click();assert.match($('setupSummary').textContent,/Kukuřice/);

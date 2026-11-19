@@ -8,7 +8,7 @@ const width=Number(process.env.RENDER_WIDTH)||1280,height=Number(process.env.REN
 globalThis.innerWidth=width;globalThis.innerHeight=height;globalThis.devicePixelRatio=1;
 globalThis.window={addEventListener(){},removeEventListener(){}};globalThis.localStorage={getItem:()=>null,setItem(){}};
 globalThis.document={createElement(name){if(name==='canvas')return createCanvas(width,height);throw new Error('Unexpected DOM request');}};
-globalThis.Image=class extends NativeImage{set src(value){super.src=value.startsWith('file:')?fileURLToPath(value):value;}get src(){return super.src;}};
+globalThis.Image=class extends NativeImage{set src(value){super.src=value.startsWith('https:')&&process.env.RENDER_EXTERNAL_PHOTO?process.env.RENDER_EXTERNAL_PHOTO:value.startsWith('file:')?fileURLToPath(value):value;}get src(){return super.src;}};
 const canvas=createCanvas(width,height);canvas.addEventListener=()=>{};canvas.setPointerCapture=()=>{};
 const game=new Fishing(()=>.2);game.venueId=process.env.RENDER_VENUE||'vajgar';game.setLoadout(methodPreset(process.env.RENDER_METHOD||'ledger'));game.loadout.rig=process.env.RENDER_RIG||game.loadout.rig;
 game.phase=process.env.RENDER_PHASE||'waiting';game.distance=game.phase==='fight'?3:30;game.tension=.65;game.fish={id:'carp',name:'Kapr obecný',length:65};game.elapsed=Number(process.env.RENDER_ELAPSED)||.5;game.biteElapsed=game.elapsed;game.biteStyle=process.env.RENDER_BITE_STYLE||'pull';

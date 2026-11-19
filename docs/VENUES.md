@@ -9,7 +9,10 @@ Ověřeno 19. 11. 2026. Veřejné zdroje dokládají výskyt nebo historické za
 - Hratelné: kapr, amur, lín, karas (druh neurčen), cejn, plotice. Dravci jsou uvedeni v informacích, nejsou losováni na boilies a partikl. Lov dravců zatím hra neobsahuje.
 - Druh karase nebyl doložen. Fotografie karase obecného je pouze ilustrační ukázka rodu; v úlovku se nepředstírá určení místního druhu.
 - Dostupnost vody k běžnému rybolovu ani nynější pravidla nebyly potvrzeny. Propozice závodu nejsou rybářským řádem pro veškeré termíny.
-- **Přesná fotografie cílové nádrže nebyla nalezena s použitelným původem/licencí.** Dočasně použit otevřeně označený ilustrační snímek jiného rybníka v Matějovci (část obce Jarošov nad Nežárkou). Matějovec není cílová nádrž. Varování je na kartě revíru, během hraní, v zápatí a deníku. Nesmí se odstranit bez náhrady fotografie.
+- **Fotografie doplněna v 0.12.1:** [Nachytáno.cz, Malá vodní nádrž Jarošov nad Nežárkou](https://www.nachytano.cz/clanky/mala-vodni-nadrz-jarosov-nad-nezarkou-a2191/), snímek `jarosov_IX.JPG`. Reportáž výslovně popisuje tuto 2,4ha vodu, molo, chatku a druhy ryb. Datum na stránce není uvedeno, provozní pravidla a ceny nepřebíráme jako současné.
+- Originál fotografie se načítá přímo od Nachytáno.cz; neukládáme jej do repozitáře a neoznačujeme licencí CC. Web uvádí autorská práva, konkrétní fotograf u snímku není jmenován. Zdroj a tento stav jsou viditelné ve hře.
+- Když externí obrázek selže nebo neodpoví do 12 sekund, načte se starší místní ilustrační náhrada rybníka v Matějovci. Viditelný pruh, zápatí i informace o prostředí pak výslovně říkají, že nejde o fotografii cílové nádrže.
+- Širší portrétní pohled používá jednotné měřítko skutečného snímku břehu. Doplňuje pouze plochu oblohy a vody ve volném prostoru; nepředstírá další geografii. Standardní záběr lze obnovit v nabídce.
 
 ## Vlkovská pískovna
 
