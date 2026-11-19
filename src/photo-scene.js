@@ -1,4 +1,4 @@
-import {RODS,RIGS} from './tackle.js?v=0.7.0';
+import {RODS,RIGS} from './tackle.js?v=0.7.1';
 
 export const PHOTO={src:'assets/vajgar-photograph.webp',author:'Wwery',title:'Pohled na Jindřichův Hradec přes rybník Vajgar',source:'https://commons.wikimedia.org/wiki/File:Pohled_na_Jind%C5%99ich%C5%AFv_Hradec_p%C5%99es_rybn%C3%ADk_Vajgar.jpg',license:'CC BY-SA 4.0',licenseUrl:'https://creativecommons.org/licenses/by-sa/4.0/',waterStart:.575};
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -10,11 +10,14 @@ export function waterPoint(w,h,waterTop,distance,angle=0){
  const near=h*.84,far=Math.max(waterTop+18,h*.60),depth=clamp(Math.log1p(distance)/Math.log(65),0,1);
  return {x:w*(.50+Math.sin(angle)*.65),y:near+(far-near)*depth};
 }
-export function gearLayout(w,h,{hudTop=h*.82,headerBottom=90,index=0,count=1,pose=0}={}){
- const top=Math.min(headerBottom+16,h*.32),bottom=Math.max(top+40,Math.min(hudTop-20,h-45));
- const dual=count>1,base={x:w*(dual?(index===0?.34:.73):.68),y:bottom-20};
- const tip={x:w*(dual?(index===0?.22:.59):.44),y:Math.max(top+12,top+(bottom-top)*(.08-pose*.30))};
- const size=clamp(Math.min(w/(dual?850:650),h/390),dual?.72:.82,1.3);
+export function gearLayout(w,h,{hudTop=h*.82,headerBottom=90,index=0,count=1,pose=0,waterTop=h*.56}={}){
+ const top=Math.min(headerBottom+12,h*.35),bottom=Math.max(top+55,Math.min(hudTop,h-30));
+ const dual=count>1,portrait=h>w;
+ // The butt and bank stick continue behind the controls and out of frame.
+ // Keep the reel visible, while aiming the resting tip towards the water.
+ const base={x:w*(dual?(index===0?.32:.80):.77),y:bottom+Math.min(55,(bottom-top)*.18)};
+ const tip={x:w*(dual?(index===0?.17:.57):.38),y:clamp(Math.min(waterTop+24,bottom-95)-pose*h*.20,top+32,bottom-50)};
+ const size=clamp(Math.min(w/(dual?750:520),h/480),portrait?.64:.65,1.05);
  return {base,tip,size,hudTop,headerBottom};
 }
 function loadImage(path){return new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>reject(new Error('Fotografii Vajgaru se nepodařilo načíst.'));image.src=new URL('../'+path,import.meta.url).href;});}
@@ -75,7 +78,7 @@ export class LakeScene{
   this.ellipse(p.x,p.y,35+Math.sin(this.clock*4)*4,5,null,'rgba(223,236,222,.35)',1);
  }
  drawRig(){const c=this.ctx,g=this.game,w=this.width,h=this.height,method=g.loadout.method,floating=method==='float',fighting=g.phase==='fight',held=g.phase==='held',casting=g.phase==='casting',flying=g.phase==='flying';
-  const hand=floating||fighting||held||casting||flying;const layout=gearLayout(w,h,{...this.inset,index:this.drawIndex,count:this.drawCount,pose:this.pose});const {base,size}=layout;let tip={...layout.tip};
+  const hand=floating||fighting||held||casting||flying;const layout=gearLayout(w,h,{...this.inset,index:this.drawIndex,count:this.drawCount,pose:this.pose,waterTop:this.waterTop});const {base,size}=layout;let tip={...layout.tip};
   if(casting){tip.x+=w*g.castPower*.14;tip.y-=h*g.castPower*.15;}
   const bend=fighting?g.tension*48:method==='feeder'?7+(g.phase==='bite'?(8+Math.sin(g.elapsed*10)*6)*(g.biteStyle==='dropback'?-1:1):0):0;
   const control={x:mix(base.x,tip.x,.48)+bend*size,y:mix(base.y,tip.y,.45)-bend*.3*size};
@@ -83,29 +86,36 @@ export class LakeScene{
   const signal=method==='feeder'&&g.phase==='bite'?(g.biteStyle==='dropback'?-1:1)*(16+Math.sin(g.elapsed*11)*10)*size:0;
   const sample=t=>{const p=point(base,control,rawTip,t),flex=Math.pow(Math.max(0,(t-.70)/.30),2)*signal;return {x:p.x+normal.x*flex,y:p.y+normal.y*flex};};
   tip=sample(1);this.tip=tip;if(method==='feeder')this.signals[this.drawIndex]={...tip,kind:'feeder'};
-  if(!floating&&!hand){const rest=sample(.42);const standGradient=c.createLinearGradient(rest.x-5,rest.y,rest.x+5,rest.y);standGradient.addColorStop(0,'#07120f');standGradient.addColorStop(.5,'#56615b');standGradient.addColorStop(1,'#101c16');this.line([{x:rest.x-15*size,y:layout.hudTop+40},{x:rest.x,y:rest.y+3},{x:rest.x+80*size,y:layout.hudTop+40}],standGradient,4*size);this.line([{x:rest.x-25*size,y:rest.y},{x:rest.x+27*size,y:rest.y}],'#1a2520',6*size);}
+  if(!floating&&!hand){
+   const rest=sample(.66),foot={x:rest.x+12*size,y:h+35};
+   // One slender bank stick, planted below the photograph's foreground edge.
+   this.line([foot,{x:rest.x,y:rest.y+4*size}],'#101a19',4*size);
+   this.line([{x:foot.x-1,y:foot.y},{x:rest.x-1,y:rest.y+5*size}],'#65716a',1*size);
+   this.line([{x:rest.x-9*size,y:rest.y-3*size},{x:rest.x-5*size,y:rest.y+4*size},{x:rest.x+5*size,y:rest.y+4*size},{x:rest.x+9*size,y:rest.y-3*size}],'#172522',4*size);
+  }
   const rodGradient=c.createLinearGradient(base.x,base.y,tip.x,tip.y);rodGradient.addColorStop(0,'#151c18');rodGradient.addColorStop(.45,'#263b33');rodGradient.addColorStop(.8,'#0d201b');rodGradient.addColorStop(1,method==='feeder'?'#e5a25c':'#303f34');
-  for(let i=0;i<40;i++){const a=sample(i/40),b=sample((i+1)/40);this.line([a,b],'rgba(228,235,216,.25)',(7*(1-i/40)+1.4)*size);this.line([a,b],method==='feeder'&&i>=32?(i%3===0?'#fff2ce':'#e99745'):rodGradient,(6*(1-i/40)+.8)*size);}
-  const gripEnd=sample(.37);this.line([base,gripEnd],'#15231c',13*size);this.line([base,gripEnd],'#85714a',9*size);
-  for(let i=0;i<21;i++){const p=sample(i/21*.37);this.line([{x:p.x-4*size,y:p.y+2},{x:p.x+3*size,y:p.y-2}],'rgba(32,32,22,.4)',.75*size);}
-  const guides=[];for(let i=0;i<7;i++){const f=.44+i*.083,p=sample(f);guides.push({x:p.x-4*size,y:p.y+5*size});this.ellipse(p.x-4*size,p.y+5*size,(5-i*.54)*size,(3.2-i*.3)*size,null,'#bcc5ba',.9*size);}
-  const reel=sample(.28);c.save();c.translate(reel.x-18*size,reel.y+2*size);c.rotate(-.5);c.scale(size,size);
-  const metal=c.createLinearGradient(-30,-20,15,20);metal.addColorStop(0,'#52665e');metal.addColorStop(.25,'#d1d8c6');metal.addColorStop(.4,'#52665e');metal.addColorStop(.65,'#b4bfa9');metal.addColorStop(1,'#20392e');
-  this.ellipse(0,5,24,17,'#152c22', '#7a8b79',1);c.fillStyle=metal;c.fillRect(-26,-16,44,23);this.ellipse(-5,-16,22,9,metal,'#c9d0bc',1.3);this.ellipse(-5,7,23,8,metal);
-  for(let y=-12;y<5;y+=2)this.line([{x:-25,y},{x:16,y}],'#9aa37d',.7);
-  c.beginPath();c.ellipse(-5,-4,30,25,.1,Math.PI*.9,Math.PI*2.1);c.strokeStyle='#d1d6bd';c.lineWidth=1.6;c.stroke();
+  for(let i=0;i<40;i++){const a=sample(i/40),b=sample((i+1)/40);this.line([a,b],'rgba(228,235,216,.16)',(5*(1-i/40)+1)*size);this.line([a,b],method==='feeder'&&i>=32?(i%3===0?'#fff2ce':'#e99745'):rodGradient,(4*(1-i/40)+.7)*size);}
+  const gripEnd=sample(.42);this.line([base,gripEnd],'#15231c',10*size);this.line([base,gripEnd],'#695b40',7*size);
+  for(let i=0;i<21;i++){const p=sample(i/21*.42);this.line([{x:p.x-4*size,y:p.y+2},{x:p.x+3*size,y:p.y-2}],'rgba(32,32,22,.4)',.75*size);}
+  const guides=[];for(let i=0;i<7;i++){const f=.68+i*.048,p=sample(f);guides.push({x:p.x-4*size,y:p.y+5*size});this.ellipse(p.x-4*size,p.y+5*size,(5-i*.54)*size,(3.2-i*.3)*size,null,'#bcc5ba',.9*size);}
+  const reel=sample(.54);c.save();c.translate(reel.x-15*size,reel.y+3*size);c.rotate(-.32);c.scale(size*.72,size*.72);
+  this.line([{x:18,y:-10},{x:25,y:-20}],'#263832',8);
+  const metal=c.createLinearGradient(-30,-20,15,20);metal.addColorStop(0,'#1a2426');metal.addColorStop(.25,'#81908c');metal.addColorStop(.4,'#253332');metal.addColorStop(.65,'#66746d');metal.addColorStop(1,'#172522');
+  this.ellipse(0,5,24,17,'#152c22', '#7a8b79',1);c.fillStyle=metal;c.fillRect(-26,-16,44,23);this.ellipse(-5,-16,22,9,metal,'#8d9b91',1);this.ellipse(-5,7,23,8,metal);
+  for(let y=-12;y<5;y+=2)this.line([{x:-25,y},{x:16,y}],'#839082',.6);
+  c.beginPath();c.ellipse(-5,-4,30,25,.1,Math.PI*.9,Math.PI*2.1);c.strokeStyle='#9caaa0';c.lineWidth=1.6;c.stroke();
   const angle=g.reeling&&fighting?this.clock*10:1.2,arm={x:-24+Math.cos(angle)*20,y:19+Math.sin(angle)*17};this.line([{x:-24,y:10},arm],'#b6c1ac',3);this.ellipse(arm.x,arm.y,8,4,'#11261e');c.restore();
   const linePoints=[{x:reel.x-10*size,y:reel.y+2*size}];
   if(method==='ledger'&&!hand&&['waiting','bite'].includes(g.phase)){
-   const lift=g.phase==='bite'?(g.biteStyle==='dropback'?1:-1)*(15+Math.sin(g.elapsed*9)*10):0,indicator={x:reel.x-34*size,y:Math.min(reel.y+43*size+lift,layout.hudTop-20)};
+   const lift=g.phase==='bite'?(g.biteStyle==='dropback'?1:-1)*(15+Math.sin(g.elapsed*9)*10):0,indicator={x:reel.x-28*size,y:clamp(Math.min(reel.y+28*size,layout.hudTop-36)+lift,layout.headerBottom+20,layout.hudTop-24)};
    this.signals[this.drawIndex]={...indicator,kind:'ledger'};linePoints.push(indicator);const glow=c.createLinearGradient(indicator.x-4,0,indicator.x+4,0);glow.addColorStop(0,'#6a7454');glow.addColorStop(.45,'#edefc0');glow.addColorStop(1,'#9cac73');this.ellipse(indicator.x,indicator.y,6*size,12*size,glow,'#303e2e',.8);
-   this.line([{x:indicator.x,y:indicator.y+11*size},{x:indicator.x+3*size,y:layout.hudTop+25}],'rgba(170,182,157,.6)',.7);
+   this.line([{x:indicator.x,y:indicator.y+11*size},{x:indicator.x+3*size,y:h+25}],'rgba(170,182,157,.6)',.7);
   }
   linePoints.push(...guides,tip);
   let end=this.target;
   if(flying){const f=clamp(g.elapsed/1.1,0,1);end={x:mix(tip.x,this.target.x,f),y:mix(tip.y,this.target.y,f)-Math.sin(Math.PI*f)*h*.25};if(floating)this.drawFloat(end,true);else this.drawTerminal(end,size);}
   if(!['ready','casting','landed','escaped'].includes(g.phase)){
-   this.line(linePoints,'rgba(219,228,203,.65)',.75*size);c.beginPath();c.moveTo(tip.x,tip.y);c.quadraticCurveTo(mix(tip.x,end.x,.5),mix(tip.y,end.y,.5)+(fighting?0:8),end.x,end.y);c.strokeStyle='rgba(220,230,208,.55)';c.lineWidth=.7*size;c.stroke();
+   this.line(linePoints,'rgba(219,228,203,.40)',.75*size);c.beginPath();c.moveTo(tip.x,tip.y);c.quadraticCurveTo(mix(tip.x,end.x,.5),mix(tip.y,end.y,.5)+(fighting?0:8),end.x,end.y);c.strokeStyle='rgba(220,230,208,.38)';c.lineWidth=.7*size;c.stroke();
   }
  }
  drawTerminal(p,size){const c=this.ctx,r=this.game.loadout.rig;

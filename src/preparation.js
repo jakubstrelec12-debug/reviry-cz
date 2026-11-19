@@ -1,5 +1,5 @@
-import {equipmentArt} from './equipment-art.js?v=0.7.0';
-import {METHODS,RODS,RIGS,BAITS,FEEDS,methodPreset,validateLoadout,setupSummary,speciesWeights,chooseBait,baitChances,LINE_DIAMETERS,LINE_PRODUCT,lineName} from './tackle.js?v=0.7.0';
+import {equipmentArt} from './equipment-art.js?v=0.7.1';
+import {METHODS,RODS,RIGS,BAITS,FEEDS,methodPreset,validateLoadout,setupSummary,speciesWeights,chooseBait,baitChances,LINE_DIAMETERS,LINE_PRODUCT,lineName} from './tackle.js?v=0.7.1';
 const $=id=>document.getElementById(id);
 const fields={
  rod:['Prut',false],rig:['Montáž',false],line:['Kmenový vlasec',true],hook:['Háček',true],leader:['Návazec',true],weight:['Zátěž',true],bait:['Nástraha na háček',false],feed:['Krmení',false],feedPortion:['Jedna dávka zakrmení',true],

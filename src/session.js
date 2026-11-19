@@ -1,5 +1,5 @@
-import {Fishing} from './fishing.js?v=0.7.0';
-import {cleanLoadout,validateLoadout} from './tackle.js?v=0.7.0';
+import {Fishing} from './fishing.js?v=0.7.1';
+import {cleanLoadout,validateLoadout} from './tackle.js?v=0.7.1';
 const LOCKED=['casting','flying','held','fight','landed'];
 export class FishingSession{
  constructor(random=Math.random){

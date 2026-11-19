@@ -60,3 +60,6 @@ Pruty a čihátka se kreslí do oblasti nad aktuálním ovládáním. Zvětšen�
 Tlačítko **+ Druhý prut** přidá druhý samostatný prut a přepne na něj. Každý má vlastní sestavu, nástrahu, vzdálenost, čas čekání a záběr. Náhozy i čekání běží současně, krmení a deník jsou společné. Karty **PRUT 1 / PRUT 2** přepínají ovládání. Během náhozu, braní prutu a zdolávání přepnout nelze. Druhý záběr může při dlouhém ignorování zaniknout; otevřená příprava, deník a karta úlovku pozastavují oba. Druhý prut je dostupný pouze pro položenou a feeder; pro plavanou jej nejprve slož. Uložení zachovává obě sestavy, nikoli živý nához při zavření stránky.
 
 41 automatických testů včetně souběžných náhozů a záběrů, společných zásob a deníku, omezení dvou prutů a skutečného Canvas vykreslení viditelných čihátek nad ovládáním v obou orientacích telefonu. Fyzický iPhone stále nebyl vývojářem změřen.
+
+### Úprava pohledu 0.7.1
+Prut má nižší polohu a míří k hladině, naviják je menší a tmavší. Celý trojnohý stojan nahrazuje štíhlá podpěra pokračující pod okraj obrazu. Na telefonu jsou informace v horní části stručnější a při čekání se nezobrazuje neaktivní tlačítko. Detail čihátka / feederové špičky se otevírá klepnutím na označení signalizace s plusem. Test zkráceného telefonního viewportu 390 × 650 zahrnuje prostor odebraný lištami prohlížeče.
