@@ -1,6 +1,6 @@
 // Game balance values, not measured fish populations or tackle safety ratings.
 export const METHODS = {
- ledger:{name:'Položená',subtitle:'Čihátko · nástraha na dně',indicator:'mechanické čihátko',description:'Prut položíš do stojanu. Při pohybu čihátka ho vezmeš do ruky a samostatně zasekneš.',rigs:['running','hair'],rods:['carp','carp-heavy'],weights:[20,40,60],cast:[14,40]},
+ ledger:{name:'Položená',subtitle:'Čihátko · olovo nebo krmítko',indicator:'mechanické čihátko',description:'Vybereš olovo nebo pružinové krmítko. Prut položíš do stojanu. Při pohybu čihátka ho vezmeš do ruky a samostatně zasekneš.',rigs:['running','spring','hair','springHair'],rods:['carp','carp-heavy'],weights:[20,40,60],cast:[14,40]},
  feeder:{name:'Feeder',subtitle:'Citlivá špička · krmítko',indicator:'špička prutu',description:'Nástraha leží u krmítka. Záběr poznáš podle chvění a ohybu barevné špičky; prut zvedneš a zasekneš.',rigs:['cage','method'],rods:['feeder-light','feeder-heavy'],weights:[20,30,45,60],cast:[12,33]},
  float:{name:'Plavaná',subtitle:'Splávek · nastavitelná hloubka',indicator:'splávek',description:'Prut držíš v ruce a sleduješ anténku splávku. Při ponoření zasekneš přímo, bez braní prutu ze stojanu.',rigs:['fixed','sliding'],rods:['match','bolo'],weights:[2,3,5],cast:[7,19]},
 };
@@ -14,19 +14,22 @@ export const RODS={
 };
 export const RIGS={
  running:{name:'Průběžné olovo',detail:'Kmenový vlasec → průběžné olovo → obratlík → návazec → háček',baits:['corn','worm','maggots','bread']},
- hair:{name:'Vlasová montáž',detail:'Kmenový vlasec → olovo → obratlík → návazec → háček s vlasovým přívěsem',baits:['corn','boilie','pellet']},
- cage:{name:'Průběžné klecové krmítko',detail:'Kmenový vlasec → klecové krmítko → obratlík → návazec → háček',baits:['corn','worm','maggots','bread']},
- method:{name:'Průběžný method feeder',detail:'Kmenový vlasec → ploché krmítko → krátký návazec → háček s přívěsem',baits:['corn','boilie','pellet']},
+ spring:{name:'Krmítko na položenou',feeder:true,detail:'Vlasec → průběžné pružinové krmítko → obratlík → návazec → háček',baits:['corn','worm','maggots','bread']},
+ springHair:{name:'Krmítko + vlasový přívěs',feeder:true,hair:true,detail:'Vlasec → pružinové krmítko → obratlík → návazec → háček s vlasovým přívěsem',baits:['corn','boilie','boilie20','pellet']},
+ hair:{hair:true,name:'Vlasová montáž',detail:'Kmenový vlasec → olovo → obratlík → návazec → háček s vlasovým přívěsem',baits:['corn','boilie','boilie20','pellet']},
+ cage:{feeder:true,name:'Průběžné klecové krmítko',detail:'Kmenový vlasec → klecové krmítko → obratlík → návazec → háček',baits:['corn','worm','maggots','bread']},
+ method:{feeder:true,hair:true,name:'Průběžný method feeder',detail:'Kmenový vlasec → ploché krmítko → krátký návazec → háček s přívěsem',baits:['corn','boilie','boilie20','pellet']},
  fixed:{name:'Pevný splávek',detail:'Kmenový vlasec → pevný splávek → broky → návazec → háček',baits:['corn','worm','maggots','bread']},
  sliding:{name:'Průběžný splávek',detail:'Zarážka → splávek → broky → obratlík → návazec → háček',baits:['corn','worm','maggots','bread']},
 };
 export const BAITS={
- corn:{name:'Kukuřice',detail:'Zrnko na háček nebo vlasový přívěs',weights:[1.7,1.2,.9]},
- worm:{name:'Žížala',detail:'Živá nástraha přímo na háček',weights:[.8,2,1.1]},
- maggots:{name:'Bílí červi',detail:'Drobná nástraha pro jemnější sestavy',weights:[.65,1,2.2]},
- bread:{name:'Pečivo',detail:'Menší kousek na háčku',weights:[.85,.8,1.8]},
- boilie:{name:'Boilies 15 mm',detail:'Jedna kulička na vlasovém přívěsu; háček č. 6–10',weights:[3,.45,.25]},
- pellet:{name:'Peleta 8 mm',detail:'Na vlasový přívěs',weights:[2.2,.8,.75]},
+ corn:{name:'Kukuřice',detail:'Zrnko na háček nebo vlasový přívěs',weights:[3,1.4,1.2],sizeBias:1.4},
+ worm:{name:'Žížala',detail:'Živá nástraha přímo na háček',weights:[.7,3,1.5],sizeBias:1.7},
+ maggots:{name:'Bílí červi',detail:'Drobná nástraha pro jemnější sestavy',weights:[.2,1.1,4],sizeBias:2.2},
+ bread:{name:'Pečivo',detail:'Menší kousek na háčku',weights:[.7,.5,3.5],sizeBias:1.8},
+ boilie:{name:'Boilies 15 mm',detail:'Jedna kulička na vlasovém přívěsu; háček č. 6–10',weights:[12,.18,.07],sizeBias:.85,minWeights:{carp:2.5}},
+ boilie20:{name:'Boilies 20 mm',detail:'Větší kulička na vlasovém přívěsu; háček č. 6 nebo 8. V této hře cílí na větší kapry.',weights:[25,0,0],sizeBias:.75,minWeights:{carp:4}},
+ pellet:{name:'Peleta 8 mm',detail:'Na vlasový přívěs',weights:[6,.8,.5],sizeBias:1,minWeights:{carp:1.8}},
 };
 export const FEEDS={
  none:{name:'Bez krmení',detail:'Pouze nástraha; nic se nespotřebovává',weights:[1,1,1]},
@@ -51,9 +54,10 @@ export function validateLoadout(value){
  if(!m.weights.includes(v.weight))errors.push('Zátěž neodpovídá technice.');
  if(!RIGS[v.rig]?.baits.includes(v.bait))errors.push('Nástraha neodpovídá montáži.');
  if(v.rig==='method'&&v.leader>20)errors.push('Method montáž potřebuje krátký návazec 10 nebo 20 cm.');
+ if(v.bait==='boilie20'&&v.hook>8)errors.push('Pro 20mm boilies zvol háček č. 6 nebo 8.');
  if(v.bait==='boilie'&&v.hook>10)errors.push('Pro 15mm boilies zvol háček č. 6, 8 nebo 10.');
  if(!Object.hasOwn(FEEDS,v.feed))errors.push('Vyber krmení.');
- if(v.method==='feeder'&&v.feed==='grain')errors.push('Pro krmítko vyber vnadicí směs nebo mikropelety.');
+ if(RIGS[v.rig]?.feeder&&v.feed==='grain')errors.push('Pro krmítko vyber vnadicí směs nebo mikropelety.');
  if(![50,150,300].includes(v.feedPortion))errors.push('Vyber dávku zakrmení.');
  if(!Number.isFinite(v.depth)||v.depth<.5||v.depth>3||Math.round(v.depth*4)!==v.depth*4)errors.push('Hloubka musí být 0,50–3,00 m po 25 cm.');
  return errors;
@@ -73,3 +77,20 @@ export function biteDelay(loadout,random,feedBonus=0){
  return (7+random*12)*depthFit/(1+feedBonus*.7);
 }
 export function setupSummary(v){return `${METHODS[v.method].name} · ${RIGS[v.rig].name} · ${BAITS[v.bait].name}`;}
+
+export function chooseBait(value,bait){
+ const result={...value,bait},method=METHODS[value.method];if(!Object.hasOwn(BAITS,bait)||!method)return result;
+ if(!RIGS[result.rig]?.baits.includes(bait)){
+  const choices=method.rigs.filter(id=>RIGS[id].baits.includes(bait));
+  result.rig=choices.find(id=>Boolean(RIGS[id].feeder)===Boolean(RIGS[value.rig]?.feeder))||choices[0]||value.rig;
+ }
+ if(RIGS[result.rig]?.feeder&&result.feed==='grain')result.feed='groundbait';
+ if(bait==='boilie')result.hook=Math.min(result.hook,10);
+ if(bait==='boilie20')result.hook=Math.min(result.hook,8);
+ return result;
+}
+export function catchWeight(species,loadout,random){
+ const bait=BAITS[loadout.bait],minimum=Math.min(species.max,bait.minWeights?.[species.id]||species.min);
+ return Math.round((minimum+Math.pow(Math.max(0,Math.min(1,random)),bait.sizeBias||1)*(species.max-minimum))*100)/100;
+}
+export function baitChances(loadout,feedBonus=0){const weights=speciesWeights(loadout,feedBonus),total=weights.reduce((a,b)=>a+b,0);return weights.map(w=>w/total);}

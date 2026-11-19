@@ -1,8 +1,8 @@
-import {Preparation} from './preparation.js?v=0.5.0';
-import {METHODS,BAITS,FEEDS,setupSummary,validateLoadout} from './tackle.js?v=0.5.0';
-import {showCatchPhoto,photoFor} from './fish-photos.js?v=0.5.0';
-import {Fishing} from './fishing.js?v=0.5.0';
-import {LakeScene} from './scene.js?v=0.5.0';
+import {Preparation} from './preparation.js?v=0.6.0';
+import {METHODS,BAITS,FEEDS,setupSummary,validateLoadout} from './tackle.js?v=0.6.0';
+import {showCatchPhoto,photoFor} from './fish-photos.js?v=0.6.0';
+import {Fishing} from './fishing.js?v=0.6.0';
+import {LakeScene} from './photo-scene.js?v=0.6.0';
 const $=id=>document.getElementById(id);const game=new Fishing();let lake;let last=performance.now(),started=false,drawerOpen=false,audio=null,soundOn=false,toastTimer;
 const setHidden=(id,hidden)=>$(id).classList.toggle('hidden',hidden);
 function toast(message){$('toast').textContent=message;setHidden('toast',false);clearTimeout(toastTimer);toastTimer=setTimeout(()=>setHidden('toast',true),4000);}
@@ -41,7 +41,7 @@ const preparation=new Preparation({game,onApply:loadout=>{
  if(!game.setLoadout(loadout)){toast('Sestavu teď nelze použít. Nejprve dokonči lov.');return;}
  try{localStorage.setItem('reviry-loadout',JSON.stringify(game.loadout));}catch{toast('Sestava funguje, ale nepodařilo se ji uložit pro příště.');}
  started=true;setHidden('intro',true);preparation.close();renderedPhase='';setPause();
- toast(`${METHODS[game.loadout.method].name} připravena. ${BAITS[game.loadout.bait].name} na háčku.`);setTimeout(()=>$('lookHint').style.opacity=0,6000);
+ toast(`Sestava připravena: ${METHODS[game.loadout.method].name}. Nástraha: ${BAITS[game.loadout.bait].name}.`);setTimeout(()=>$('lookHint').style.opacity=0,6000);
 },onClose:()=>{preparation.close();setPause();}});
 function openPreparation(){if(['fight','casting','flying','landed'].includes(game.phase)){toast('Nejprve dokonči aktuální nához nebo zdolávání.');return;}preparation.open();setPause();}
 $('start').onclick=openPreparation;$('tackle').onclick=openPreparation;
@@ -51,12 +51,11 @@ $('feed').onclick=()=>{if(game.paused)return;if(!game.feed())toast('Na tuto dáv
 $('menu').onclick=()=>{drawerOpen=true;renderJournal();setHidden('drawer',false);setPause();if(game.phase==='casting'){game.phase='ready';renderedPhase='';}};$('closeDrawer').onclick=()=>{drawerOpen=false;setHidden('drawer',true);setPause();};
 $('release').onclick=()=>{setHidden('catchOverlay',true);game.phase='ready';game.result=null;renderedPhase='';setPause();};
 $('sound').onclick=toggleSound;$('quality').onclick=()=>{lake.setQuality(!lake.high);$('quality').textContent=lake.high?'HD':'ECO';toast(lake.high?'Vyšší kvalita grafiky':'Úspornější vykreslování');};
-function fatal(error){console.error(error);setHidden('loading',true);setHidden('fatal',false);$('fatalMessage').textContent='Pro scénu je potřeba WebGL 2. Zkus aktuální Safari a zavři náročné aplikace. Detail: '+String(error?.message||error).slice(0,180);}
+function fatal(error){console.error(error);setHidden('loading',true);setHidden('fatal',false);$('fatalMessage').textContent='Fotografický revír se nepodařilo načíst. Obnov stránku a zkontroluj připojení. Detail: '+String(error?.message||error).slice(0,180);}
 document.addEventListener('visibilitychange',()=>{if(game.phase==='casting'){game.phase='ready';renderedPhase='';}setPause();if(audio){if(document.hidden)audio.suspend();else if(soundOn)audio.resume();}});window.addEventListener('blur',()=>{game.reeling=false;game.lifting=false;});
 game.onEvent=(event,data)=>{renderedPhase='';if(event==='cast'){lake?.setCastDirection();game.castAngle=lake?.yaw||0;}if(event==='splash')lake?.splash();if(event==='feed'){lake?.scatterFeed();toast(`Zakrmil jsi ${game.loadout.feedPortion} g. Zbývá ${game.feedStocks[game.loadout.feed]} g.`);}if(event==='bite'){toast(game.loadout.method==='float'?'Splávek! Zasekni.':game.loadout.method==='feeder'?'Špička se ohýbá! Vezmi prut a zasekni.':'Čihátko! Vezmi prut a zasekni.');navigator.vibrate?.([60,80,60]);}if(event==='hooked'){toast('Sedí! Drž NAVÍJET a hlídej napětí.');navigator.vibrate?.(80);}if(event==='escaped')toast(data.reason);if(event==='landed'){showCatchPhoto(data,$('fishIllustration'),$('fishPhotoCredit'));$('catchSetup').textContent=setupSummary(data.loadout);$('fishName').textContent=data.name;$('fishWeight').textContent=data.weight.toLocaleString('cs-CZ');$('fishLength').textContent=data.length;setHidden('catchOverlay',false);saveJournal();setPause();}};
-async function boot(){loadJournal();try{const saved=JSON.parse(localStorage.getItem('reviry-loadout')||'null');if(saved&&validateLoadout(saved).length===0)game.setLoadout(saved);}catch{}setPause();try{lake=await new LakeScene($('world'),game).init();$('quality').textContent=lake.high?'HD':'ECO';$('geoCredit').textContent=lake.geoAccurate?'Tvar břehu a ostrova: OpenStreetMap, relace 1744135. Jižní stanoviště je odvozené z mapy. Výšky terénu, přístup k vodě ani lovné místo nebyly zaměřeny.':'Půdorys prostředí je orientační rekonstrukce. Mapové podklady se nepodařilo načíst.';setHidden('loading',true);if(lake.assetWarnings.length)toast('Část grafických podkladů se nenačetla. Zkus obnovit stránku.');requestAnimationFrame(frame);}catch(error){fatal(error);}}
+async function boot(){loadJournal();try{const saved=JSON.parse(localStorage.getItem('reviry-loadout')||'null');if(saved&&validateLoadout(saved).length===0)game.setLoadout(saved);}catch{}setPause();try{lake=await new LakeScene($('world'),game).init();$('quality').textContent=lake.high?'HD':'ECO';$('geoCredit').textContent='Výhled tvoří skutečná fotografie Vajgaru od Wwery, doplněná o pohyb vody a vybavení. Jde o fotografický pohled s omezeným posunem kamery. Hloubky a chování ryb jsou herní model.';setHidden('loading',true);if(lake.assetWarnings.length)toast('Část grafických podkladů se nenačetla. Zkus obnovit stránku.');requestAnimationFrame(frame);}catch(error){fatal(error);}}
 function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;try{game.tick(dt);updateUI();if(!document.hidden)lake.render(game.paused?0:dt);}catch(error){fatal(error);return;}requestAnimationFrame(frame);}
 // Diagnostics expose observable state only; normal play never depends on this interface.
-window.reviry={getState:()=>({phase:game.phase,loadout:{...game.loadout},feedBonus:game.feedBonus,feedStocks:{...game.feedStocks},distance:game.distance,stamina:game.stamina,tension:game.tension,catches:game.journal.length,paused:game.paused,geoAccurate:lake?.geoAccurate,assetWarnings:lake?.assetWarnings,drawCalls:lake?.renderer.info.render.calls,triangles:lake?.renderer.info.render.triangles}),version:'0.5.0'};
-$('world').addEventListener('webglcontextlost',e=>{e.preventDefault();fatal(new Error('Grafický kontext byl přerušen.'));});
+window.reviry={getState:()=>({phase:game.phase,loadout:{...game.loadout},feedBonus:game.feedBonus,feedStocks:{...game.feedStocks},distance:game.distance,stamina:game.stamina,tension:game.tension,catches:game.journal.length,paused:game.paused,engine:lake?.metrics?.engine,assetWarnings:lake?.assetWarnings,drawImages:lake?.metrics?.drawImages}),version:'0.6.0'};
 boot();

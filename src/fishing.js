@@ -1,4 +1,4 @@
-import {DEFAULT_LOADOUT, METHODS, RODS, validateLoadout, cleanLoadout, feedInfluence, speciesWeights, biteDelay} from './tackle.js?v=0.5.0';
+import {DEFAULT_LOADOUT, METHODS, RODS, RIGS, catchWeight, validateLoadout, cleanLoadout, feedInfluence, speciesWeights, biteDelay} from './tackle.js?v=0.6.0';
 export const SPECIES = [
   {id:'carp',name:'Kapr obecný', min:1.4, max:7.8, power:0.85, color:0xb79b5d},
   {id:'tench',name:'Lín obecný', min:0.45, max:2.3, power:0.6, color:0x6d7841},
@@ -45,10 +45,10 @@ export class Fishing {
   retrieve(){if(!['waiting','bite','held'].includes(this.phase))return;this.phase='ready';this.reeling=false;this.lifting=false;this.emit('retrieved');}
   tick(dt){if(this.paused)return;dt=Math.min(Math.max(dt,0),0.05);this.time+=dt;this.elapsed+=dt;
     if(this.phase==='casting')this.castPower=Math.min(1,this.castPower+dt/1.7);
-    if(this.phase==='flying'&&this.elapsed>1.1){this.phase='waiting';if(this.loadout.method==='feeder')this.depositFeed(20);this.biteIn=biteDelay(this.loadout,this.random(),this.feedBonus);this.elapsed=0;this.emit('splash');}
+    if(this.phase==='flying'&&this.elapsed>1.1){this.phase='waiting';if(RIGS[this.loadout.rig].feeder)this.depositFeed(20);this.biteIn=biteDelay(this.loadout,this.random(),this.feedBonus);this.elapsed=0;this.emit('splash');}
     if(this.phase==='waiting'&&this.elapsed>=this.biteIn){
-      const weights=speciesWeights(this.loadout,this.feedBonus);let pick=this.random()*weights.reduce((a,b)=>a+b,0),index=0;while(index<weights.length-1&&pick>=weights[index])pick-=weights[index++];const species=SPECIES[index];
-      const weight=Math.round((species.min+this.random()*(species.max-species.min))*100)/100;
+      const weights=speciesWeights(this.loadout,this.feedBonus);let pick=Math.max(0,Math.min(1-Number.EPSILON,this.random()))*weights.reduce((a,b)=>a+b,0),index=0;while(index<weights.length-1&&pick>=weights[index])pick-=weights[index++];const species=SPECIES[index];
+      const weight=catchWeight(species,this.loadout,this.random());
       this.fish={...species,weight,length:Math.round(22+Math.pow(weight,0.44)*23)};
       this.biteStyle=Math.round(weight*100)%3===0?'dropback':'pull';this.phase='bite';this.elapsed=0;this.biteElapsed=0;this.emit('bite');
     }

@@ -21,3 +21,11 @@ Fotografie na kartě úlovku a v deníku jsou ilustrační fotografie daného dr
 | fish/bream.webp | Микова Наталия, [Carp bream.jpg](https://commons.wikimedia.org/wiki/File:Carp_bream.jpg) | Public domain, uvolněno autorkou na Commons | Zmenšení na 1200 px, převod do WebP. |
 
 Autor, odkaz na původní soubor, licence a informace o ořezu/zmenšení jsou dostupné i přímo na kartě úlovku. Fotografové projekt nezaštiťují.
+
+## Fotografický revír — 0.6
+
+`vajgar-photograph.webp`: **Wwery**, [Pohled na Jindřichův Hradec přes rybník Vajgar.jpg](https://commons.wikimedia.org/wiki/File:Pohled_na_Jind%C5%99ich%C5%AFv_Hradec_p%C5%99es_rybn%C3%ADk_Vajgar.jpg), 31. 5. 2024, vlastní fotografie autora, [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+
+Úpravy: zmenšení z 4032 px na 2400 px, převod JPG → WebP. Za běhu ořez podle obrazovky, omezený posun, jemná animace pouze vodní části a doplnění herních prvků. Upravená fotografie i kompozitní kontrolní snímek `preview/vajgar-0.6.webp` jsou šířené pod CC BY-SA 4.0. Autor ani Wikimedia projekt nezaštiťují. Připsání autora, zdroj, licence a označení úprav jsou v zápatí a nabídce hry.
+
+Nejde o procedurálně vygenerovanou rekonstrukci ani o 360° panorama. Snímek 0.6 vzniká skutečným vykreslením `src/photo-scene.js` přes Canvas 2D. Není vytvořený generátorem obrázků. OSM a materiály původní 3D scény se v hlavní scéně 0.6 nepoužívají.

@@ -1,5 +1,10 @@
 # REVÍRY CZ — Vajgar: závazný směr nové verze
 
+## Aktualizace — verze 0.6: uživatelem schválená změna směru
+Uživatel nyní výslovně preferuje fotografii zakomponovanou do hry před dosavadní 3D grafikou. Tento pokyn nahrazuje níže uvedený původní zákaz fotografického pozadí. Hlavní scéna 0.6 používá skutečnou fotografii Vajgaru od Wwery (CC BY-SA 4.0), vodní animaci a kreslené vybavení. Není vydávána za volně průchozí 3D rekonstrukci. Původní 3D kód zůstává jen pro historii.
+
+Položená má nově průběžné pružinové krmítko i kombinaci krmítka a vlasového přívěsu. Krmítko skutečně spotřebovává směs. Boilies 15 / 20 mm jsou viditelné karty dostupné bez ručního hledání vlasové montáže. Nástraha upravuje druh i velikost ryby; 20mm boilies mají v herním modelu výhradně větší kapry. Šance se zobrazují v přípravě. 36 automatických testů včetně skutečného Canvas 2D vykreslení prošlo.
+
 ## Aktualizace — verze 0.5
 Skutečné fotografie tří druhů na kartě úlovku a v deníku nahrazují 3D portrét. Přidána funkční příprava lovu: položená / feeder / plavaná, šest kompatibilních montáží, prut, vlasec, háček, návazec, zátěž, nástraha, krmení a hloubka splávku. Techniky se liší signalizací i zásekem, výběr ovlivňuje zjednodušený model lovu. Krmné místo má skutečný stav, zásoby a útlum účinku. 30 automatických testů a skutečný WebGL render nových technik prošly. Podvodní fyzika montáže není kompletní. Prostředí, ruce a ryba při zdolávání nadále nedosahují původního grafického cíle.
 

@@ -1,68 +1,50 @@
-# REVÍRY CZ — Vajgar 0.5
+# REVÍRY CZ — Vajgar 0.6
 
-Hratelná 3D pracovní rekonstrukce Vajgaru pro Safari na iPhonu. Grafika prostředí nadále není finální ani fotorealistická. Není to nativní iOS aplikace.
+Rybářská hra pro Safari na iPhonu. Výhled nově tvoří **skutečná fotografie Vajgaru** s animovanou hladinou, prutem, čihátkem, náhozem, splávkem a krmením. Zjednodušená 3D zástavba se v hlavní hře nepoužívá. Vykreslování běží přes Canvas 2D a nepotřebuje WebGL.
 
-**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.5.0
+**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.6.0
 
-Nejlépe na šířku. Engine i fotografie se načítají ze stejného webu. Vykreslování vyžaduje WebGL 2; režim ECO snižuje rozlišení a vypíná stíny.
+Nejlépe na šířku. Všechny herní fotografie jsou přiložené lokálně. HD / ECO mění rozlišení a jemnost animace vody. Fotografie není 360° panorama: tažením jde pouze mírně posouvat výhled a směr náhozu. Nejde o volně průchozí 3D svět.
 
-## Příprava a lov
+## Příprava lovu
 
-Po otevření vyber **PŘIPRAVIT VÝPRAVU**. Přípravu lze později otevřít tlačítkem **Montáž** v horní liště.
+**PŘIPRAVIT VÝPRAVU** → Technika → Montáž → Nástraha → Krmení. Později horní tlačítko **Montáž**.
 
-1. **Technika:** položená s mechanickým čihátkem, feeder s barevnou citlivou špičkou, nebo plavaná se splávkem. Plavaná má také detail signalizace v rohu obrazovky.
-2. **Montáž:** šest sestav podle techniky, šest prutů, průměr vlasce, háček, délka návazce a hmotnost olova / krmítka / splávku. U plavané i hloubka pod splávkem. Schéma se průběžně mění podle voleb.
-3. **Nástraha:** kukuřice, žížala, bílí červi, pečivo, boilies nebo peleta podle vhodnosti k montáži. Nehodící se kombinace nelze použít.
-4. **Krmení:** bez krmení, partikl, jemná směs nebo mikropelety; dávka zakrmení 50 / 150 / 300 g. Každé krmení má pro výpravu zásobu 1 kg.
+- **Položená:** olovo, průběžné pružinové krmítko, vlasový přívěs s olovem, nebo **krmítko s vlasovým přívěsem**. Vždy mechanické čihátko. V přípravě je přímá zkratka **Položená s krmítkem**.
+- **Feeder:** průběžné klecové krmítko nebo method feeder; záběr na barevné špičce.
+- **Plavaná:** pevný nebo průběžný splávek; nastavitelná hloubka a detail signalizace.
 
-Podrž **NAHODIT** a pusť. U položené a feederu při záběru nejprve **VZÍT PRUT**, potom **ZASEKNOUT**. U plavané **ZASEKNOUT** přímo při ponoření splávku. Drž **NAVÍJET**, při silném tahu uvolni nebo povol brzdu. Unavenou rybu do 4 metrů od hrany vody podeber.
+Volíš prut, vlasec, háček, délku návazce a zátěž. Schéma ukazuje aktuální sestavu. Nástrahy jsou samostatné viditelné karty: kukuřice, žížala, bílí červi, pečivo, **boilies 15 mm, boilies 20 mm** a peleta. Výběr boilies automaticky doplní kompatibilní vlasový přívěs i háček; u krmítka zachová krmítko. Neplatnou pozdější kombinaci nelze potvrdit.
 
-Po náhozu lze použít **ZAKRMIT**. Feeder při dopadu automaticky vysype 20 g zvoleného krmení, pokud je dostatečná zásoba. Působení krmného místa slábne během herního času a s náhozem do jiné vzdálenosti nebo směru. Při vyčerpání zásoby lze dál chytat bez dalšího zakrmení.
+## Nástraha a úlovek
 
-Volby mění hru: nástraha a krmení ovlivňují výběr ryb, průměr vlasce napětí při zdolávání, prut délku náhozu a navíjení, hloubka u plavané četnost záběrů. To jsou zjednodušené herní parametry, nikoli měření revíru nebo skutečné pravděpodobnosti úlovků. Tvar montáže, háček a délka návazce se zobrazují ve schématu a kontroluje se jejich slučitelnost; nejde o úplnou fyzikální simulaci montáže pod vodou.
+Druh ani velikost ryby se nelosují nezávisle na nástraze. Herní pravidla:
 
-Sestava se ukládá pro příští spuštění. Změna během čekání nejprve stáhne nástrahu; během zdolávání nelze sestavu měnit. Deník uchovává hmotnost, délku a skutečně použitou sestavu. Otevřená příprava, deník a přechod do jiné aplikace lov pozastaví.
+- 20mm boilies: větší kapři od 4 kg; ostatní dva druhy v tomto herním režimu vyloučené.
+- 15mm boilies: výrazná převaha kapra, vzácně větší lín / cejn; kapr od 2,5 kg.
+- Žížala: zvýhodněný lín, bílí červi a pečivo: zvýhodněný cejn.
+- Kukuřice a pelety: kapr s možností dalších druhů.
 
-## Fotografie úlovků
+Na kartě nástrahy jsou herní šance bez přikrmování. Krmení, technika a háček je dále upravují. Jde o zjednodušený herní model, ne skutečné pravděpodobnosti úlovků na Vajgaru.
 
-Karta úlovku a deník používají skutečné lokálně přiložené fotografie kapra, lína a cejna. U fotografie je autor, zdroj, licence a označení **ilustrační fotografie druhu**: nejde o snímek konkrétního virtuálního úlovku. Ve 3D scéně při zdolávání zůstává pracovní model. Zdroje a podmínky jsou v [assets/CREDITS.md](assets/CREDITS.md).
+## Ovládání a krmení
 
-## Přesnost a omezení
+Podrž **NAHODIT** a pusť. U položené a feederu při záběru **VZÍT PRUT**, potom **ZASEKNOUT**. U plavané **ZASEKNOUT** přímo. Drž **NAVÍJET**, při výpadu pusť nebo povol brzdu. Unavenou rybu do 4 m od hrany vody podeber.
 
-Břeh a ostrov jsou převzaté z OpenStreetMap, relace 1744135. Půdorysy budov odpovídají mapě; jejich výšky, střechy, fasády, vegetace a blízký terén jsou převážně procedurální aproximace. Místo kamery na jižním břehu je odvozené z mapy, bez zaměření přístupu a povoleného rybolovu. Herní hloubky ani výskyt a chování ryb nejsou měřením reality nebo rybářským řádem.
+Krmítko při dopadu spotřebuje 20 g směsi — také u položené, nejen u feederu. Po náhozu lze přikrmovat dávkou 50 / 150 / 300 g. Pro výpravu je 1 kg každého druhu krmení. Krmné místo postupně slábne a ztrácí účinek při náhozu jinam. Při prázdných zásobách lze dál chytat bez dalšího krmení.
 
-Jeden aktivní prut, tři techniky. Přívlač zatím není implementovaná. Modely ruky, ryby ve scéně i vybavení jsou základní. Další výtvarná práce a ověření na fyzickém iPhonu jsou potřebné, než lze mluvit o finální kvalitě. Nativní distribuce není zatím zajištěna.
+Zvolená sestava se ukládá pro příště. Při změně během čekání se nástraha stáhne; během zdolávání změnu nelze provést. Deník ukládá hmotnost, délku a použitou sestavu. Příprava, deník a přechod do jiné aplikace lov pozastavují.
+
+## Fotografie a omezení
+
+Podklad Vajgaru: Wwery, [původní fotografie](https://commons.wikimedia.org/wiki/File:Pohled_na_Jind%C5%99ich%C5%AFv_Hradec_p%C5%99es_rybn%C3%ADk_Vajgar.jpg), [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Zmenšení, převod do WebP, ořez podle obrazovky a animace vodní části. Upravený obraz i kontrolní snímek 0.6 zachovávají tuto licenci. Autor, zdroj, licence a informace o úpravách jsou i přímo ve hře. Viz [assets/CREDITS.md](assets/CREDITS.md).
+
+Karta úlovku používá skutečné **ilustrační fotografie druhů** (kapr, lín, cejn). Nejde o fotografie konkrétních virtuálních úlovků. Prut, naviják a ryba u hladiny jsou stále kreslené herní prvky. Podvodní fyzika montáže, další druhy ryb a přívlač nejsou implementované. Není to nativní iOS aplikace. Fyzický iPhone nebyl vývojářem změřen.
 
 ## Vývoj a ověření
 
-Bez instalace závislostí: `node dev-server.mjs` a http://localhost:3000. Testy: `node --test tests/*.test.js`.
+`npm ci`, `npm test`, `npm run dev` → http://localhost:3000. `npm run render` ukládá skutečný snímek fotografické scény bez HTML ovládání. Parametry `RENDER_METHOD`, `RENDER_PHASE`, `RENDER_WIDTH`, `RENDER_HEIGHT` umožňují ověřovat techniky, stavy a orientace.
 
-Automatické testy ověřují celý cyklus lovu, chyby při zdolávání, pauzu a geografické podmínky. Konstrukce scény prošla samostatnou CPU kontrolou všech vrcholů a osmi herních stavů. Testovací prohlížeč nevytvořil WebGL kontext. Ve verzi 0.3 byl skutečný WebGL výstup ověřen samostatně přes webgl-node a Mesa, včetně kontroly chyb shaderů a načtení materiálů. Snímek je v preview/. Výkon na fyzickém iPhonu nebyl měřen. Před finálním hodnocením nutná skutečná hra na cílovém zařízení.
+36 automatických testů: herní cyklus, DOM ovládání přípravy a karty úlovku, kompatibilita montáží, vliv nástrahy na skutečně vybrané druhy i velikosti, krmítko na položenou, ořez fotografie a vykreslení všech stavů tří technik přes stejný Canvas 2D modul bez GPU. `tools/ui-matrix.html` zobrazuje skutečné komponenty přípravy v rozměrech telefonu s označenými testovacími údaji. Test cílového fyzického telefonu nenahrazují.
 
-Původní 2D verze je v `legacy/`; její data se do nového deníku nepřevádějí.
-
-## Zdroje a licence
-
-© OpenStreetMap contributors, ODbL 1.0. Viz [data/README.md](data/README.md). Three.js r160: MIT, plné znění v `vendor/LICENSE-three.txt`. Herní modely a procedurální materiály vytvořené pro tento projekt. Fotografie dodané jako reference nejsou do hry vložené.
-
-## Změny 0.3
-
-Fotografické materiály země, fotografická obloha, vegetační billboardy odvozené z detailního stromu, upravená voda a směrování slunce, oprava překážejících kamenů, výhled a mechanické čihátko. Viz assets/CREDITS.md. Zástavba a rybářské vybavení stále mají pracovní modely; tato verze nedosahuje původních fotorealistických referencí.
-
-Volitelný skutečný render bez prohlížeče: nainstalovat vývojové závislosti, na Linuxu zajistit EGL/GLES (libegl1, libgles2 a Mesa), pak `EGL_PLATFORM=surfaceless npm run render`. Nástroj ukládá preview/vajgar-render.png, bez HTML ovládání. Nepotřebuje měnit nastavení prohlížeče.
-
-## Změny 0.4
-
-- Souvislý kuželový blank prutu; očka a vlasec vycházejí ze stejné křivky ohybu. Vybavení je při čekání ukotvené na břehu a při uchopení plynule přechází do ruky.
-- Vlasec prochází čihátkem a očky. Let zátěže při náhozu má prostorový oblouk. Vzdálenost ryby se nyní počítá od hrany vody, aby se u břehu nedostávala do suchého terénu.
-- Jemnější vegetace v trsech s pohybem ve větru, drobný reliéf blízkého břehu, vlhký pás na hraně vody a méně pravidelné vlnění s filtrovanými odrazy.
-- Nový společný model ryby pro scénu a kartu úlovku: tělo s barevným přechodem, šupinový bump, ploutve, skřele, oči a tlama. Druhy zatím sdílejí geometrii a liší se barvou a velikostí; nejsou to tři věrné druhové modely.
-- Oprava obnovy viditelnosti objektů po vykreslení odrazu.
-
-Ověření 0.4: 15 automatických testů herní logiky, geografie a geometrie modelů. Skutečný WebGL render přes Mesa v režimu čekání, zdolávání, na výšku a pro kartu úlovku; kontrola konečnosti vrcholů, ukotvení stojanu a obnovy viditelnosti. Jde o snímky stejného renderovacího kódu, bez HTML ovládání. Výkon a ovládání na fyzickém iPhonu nadále nejsou ověřené. Zástavba, ruce a vybavení stále vyžadují výtvarnou práci; verze nesplňuje původní fotorealistický cíl.
-
-Kontrolní snímky: `preview/vajgar-0.4.webp`, `preview/fight-0.4.webp`, `preview/portrait-0.4.webp`, `preview/fish-0.4.png`.
-
-## Ověření 0.5
-
-30 automatických testů včetně sestavení montáže přes skutečné DOM handlery, zablokování neplatných kombinací, náhozu, přímého záseku při plavané, zdolání, správné fotografie, uložení úlovku a zásob krmení. WebGL vykreslení feederu a plavané prošlo přes Mesa se stejným `src/scene.js`. Rozhraní lze kontrolovat bez WebGL na `tools/ui-matrix.html`; jde o skutečné komponenty v rozměrech 390 × 844 a 844 × 390 s výslovně označenými testovacími hodnotami. Test fyzického iPhonu a výkonu na něm to nenahrazuje.
+Původní procedurální 3D modul a jeho testovací nástroje zůstávají v repozitáři pro historii; nejsou načítané vstupem hry 0.6. Jeho render je `npm run render:legacy3d`. Nejstarší samostatná 2D verze je v `legacy/`.

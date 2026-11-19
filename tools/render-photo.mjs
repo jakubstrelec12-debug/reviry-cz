@@ -1,0 +1,17 @@
+import fs from 'node:fs/promises';
+import {fileURLToPath} from 'node:url';
+import {createCanvas,Image as NativeImage} from '@napi-rs/canvas';
+import {LakeScene} from '../src/photo-scene.js';
+import {Fishing} from '../src/fishing.js';
+import {methodPreset} from '../src/tackle.js';
+const width=Number(process.env.RENDER_WIDTH)||1280,height=Number(process.env.RENDER_HEIGHT)||720;
+globalThis.innerWidth=width;globalThis.innerHeight=height;globalThis.devicePixelRatio=1;
+globalThis.window={addEventListener(){},removeEventListener(){}};globalThis.localStorage={getItem:()=>null,setItem(){}};
+globalThis.document={createElement(name){if(name==='canvas')return createCanvas(width,height);throw new Error('Unexpected DOM request');}};
+globalThis.Image=class extends NativeImage{set src(value){super.src=value.startsWith('file:')?fileURLToPath(value):value;}get src(){return super.src;}};
+const canvas=createCanvas(width,height);canvas.addEventListener=()=>{};canvas.setPointerCapture=()=>{};
+const game=new Fishing(()=>.2);game.setLoadout(methodPreset(process.env.RENDER_METHOD||'ledger'));game.loadout.rig=process.env.RENDER_RIG||game.loadout.rig;
+game.phase=process.env.RENDER_PHASE||'waiting';game.distance=game.phase==='fight'?3:30;game.tension=.65;game.fish={id:'carp',name:'Kapr obecný',length:65};game.elapsed=.5;
+const scene=await new LakeScene(canvas,game).init();for(let i=0;i<4;i++)scene.render(.05);
+await fs.writeFile(process.argv[2]||new URL('../preview/vajgar-0.6.png',import.meta.url),canvas.toBuffer('image/png'));
+console.log({width,height,engine:scene.metrics.engine,waterTop:scene.waterTop,drawImages:scene.metrics.drawImages,target:scene.target});

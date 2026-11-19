@@ -13,13 +13,13 @@ function choose(name,value,dom){const input=document.querySelector(`[name="${nam
 
 test('preparation lets player choose techniques, assembly, hook bait and feeding before applying',()=>{
  const b=bench();click('[data-method="feeder"]');assert.equal(b.p.draft.method,'feeder');click('[data-tab="assembly"]');choose('rig','method',b.dom);choose('leader',10,b.dom);choose('line',.20,b.dom);
- click('[data-tab="bait"]');choose('bait','pellet',b.dom);click('[data-tab="feed"]');choose('feed','micro',b.dom);choose('feedPortion',300,b.dom);
+ click('[data-tab="bait"]');click('[data-bait="pellet"]');click('[data-tab="feed"]');choose('feed','micro',b.dom);choose('feedPortion',300,b.dom);
  assert.ok(el('rigPreview').textContent.includes('Peleta'));assert.ok(el('setupSummary').textContent.includes('Feeder'));
  el('setupApply').click();assert.equal(b.applied.rig,'method');assert.equal(b.applied.line,.20);assert.equal(b.applied.bait,'pellet');assert.equal(b.applied.feed,'micro');assert.equal(b.applied.feedPortion,300);
  assert.equal(b.game.loadout.method,'ledger','draft does not change an active setup by itself');
 });
 test('invalid combinations display a reason and block apply until repaired',()=>{
- const b=bench();click('[data-tab="assembly"]');choose('rig','hair',b.dom);choose('hook',14,b.dom);click('[data-tab="bait"]');choose('bait','boilie',b.dom);
+ const b=bench();click('[data-tab="assembly"]');choose('rig','hair',b.dom);click('[data-tab="bait"]');click('[data-bait="boilie"]');click('[data-tab="assembly"]');choose('hook',14,b.dom);
  assert.equal(el('setupApply').disabled,true);assert.match(el('setupErrors').textContent,/háček/);el('setupApply').click();assert.equal(b.applied,null);
  click('[data-tab="assembly"]');choose('hook',8,b.dom);assert.equal(el('setupApply').disabled,false);el('setupApply').click();assert.equal(b.applied.bait,'boilie');
 });
@@ -29,4 +29,9 @@ test('float depth is adjustable and closing discards unapplied changes',()=>{
 test('catch photo maps actual species, exposes attribution, and handles failures without a fake model',()=>{
  bench();showCatchPhoto({name:'Lín obecný'},el('fishIllustration'),el('fishPhotoCredit'));assert.ok(el('fishIllustration').getAttribute('src').endsWith('/assets/fish/tench.webp'));assert.match(el('fishPhotoCredit').textContent,/Dezidor/);assert.equal(el('fishPhotoCredit').querySelectorAll('a').length,2);
  el('fishIllustration').dispatchEvent(new document.defaultView.Event('error'));assert.equal(el('fishIllustration').hasAttribute('src'),false);assert.match(el('fishPhotoCredit').textContent,/nepodařilo/);
+});
+
+test('bottom feeder shortcut is visible and boilies are reachable without hunting for a hidden compatible rig',()=>{
+ const b=bench();click('[data-quick-feeder]');assert.equal(b.p.draft.method,'ledger');assert.equal(b.p.draft.rig,'spring');assert.equal(b.p.draft.feed,'groundbait');click('[data-tab="bait"]');
+ assert.ok(document.querySelector('[data-bait="boilie20"]'));click('[data-bait="boilie20"]');assert.equal(b.p.draft.rig,'springHair');assert.match(el('rigPreview').textContent,/Boilies 20 mm/);assert.match(el('setupForm').textContent,/100 %/);assert.equal(el('setupApply').disabled,false);el('setupApply').click();assert.equal(b.applied.bait,'boilie20');
 });

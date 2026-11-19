@@ -1,12 +1,13 @@
 {
   "name": "reviry-vajgar",
   "private": true,
-  "version": "0.5.0",
+  "version": "0.6.0",
   "type": "module",
   "scripts": {
     "test": "node --test tests/*.test.js",
     "dev": "node dev-server.mjs",
-    "render": "node tools/render-scene.mjs"
+    "render": "node tools/render-photo.mjs",
+    "render:legacy3d": "node tools/render-scene.mjs"
   },
   "devDependencies": {
     "@napi-rs/canvas": "0.1.100",
