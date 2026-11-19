@@ -56,3 +56,15 @@ test('rod tips, reels and indicators remain above the actual mobile controls for
   s.rods[1].loadout=methodPreset('feeder');scene.render(.05);assert.equal(scene.signals[1].kind,'feeder');assert.ok(scene.signals[1].y>headerBottom&&scene.signals[1].y<hudTop-40);scene.dispose();
  }
 });
+
+
+test('photographic equipment has real alpha; float visibly submerges and its focus crops the rendered scene',async()=>{
+ globalThis.innerWidth=844;globalThis.innerHeight=390;globalThis.devicePixelRatio=1;globalThis.window={addEventListener(){},removeEventListener(){}};globalThis.localStorage={getItem:()=>null,setItem(){}};globalThis.document={createElement:()=>createCanvas(844,390)};
+ globalThis.Image=class extends NativeImage{set src(v){super.src=v.startsWith('file:')?fileURLToPath(v):v;}get src(){return super.src;}};
+ const canvas=createCanvas(844,390);canvas.addEventListener=()=>{};const game=new Fishing(()=>.2);game.loadout=methodPreset('float');game.phase='waiting';game.distance=20;
+ const scene=await new LakeScene(canvas,game).init(),focus=createCanvas(300,180);scene.setUiBounds({hudTop:290,headerBottom:115});scene.setSignalCanvas(focus);scene.render(0);
+ assert.equal(scene.assetWarnings.length,0);assert.equal(scene.metrics.heldPhoto,true);assert.equal(scene.signals[0].kind,'float');
+ for(const key of ['rod','float']){const sprite=scene.equipment[key],check=createCanvas(sprite.width,sprite.height),ctx=check.getContext('2d');ctx.drawImage(sprite,0,0);const px=ctx.getImageData(0,0,sprite.width,sprite.height).data;assert.ok(px.some((v,i)=>i%4===3&&v===0));assert.ok(px.some((v,i)=>i%4===3&&v>240));}
+ const red=()=>{const t=scene.signals[0],px=scene.ctx.getImageData(Math.round(t.x)-8,Math.round(t.y)-25,16,25).data;let n=0;for(let i=0;i<px.length;i+=4)if(px[i]>150&&px[i]>px[i+1]*1.8&&px[i]>px[i+2]*1.8)n++;return n;};
+ const before=red();assert.ok(before>5);const zoomBefore=focus.toBuffer('image/png');game.phase='bite';game.elapsed=6;scene.render(0);assert.ok(red()<before/2);assert.notDeepEqual(focus.toBuffer('image/png'),zoomBefore);scene.dispose();
+});

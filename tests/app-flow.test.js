@@ -20,7 +20,7 @@ test('app flow: prepare float tackle, cast, strike, land, show real photo, store
  $('start').click();document.querySelector('[data-method="float"]').click();$('setupApply').click();tick();
  assert.equal(state().loadout.method,'float');assert.equal(state().paused,false);
  $('action').dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:' ',bubbles:true}));for(let i=0;i<10;i++)tick();$('action').dispatchEvent(new dom.window.KeyboardEvent('keyup',{key:' ',bubbles:true}));
- for(let i=0;i<1000&&state().phase!=='bite';i++)tick();assert.equal(state().phase,'bite');assert.match($('action').textContent,/ZASEKNOUT/);assert.equal($('floatFocus').classList.contains('hidden'),false);
+ for(let i=0;i<1000&&state().phase!=='bite';i++)tick();assert.equal(state().phase,'bite');assert.match($('action').textContent,/ZASEKNOUT/);assert.equal($('signalFocus').classList.contains('hidden'),false);assert.match($('signalTitle').textContent,/SPLÁVEK/);
  $('action').dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:' ',bubbles:true}));$('action').dispatchEvent(new dom.window.KeyboardEvent('keyup',{key:' ',bubbles:true}));assert.equal(state().phase,'fight');
  for(let i=0;i<6000&&state().phase==='fight';i++){
   $('drag').value=state().tension>.8?'20':'50';$('drag').dispatchEvent(new dom.window.Event('input',{bubbles:true}));

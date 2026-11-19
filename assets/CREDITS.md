@@ -29,3 +29,12 @@ Autor, odkaz na původní soubor, licence a informace o ořezu/zmenšení jsou d
 Úpravy: zmenšení z 4032 px na 2400 px, převod JPG → WebP. Za běhu ořez podle obrazovky, omezený posun, jemná animace pouze vodní části a doplnění herních prvků. Upravená fotografie i kompozitní kontrolní snímek `preview/vajgar-0.6.webp` jsou šířené pod CC BY-SA 4.0. Autor ani Wikimedia projekt nezaštiťují. Připsání autora, zdroj, licence a označení úprav jsou v zápatí a nabídce hry.
 
 Nejde o procedurálně vygenerovanou rekonstrukci ani o 360° panorama. Snímek 0.6 vzniká skutečným vykreslením `src/photo-scene.js` přes Canvas 2D. Není vytvořený generátorem obrázků. OSM a materiály původní 3D scény se v hlavní scéně 0.6 nepoužívají.
+
+## Fotografické náčiní — 0.8
+
+- `equipment/rod-hand.webp`: JaredMcKenzie, [A spinning reel on a rod.jpg](https://commons.wikimedia.org/wiki/File:A_spinning_reel_on_a_rod.jpg), [CC0](https://creativecommons.org/publicdomain/zero/1.0/). Skutečná fotografie navijáku Savage Gear 3000H, rukojeti a ruky. Odstranění pozadí nástrojem image_gen, zmenšení na 900 × 1200 a WebP. Ve hře ořez, natočení, skládání dílů a animovaná horní část prutu s texturou z fotografie. Jde o fotografický kompozit, nikoli přesný 3D model. AI při oddělení pozadí může upravit drobné detaily; netvrdíme shodu pixelů s originálem.
+- `equipment/waggler.webp`: Geotek, [Pellet waggler fishing float.jpg](https://commons.wikimedia.org/wiki/File:Pellet_waggler_fishing_float.jpg), [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/). Skutečná fotografie splávku J-Range. Odstranění bílého pozadí nástrojem image_gen, zvětšení a převod do WebP, ve hře částečné ponoření, průhlednost pod hladinou a animace záběru. Tento upravený obrázek se šíří pod **CC BY-SA 3.0**.
+
+Jména modelů v přípravě lovu jsou oddělená od těchto ilustračních snímků: fotografie automaticky nezobrazuje vybraný výrobek Mivardi. Zdroj, autor, licence a úpravy jsou uvedeny také v herním deníku v části O prostředí a podkladech. Výrobci ani fotografové hru nezaštiťují. Detail splávku je výřez skutečně vykreslené hladiny, nikoli samostatná animace.
+
+Prompty pro extrakci: zachovat skutečný fotografovaný prut, naviják a ruku, odstranit pouze béžovou stěnu; u splávku zachovat přesný tvar, barevné tělo a červenou špičku, odstranit bílé pozadí. Použit vestavěný image_gen s průhledným pozadím.

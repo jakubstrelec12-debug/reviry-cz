@@ -1,4 +1,4 @@
-import {RODS,RIGS} from './tackle.js?v=0.7.1';
+import {RODS,RIGS} from './tackle.js?v=0.8.0';
 
 export const PHOTO={src:'assets/vajgar-photograph.webp',author:'Wwery',title:'Pohled na Jindřichův Hradec přes rybník Vajgar',source:'https://commons.wikimedia.org/wiki/File:Pohled_na_Jind%C5%99ich%C5%AFv_Hradec_p%C5%99es_rybn%C3%ADk_Vajgar.jpg',license:'CC BY-SA 4.0',licenseUrl:'https://creativecommons.org/licenses/by-sa/4.0/',waterStart:.575};
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -31,7 +31,7 @@ export class LakeScene{
   try{this.high=localStorage.getItem('reviry-quality')!=='low';}catch{this.high=true;}
   this.background=document.createElement('canvas');this.bctx=this.background.getContext('2d');this.lastView='';this.bindLook();this.onResize=()=>this.resize();window.addEventListener('resize',this.onResize);
  }
- async init(){this.image=await loadImage(PHOTO.src);this.resize();this.render(0);return this;}
+ async init(){this.image=await loadImage(PHOTO.src);this.equipment={};await Promise.all([['rod','assets/equipment/rod-hand.webp'],['float','assets/equipment/waggler.webp']].map(async([key,path])=>{try{this.equipment[key]=await loadImage(path);}catch{this.assetWarnings.push(path);}}));this.resize();this.render(0);return this;}
  resize(){this.width=innerWidth;this.height=innerHeight;this.ratio=Math.min(devicePixelRatio||1,this.high?1.75:1);for(const c of [this.canvas,this.background]){c.width=Math.round(this.width*this.ratio);c.height=Math.round(this.height*this.ratio);}this.ctx.setTransform(this.ratio,0,0,this.ratio,0,0);this.bctx.setTransform(this.ratio,0,0,this.ratio,0,0);this.lastView='';}
  setQuality(high){this.high=high;try{localStorage.setItem('reviry-quality',high?'high':'low');}catch{}this.resize();}
  bindLook(){let pointer=null,lastX=0,lastY=0;
@@ -64,11 +64,44 @@ export class LakeScene{
   for(const p of this.ripples){const age=t-p.time;for(let i=0;i<3;i++){const f=age-i*.24;if(f<0)continue;const radius=5+f*19;this.ellipse(p.x,p.y,radius,radius*.17,null,`rgba(231,242,228,${Math.max(0,.45-f*.09)})`,1);}}
   if(this.feedThrow){const p=this.feedThrow,f=clamp((t-p.time)/.95,0,1);for(let i=0;i<20;i++){const x=mix(p.start.x,p.end.x+Math.sin(i*2.4)*18,f),y=mix(p.start.y,p.end.y+Math.cos(i*2.4)*4,f)-Math.sin(Math.PI*f)*(this.height*.22+i%3*5);this.ellipse(x,y,1.4,1.2,'#cfb77d');}if(f>=1){this.feedThrow=null;this.splash();}}
  }
- drawFloat(target,flying){const c=this.ctx,g=this.game,scale=clamp(15/(g.distance||15),.6,1.8),bite=g.phase==='bite';
-  c.save();c.translate(target.x,target.y+(flying?0:Math.sin(this.clock*1.6)*1.1+(bite?6+Math.sin(g.elapsed*6)*4:0)));c.scale(scale,scale);
-  if(!flying){c.beginPath();c.rect(-35,-35,70,36);c.clip();}
-  c.rotate(flying?.7:Math.sin(this.clock*1.6)*.04);const body=c.createLinearGradient(-4,0,4,0);body.addColorStop(0,'#746a3c');body.addColorStop(.4,'#e4d3a3');body.addColorStop(1,'#77643a');
-  this.ellipse(0,-2,3.5,8,body);this.line([{x:0,y:-10},{x:0,y:-26}],'#e56c39',2);this.line([{x:0,y:-18},{x:0,y:-21}],'#fff1c4',2.3);this.line([{x:0,y:5},{x:0,y:14}],'#313d36',1);c.restore();
+ drawFloat(target,flying){
+  const c=this.ctx,g=this.game,image=this.equipment?.float;if(!image)return;
+  const height=clamp(23/Math.sqrt(Math.max(3,g.distance||20)),3.7,9)*10,width=height*image.width/image.height;
+  const bob=Math.sin(this.clock*1.6)*.7,sink=g.phase==='bite'?clamp(g.elapsed*4,0,24)+Math.sin(g.elapsed*4)*1.5:bob;
+  const angle=flying?.65:Math.sin(this.clock*1.6)*.025;
+  this.signals[this.drawIndex]={x:target.x,y:target.y,kind:'float'};
+  c.save();c.translate(target.x,target.y);
+  if(!flying){
+   c.save();c.beginPath();c.rect(-width,-height,width*2,height);c.clip();c.translate(0,sink);c.rotate(angle);c.drawImage(image,-width/2,-height*.24,width,height);c.restore();
+   // Light transmission below the real waterline, using the very same sprite.
+   c.save();c.beginPath();c.rect(-width,0,width*2,height);c.clip();c.globalAlpha=.10;c.translate(0,sink);c.rotate(angle);c.drawImage(image,-width/2,-height*.24,width,height);c.restore();
+   this.ellipse(0,0,4,1,null,'rgba(229,236,222,.45)',.6);
+  }else{c.rotate(angle);c.drawImage(image,-width/2,-height*.24,width,height);}
+  c.restore();this.metrics.drawImages++;
+ }
+ drawPhotoHeld(){
+  const image=this.equipment?.rod;if(!image)return false;
+  const c=this.ctx,g=this.game,w=this.width,h=this.height,hud=this.inset.hudTop??h*.82,portrait=h>w;
+  const scale=Math.min(clamp(w*.00029,portrait?.25:.15,.37),Math.max(.075,(hud-(this.inset.headerBottom??85)-38)/(image.height*.68))),cropY=image.height*.30,axisX=image.width*.83;
+  const cast=g.phase==='casting'?g.castPower:0,angle=-.30+cast*.65-this.pose*.28;
+  const base={x:portrait?w*.98:w+10,y:hud+(portrait?45:28)-this.pose*35};
+  const transform=(x,y)=>({x:base.x+(x-axisX)*scale*Math.cos(angle)-(y-image.height)*scale*Math.sin(angle),y:base.y+(x-axisX)*scale*Math.sin(angle)+(y-image.height)*scale*Math.cos(angle)});
+  const joint=transform(image.width*.81,cropY+8),tip={x:joint.x-w*.16+cast*w*.22,y:Math.max((this.inset.headerBottom??85)+16,joint.y-(portrait?100:55)-this.pose*40)};
+  const control={x:mix(joint.x,tip.x,.48)+(g.phase==='fight'?g.tension*25:0),y:mix(joint.y,tip.y,.5)};
+  const sample=t=>point(joint,control,tip,t),guides=[];
+  // Tapered flexible blank, textured with the photographed carbon foregrip.
+  for(let i=0;i<28;i++){
+   const a=sample(i/28),b=sample((i+1)/28),dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy),thickness=(3.8*(1-i/28)+.7)*clamp(scale/.25,.7,1.4);
+   c.save();c.translate(a.x,a.y);c.rotate(Math.atan2(dy,dx)-Math.PI/2);c.drawImage(image,image.width*.795,image.height*.33,image.width*.04,image.height*.08,-thickness/2,0,thickness,len+1);c.restore();
+  }
+  for(let i=0;i<6;i++){const t=.12+i*.16,p=sample(t),r=2.6-i*.29;this.ellipse(p.x+2,p.y+1,r,r*.55,null,'#9caaa5',.6);guides.push({x:p.x+2,y:p.y+1});}
+  const reel=transform(image.width*.39,image.height*.40);
+  if(!['ready','casting','landed','escaped'].includes(g.phase)){
+   this.line([reel,...guides,tip],'rgba(222,232,222,.42)',.55);let end=this.target;if(g.phase==='flying'){const f=clamp(g.elapsed/1.1,0,1);end={x:mix(tip.x,end.x,f),y:mix(tip.y,end.y,f)-Math.sin(Math.PI*f)*h*.20};if(g.loadout.method==='float')this.drawFloat(end,true);else this.drawTerminal(end,scale*3);}
+   c.beginPath();c.moveTo(tip.x,tip.y);c.quadraticCurveTo(mix(tip.x,end.x,.5),mix(tip.y,end.y,.5)+5,end.x,end.y);c.strokeStyle='rgba(225,236,225,.45)';c.lineWidth=.6;c.stroke();
+  }
+  c.save();c.translate(base.x,base.y);c.rotate(angle);c.drawImage(image,0,cropY,image.width,image.height-cropY,-axisX*scale,-(image.height-cropY)*scale,image.width*scale,(image.height-cropY)*scale);c.restore();
+  this.tip=tip;this.metrics.heldPhoto=true;this.metrics.drawImages+=29;return true;
  }
  drawFish(){const g=this.game;if(g.phase!=='fight'||g.distance>8)return;
   const c=this.ctx,p=this.target,s=clamp(8/g.distance,.9,2.2)*(g.fish?.length||50)/60;
@@ -78,7 +111,7 @@ export class LakeScene{
   this.ellipse(p.x,p.y,35+Math.sin(this.clock*4)*4,5,null,'rgba(223,236,222,.35)',1);
  }
  drawRig(){const c=this.ctx,g=this.game,w=this.width,h=this.height,method=g.loadout.method,floating=method==='float',fighting=g.phase==='fight',held=g.phase==='held',casting=g.phase==='casting',flying=g.phase==='flying';
-  const hand=floating||fighting||held||casting||flying;const layout=gearLayout(w,h,{...this.inset,index:this.drawIndex,count:this.drawCount,pose:this.pose,waterTop:this.waterTop});const {base,size}=layout;let tip={...layout.tip};
+  const hand=floating||fighting||held||casting||flying;if(hand&&this.drawPhotoHeld())return;const layout=gearLayout(w,h,{...this.inset,index:this.drawIndex,count:this.drawCount,pose:this.pose,waterTop:this.waterTop});const {base,size}=layout;let tip={...layout.tip};
   if(casting){tip.x+=w*g.castPower*.14;tip.y-=h*g.castPower*.15;}
   const bend=fighting?g.tension*48:method==='feeder'?7+(g.phase==='bite'?(8+Math.sin(g.elapsed*10)*6)*(g.biteStyle==='dropback'?-1:1):0):0;
   const control={x:mix(base.x,tip.x,.48)+bend*size,y:mix(base.y,tip.y,.45)-bend*.3*size};
@@ -95,16 +128,15 @@ export class LakeScene{
   }
   const rodGradient=c.createLinearGradient(base.x,base.y,tip.x,tip.y);rodGradient.addColorStop(0,'#151c18');rodGradient.addColorStop(.45,'#263b33');rodGradient.addColorStop(.8,'#0d201b');rodGradient.addColorStop(1,method==='feeder'?'#e5a25c':'#303f34');
   for(let i=0;i<40;i++){const a=sample(i/40),b=sample((i+1)/40);this.line([a,b],'rgba(228,235,216,.16)',(5*(1-i/40)+1)*size);this.line([a,b],method==='feeder'&&i>=32?(i%3===0?'#fff2ce':'#e99745'):rodGradient,(4*(1-i/40)+.7)*size);}
-  const gripEnd=sample(.42);this.line([base,gripEnd],'#15231c',10*size);this.line([base,gripEnd],'#695b40',7*size);
-  for(let i=0;i<21;i++){const p=sample(i/21*.42);this.line([{x:p.x-4*size,y:p.y+2},{x:p.x+3*size,y:p.y-2}],'rgba(32,32,22,.4)',.75*size);}
+  const gripEnd=sample(.42),gripPhoto=this.equipment?.rod;
+  if(gripPhoto){const dx=gripEnd.x-base.x,dy=gripEnd.y-base.y;c.save();c.translate(base.x,base.y);c.rotate(Math.atan2(dy,dx)-Math.PI/2);c.drawImage(gripPhoto,gripPhoto.width*.78,gripPhoto.height*.32,gripPhoto.width*.075,gripPhoto.height*.12,-5*size,0,10*size,Math.hypot(dx,dy));c.restore();}
   const guides=[];for(let i=0;i<7;i++){const f=.68+i*.048,p=sample(f);guides.push({x:p.x-4*size,y:p.y+5*size});this.ellipse(p.x-4*size,p.y+5*size,(5-i*.54)*size,(3.2-i*.3)*size,null,'#bcc5ba',.9*size);}
-  const reel=sample(.54);c.save();c.translate(reel.x-15*size,reel.y+3*size);c.rotate(-.32);c.scale(size*.72,size*.72);
-  this.line([{x:18,y:-10},{x:25,y:-20}],'#263832',8);
-  const metal=c.createLinearGradient(-30,-20,15,20);metal.addColorStop(0,'#1a2426');metal.addColorStop(.25,'#81908c');metal.addColorStop(.4,'#253332');metal.addColorStop(.65,'#66746d');metal.addColorStop(1,'#172522');
-  this.ellipse(0,5,24,17,'#152c22', '#7a8b79',1);c.fillStyle=metal;c.fillRect(-26,-16,44,23);this.ellipse(-5,-16,22,9,metal,'#8d9b91',1);this.ellipse(-5,7,23,8,metal);
-  for(let y=-12;y<5;y+=2)this.line([{x:-25,y},{x:16,y}],'#839082',.6);
-  c.beginPath();c.ellipse(-5,-4,30,25,.1,Math.PI*.9,Math.PI*2.1);c.strokeStyle='#9caaa0';c.lineWidth=1.6;c.stroke();
-  const angle=g.reeling&&fighting?this.clock*10:1.2,arm={x:-24+Math.cos(angle)*20,y:19+Math.sin(angle)*17};this.line([{x:-24,y:10},arm],'#b6c1ac',3);this.ellipse(arm.x,arm.y,8,4,'#11261e');c.restore();
+  const reel=sample(.54),photo=this.equipment?.rod;
+  if(photo){
+   // Photograph of the reel, without the hand, for rods resting in a bank stick.
+   const width=65*size,height=width*1.22;
+   c.save();c.translate(reel.x-16*size,reel.y+8*size);c.rotate(-.30);c.drawImage(photo,photo.width*.115,photo.height*.32,photo.width*.52,photo.height*.47,-width*.56,-height*.40,width,height);c.restore();this.metrics.drawImages++;
+  }
   const linePoints=[{x:reel.x-10*size,y:reel.y+2*size}];
   if(method==='ledger'&&!hand&&['waiting','bite'].includes(g.phase)){
    const lift=g.phase==='bite'?(g.biteStyle==='dropback'?1:-1)*(15+Math.sin(g.elapsed*9)*10):0,indicator={x:reel.x-28*size,y:clamp(Math.min(reel.y+28*size,layout.hudTop-36)+lift,layout.headerBottom+20,layout.hudTop-24)};
@@ -123,8 +155,8 @@ export class LakeScene{
  }
  paintSignal(active){
   const target=this.signals[active],canvas=this.signalCanvas;if(!target||!canvas)return;
-  const ctx=canvas.getContext('2d'),r=this.ratio,roi=target.kind==='ledger'?95:115;
-  const sx=clamp(target.x-roi/2,0,Math.max(0,this.width-roi)),sy=clamp(target.y-roi*.32,0,Math.max(0,this.height-roi*.65));
+  const ctx=canvas.getContext('2d'),r=this.ratio,roi=target.kind==='float'?46:target.kind==='ledger'?95:115;
+  const sx=clamp(target.x-roi/2,0,Math.max(0,this.width-roi)),sy=clamp(target.y-roi*(target.kind==='float'?.45:.32),0,Math.max(0,this.height-roi*.65));
   ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(this.canvas,sx*r,sy*r,roi*r,roi*.65*r,0,0,canvas.width,canvas.height);
  }
  render(dt){if(!this.image)return;this.clock+=Math.max(0,dt);this.cachePhotograph();this.water();this.drawRipples();

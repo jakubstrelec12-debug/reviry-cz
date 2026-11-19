@@ -1,8 +1,8 @@
-# REVÍRY CZ — Vajgar 0.7
+# REVÍRY CZ — Vajgar 0.8
 
 Rybářská hra pro Safari na iPhonu. Výhled nově tvoří **skutečná fotografie Vajgaru** s animovanou hladinou, prutem, čihátkem, náhozem, splávkem a krmením. Zjednodušená 3D zástavba se v hlavní hře nepoužívá. Vykreslování běží přes Canvas 2D a nepotřebuje WebGL.
 
-**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.7.0
+**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.8.0
 
 Nejlépe na šířku. Všechny herní fotografie jsou přiložené lokálně. HD / ECO mění rozlišení a jemnost animace vody. Fotografie není 360° panorama: tažením jde pouze mírně posouvat výhled a směr náhozu. Nejde o volně průchozí 3D svět.
 
@@ -63,3 +63,6 @@ Tlačítko **+ Druhý prut** přidá druhý samostatný prut a přepne na něj. 
 
 ### Úprava pohledu 0.7.1
 Prut má nižší polohu a míří k hladině, naviják je menší a tmavší. Celý trojnohý stojan nahrazuje štíhlá podpěra pokračující pod okraj obrazu. Na telefonu jsou informace v horní části stručnější a při čekání se nezobrazuje neaktivní tlačítko. Detail čihátka / feederové špičky se otevírá klepnutím na označení signalizace s plusem. Test zkráceného telefonního viewportu 390 × 650 zahrnuje prostor odebraný lištami prohlížeče.
+
+### Fotografické náčiní 0.8
+Plavaná zobrazuje výřez skutečné fotografie ruky, rukojeti a navijáku. Při záseku a zdolávání se celá sestava zvedá; horní část prutu se prohýbá podle tahu. Stejný fotografický základ se používá při práci s prutem u ostatních technik a naviják také u odložených prutů. Splávek J-Range je založený na skutečné fotografii, při záběru klesá pod skutečnou hladinu. Tlačítko detailu ukazuje výřez této stejné scény. Podklady mají průhledné pozadí připravené pomocí AI, celkem asi 116 kB WebP; jde o ilustrační fotografie, nikoli přesné zobrazení vybraného modelu. Podrobný původ a úpravy: `assets/CREDITS.md`, rovněž přímo v deníku hry.
