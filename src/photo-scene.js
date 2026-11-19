@@ -21,7 +21,7 @@ export function gearLayout(w,h,{hudTop=h*.82,headerBottom=90,index=0,count=1,pos
  const size=clamp(Math.min(w/(dual?750:520),h/480),portrait?.64:.65,1.05);
  return {base,tip,size,hudTop,headerBottom};
 }
-export function heldLayout(w,h,pose=0,cast=0){return {scale:clamp(Math.min(w*.00056,h*.00055),.16,.30),angle:-.42+cast*.65-pose*.28,base:{x:h>w?w*1.02:w*.98+12,y:h+10-pose*50}};}
+export function heldLayout(w,h,pose=0,cast=0){return {scale:clamp(Math.min(w*.00056,h*.00055),.16,.30),angle:-.42+cast*.65-pose*.28,base:{x:h>w?w*1.02:w*.98+12,y:h+(h>w?-32:10)-pose*50}};}
 function loadImage(path){return new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>reject(new Error('Fotografii Vajgaru se nepodařilo načíst.'));image.src=new URL('../'+path,import.meta.url).href;});}
 function mix(a,b,t){return a+(b-a)*t;}
 function point(a,b,c,t){const u=1-t;return {x:u*u*a.x+2*u*t*b.x+t*t*c.x,y:u*u*a.y+2*u*t*b.y+t*t*c.y};}
