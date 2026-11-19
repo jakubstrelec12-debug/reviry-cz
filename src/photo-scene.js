@@ -1,6 +1,6 @@
-import {getVenue} from './venues.js?v=0.12.1';
-import {biteMotion} from './bite-motion.js?v=0.12.1';
-import {RODS,RIGS} from './tackle.js?v=0.12.1';
+import {getVenue} from './venues.js?v=0.12.2';
+import {biteMotion} from './bite-motion.js?v=0.12.2';
+import {RODS,RIGS} from './tackle.js?v=0.12.2';
 
 export const PHOTO=getVenue('vajgar').photo;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -148,8 +148,15 @@ export class LakeScene{
    const indicator={x:anchor.x,y:anchor.y+motion};
    this.signals[this.drawIndex]={...indicator,anchor,kind:'ledger'};
    points.push(indicator);const grad=c.createLinearGradient(indicator.x-3,0,indicator.x+3,0);grad.addColorStop(0,'#4e5941');grad.addColorStop(.45,'#c6cca0');grad.addColorStop(1,'#7f8d60');
-   this.ellipse(indicator.x,indicator.y,3.5,7,grad,'#28332b',.6);
-   const tether=at(.50,.91);this.line([{x:indicator.x,y:indicator.y+7},tether],'rgba(100,115,94,.6)',.55);
+   const type=g.loadout.indicator||'bobbin',tether=at(.50,.91);
+   if(type!=='bobbin')this.line([tether,indicator],'#8d9a94',2);
+   this.ellipse(indicator.x,indicator.y,3.5,7,type==='bobbin'?grad:'#72b8c6','#28332b',.6);
+   if(type==='bobbin')this.line([{x:indicator.x,y:indicator.y+7},tether],'rgba(100,115,94,.6)',.55);
+   if(type==='electronic'){
+    const alarm=at(.43,.72),lit=g.phase==='bite'&&Math.sin(this.clock*12)>0;
+    c.fillStyle='#263035';c.strokeStyle='#8b9994';c.lineWidth=.7;c.beginPath();c.roundRect(alarm.x-5,alarm.y-8,10,17,3);c.fill();c.stroke();
+    this.ellipse(alarm.x,alarm.y-3,1.8,1.8,lit?'#7fe2ff':'#355661');
+   }
   }
   if(feeder)this.signals[this.drawIndex]={...tip,anchor:rawTip,kind:'feeder'};
   if(!['ready','landed','escaped'].includes(g.phase)){

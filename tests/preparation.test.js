@@ -54,3 +54,15 @@ test('a second rod can be staged directly in preparation, cancelled, or applied 
  p.open();click('[data-method="ledger"]');el('setupAddSecond').click();click('[data-tab="bait"]');click('[data-bait="boilie"]');el('setupApply').click();
  assert.equal(game.secondEnabled,true);assert.equal(game.activeIndex,1);assert.equal(game.rods[0].loadout.method,'ledger');assert.equal(game.rods[0].loadout.bait,'corn');assert.equal(game.rods[1].loadout.bait,'boilie');assert.equal(game.rods[1].loadout.rig,'hair');
 });
+
+test('ledger signal choices are independent per rod, persist, and migrate old setups',async()=>{
+ const {FishingSession}=await import('../src/session.js');const {DEFAULT_LOADOUT,validateLoadout}=await import('../src/tackle.js');
+ const dom=new JSDOM(fs.readFileSync(new URL('../index.html',import.meta.url),'utf8'),{url:'https://example.test'});globalThis.document=dom.window.document;
+ const game=new FishingSession();game.enableSecond();const p=new Preparation({game,onApply:(v,c,o)=>{assert.ok(game.applyLoadouts(c,o));p.close();},onClose:()=>p.close()});p.open();
+ click('[data-tab="assembly"]');click('[data-assembly="indicator"]');click('[data-gear="indicator"][data-value="electronic"]');
+ click('[data-setup-rod="0"]');click('[data-gear="indicator"][data-value="swinger"]');click('[data-setup-rod="1"]');assert.equal(p.draft.indicator,'electronic');assert.equal(game.rods[1].loadout.indicator,'bobbin');
+ el('setupApply').click();assert.equal(game.rods[0].loadout.indicator,'swinger');assert.equal(game.rods[1].loadout.indicator,'electronic');
+ const restored=new FishingSession();assert.ok(restored.restoreSetup(JSON.parse(JSON.stringify(game.exportSetup()))));assert.equal(restored.rods[0].loadout.indicator,'swinger');assert.equal(restored.rods[1].loadout.indicator,'electronic');
+ const legacy={...DEFAULT_LOADOUT};delete legacy.indicator;assert.deepEqual(validateLoadout(legacy),[]);assert.ok(restored.restoreSetup({loadouts:[legacy]}));assert.equal(restored.loadout.indicator,'bobbin');assert.ok(validateLoadout({...legacy,indicator:'invalid'}).length);
+ p.open();click('[data-tab="assembly"]');click('[data-assembly="indicator"]');click('[data-gear="indicator"][data-value="bobbin"]');el('setupClose').click();assert.equal(game.loadout.indicator,'electronic');
+});

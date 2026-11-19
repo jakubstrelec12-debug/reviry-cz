@@ -22,6 +22,7 @@ test('photographic renderer executes every phase and technique without a GPU',as
  for(const method of ['ledger','feeder','float']){g.loadout=methodPreset(method);g.fish={id:'carp',length:60};g.distance=3;g.tension=.7;
   for(const phase of ['ready','casting','flying','waiting','bite','held','fight','landed','escaped']){g.phase=phase;g.elapsed=.45;g.castPower=.6;scene.render(.05);if(phase==='waiting'){scene.splash();scene.scatterFeed();scene.render(.05);}}
  }
+ g.loadout=methodPreset('ledger');g.phase='bite';for(const indicator of ['bobbin','swinger','electronic']){g.loadout.indicator=indicator;scene.render(.2);assert.equal(scene.signals[0].kind,'ledger');}
  assert.equal(scene.metrics.engine,'photographic-2d');assert.ok(scene.metrics.drawImages>10);
  const pixels=scene.ctx.getImageData(10,10,300,100).data;assert.ok(pixels.some((v,i)=>i%4!==3&&v>50));
  const before=scene.clock;scene.render(0);assert.equal(scene.clock,before);scene.setQuality(false);scene.render(.05);assert.equal(scene.ratio,1);scene.dispose();

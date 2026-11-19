@@ -1,4 +1,4 @@
-import {strikeWindow,biteAge} from './strike-timing.js?v=0.12.1';
+import {strikeWindow,biteAge} from './strike-timing.js?v=0.12.2';
 // A single pose drives the tackle, optical detail and short movement caption.
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 export function biteMotion(game,clock=0){
@@ -7,9 +7,9 @@ export function biteMotion(game,clock=0){
  return {stage:fade>0?'fading':touch?'touch':'run',progress,floatSink:t<window.touchEnd?twitch*.025:(drop?-.15:.38)*progress,floatTilt:t<window.touchEnd?twitch*.07:(drop?.60:.13)*progress,ledgerLift:t<window.touchEnd?-twitch*2.5:(drop?1:-1)*(progress*28+Math.sin(t*3)*progress*2),feederFlex:t<window.touchEnd?twitch*2:(drop?-1:1)*(progress*27+Math.sin(t*4)*progress*3)};
 }
 export function signalCaption(game){
- const pose=biteMotion(game,game.time),method=game.loadout.method,drop=game.biteStyle==='dropback';
- if(pose.stage==='idle')return method==='float'?'Klidná hladina':method==='feeder'?'Špička v klidu':'Čihátko v klidu';
+ const pose=biteMotion(game,game.time),method=game.loadout.method,drop=game.biteStyle==='dropback',indicator=game.loadout.indicator||'bobbin',name=indicator==='bobbin'?'Čihátko':'Swinger';
+ if(pose.stage==='idle')return method==='float'?'Klidná hladina':method==='feeder'?'Špička v klidu':indicator==='electronic'?'Hlásič v klidu · swinger bez pohybu':`${name} v klidu`;
  if(pose.stage==='fading')return 'Záběr slábne';
  if(pose.stage==='touch')return 'Jemné ťuknutí';
- return method==='float'?(drop?'Přizvednutí · zasekni':'Potápí se · zasekni'):method==='feeder'?(drop?'Špička povoluje':'Špička se ohýbá'):(drop?'Čihátko klesá':'Čihátko stoupá');
+ return method==='float'?(drop?'Přizvednutí · zasekni':'Potápí se · zasekni'):method==='feeder'?(drop?'Špička povoluje':'Špička se ohýbá'):(indicator==='electronic'?`Hlásič bliká · ${drop?'padák':'jízda'}`:`${name} ${drop?'klesá':'stoupá'}`);
 }

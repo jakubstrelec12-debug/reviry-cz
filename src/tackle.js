@@ -1,9 +1,15 @@
 // Game balance values, not measured fish populations or tackle safety ratings.
 export const METHODS = {
- ledger:{name:'Položená',subtitle:'Čihátko · olovo nebo krmítko',indicator:'mechanické čihátko',description:'Vybereš olovo nebo pružinové krmítko. Prut položíš do stojanu. Při pohybu čihátka ho vezmeš do ruky a samostatně zasekneš.',rigs:['running','spring','hair','springHair'],rods:['carp','carp-heavy'],weights:[20,40,60],cast:[14,40]},
+ ledger:{name:'Položená',subtitle:'Volitelná signalizace · olovo nebo krmítko',indicator:'mechanické čihátko',description:'Vybereš olovo nebo pružinové krmítko. Prut položíš do stojanu. Podle zvolené signalizace poznáš záběr, vezmeš ho do ruky a samostatně zasekneš.',rigs:['running','spring','hair','springHair'],rods:['carp','carp-heavy'],weights:[20,40,60],cast:[14,40]},
  feeder:{name:'Feeder',subtitle:'Citlivá špička · krmítko',indicator:'špička prutu',description:'Nástraha leží u krmítka. Záběr poznáš podle chvění a ohybu barevné špičky; prut zvedneš a zasekneš.',rigs:['cage','method'],rods:['feeder-light','feeder-heavy'],weights:[20,30,45,60],cast:[12,33]},
  float:{name:'Plavaná',subtitle:'Splávek · nastavitelná hloubka',indicator:'splávek',description:'Prut držíš v ruce a sleduješ anténku splávku. Při souvislém ponoření nebo přizvednutí zasekneš přímo, bez braní prutu ze stojanu.',rigs:['fixed','sliding'],rods:['match','bolo'],weights:[2,3,5],cast:[7,19]},
 };
+export const INDICATORS={
+ bobbin:{name:'Mechanické čihátko',detail:'Zavěšené pod vlascem. Stoupá při jízdě a klesá při padáku.'},
+ swinger:{name:'Swinger',detail:'Indikátor na pevném raménku. Ukazuje tah i povolení vlasce.'},
+ electronic:{name:'Elektronický hlásič + swinger',detail:'Světelná a zvuková signalizace pohybu vlasce. Swinger ukazuje i padák. Pro pípání zapni zvuk hry.'},
+};
+export function indicatorName(v){return v.method==='ledger'?(INDICATORS[v.indicator||'bobbin']||INDICATORS.bobbin).name:METHODS[v.method].indicator;}
 export const RODS={
  carp:{brand:'Mivardi',model:'Spotter',source:'https://www.rybina.cz/rybarske-pruty/kaprove-pruty/%28p%29-mivardi/',name:'Mivardi Spotter · 3,60 m · 2,75 lb',length:3.6,maxWeight:60,power:1},
  'carp-heavy':{brand:'Mivardi',model:'Vector MK2 FC',source:'https://www.mivardi.cz/prut-vector-mk2-fc-360h',name:'Mivardi Vector MK2 FC · 3,60 m · 3 lb',length:3.6,maxWeight:80,power:1.08},
@@ -79,7 +85,7 @@ for(const [id,f] of Object.entries(FEEDS)){if(id!=='none'){f.family||=id==='micr
 export const BAIT_FAMILIES={all:'Vše',natural:'Přírodní',boilie:'Potápivé boilies',balanced:'Pop-up a wafters',pellet:'Pelety'};
 export function feedAllowed(loadout,id){return Object.hasOwn(FEEDS,id)&&(!RIGS[loadout.rig]?.feeder||FEEDS[id].feederSafe!==false);}
 export function createFeedStocks(){return Object.fromEntries(Object.keys(FEEDS).filter(id=>id!=='none').map(id=>[id,1000]));}
-export const DEFAULT_LOADOUT=Object.freeze({method:'ledger',rod:'carp',rig:'running',line:.255,hook:8,leader:40,weight:40,bait:'corn',feed:'none',feedPortion:150,depth:2});
+export const DEFAULT_LOADOUT=Object.freeze({method:'ledger',indicator:'bobbin',rod:'carp',rig:'running',line:.255,hook:8,leader:40,weight:40,bait:'corn',feed:'none',feedPortion:150,depth:2});
 export function methodPreset(method,current=DEFAULT_LOADOUT){
  const m=METHODS[method];if(!m)throw new Error('Neznámý způsob lovu.');
  const rig=m.rigs[0];
@@ -88,6 +94,7 @@ export function methodPreset(method,current=DEFAULT_LOADOUT){
 export function validateLoadout(value){
  if(!value||typeof value!=='object')return ['Chybí sestava.'];
  const v=value,m=METHODS[v.method],errors=[];if(!m)return ['Vyber způsob lovu.'];
+ if(v.indicator!==undefined&&!Object.hasOwn(INDICATORS,v.indicator))errors.push('Vyber signalizaci záběru.');
  if(!m.rods.includes(v.rod))errors.push('Tento prut nepatří ke zvolené technice.');
  if(!m.rigs.includes(v.rig))errors.push('Montáž neodpovídá technice.');
  if(![.16,.20,.25,.30,.35,...LINE_DIAMETERS].includes(v.line))errors.push('Vyber průměr vlasce.');
@@ -103,7 +110,7 @@ export function validateLoadout(value){
  if(!Number.isFinite(v.depth)||v.depth<.5||v.depth>3||Math.round(v.depth*4)!==v.depth*4)errors.push('Hloubka musí být 0,50–3,00 m po 25 cm.');
  return errors;
 }
-export function cleanLoadout(value){const result={};for(const key of Object.keys(DEFAULT_LOADOUT))result[key]=value[key];return result;}
+export function cleanLoadout(value){const result={};for(const key of Object.keys(DEFAULT_LOADOUT))result[key]=value[key]??DEFAULT_LOADOUT[key];return result;}
 export function feedInfluence(loadout,spot,time,distance,angle=0){
  if(!spot||loadout.feed==='none'||spot.type!==loadout.feed)return 0;
  const age=Math.max(0,time-spot.time),distanceMatch=Math.exp(-Math.pow((distance-spot.distance)/7,2)),angleMatch=Math.exp(-Math.pow((angle-spot.angle)/.18,2));
@@ -117,7 +124,7 @@ export function biteDelay(loadout,random,feedBonus=0){
  const depthFit=loadout.method==='float'?1+Math.abs(loadout.depth-2)*.45:1;
  return (7+random*12)*depthFit/((1+feedBonus*.7)*(BAITS[loadout.bait].speed||1));
 }
-export function setupSummary(v){return `${METHODS[v.method].name} · ${RIGS[v.rig].name} · ${BAITS[v.bait].name}`;}
+export function setupSummary(v){return `${METHODS[v.method].name} · ${RIGS[v.rig].name} · ${BAITS[v.bait].name}${v.method==='ledger'?' · '+indicatorName(v):''}`;}
 
 export function chooseBait(value,bait){
  const result={...value,bait},method=METHODS[value.method];if(!Object.hasOwn(BAITS,bait)||!method)return result;

@@ -2,11 +2,11 @@
 
 Rybářská hra pro Safari na iPhonu. Výhled nově tvoří **skutečná fotografie Vajgaru** s animovanou hladinou, prutem, čihátkem, náhozem, splávkem a krmením. Zjednodušená 3D zástavba se v hlavní hře nepoužívá. Vykreslování běží přes Canvas 2D a nepotřebuje WebGL.
 
-**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.12.1
+**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.12.2
 
 Nejlépe na šířku. Všechny herní fotografie jsou přiložené lokálně. HD / ECO mění rozlišení a jemnost animace vody. Fotografie není 360° panorama: tažením jde pouze mírně posouvat výhled a směr náhozu. Nejde o volně průchozí 3D svět.
 
-## Širší pohled — 0.12.1
+## Širší pohled — 0.12.2
 
 Jarošov má na výšku automaticky širší záběr skutečné fotografie, bez deformace břehů a staveb. Volné místo nahoře vyplňuje obloha a dole rozšířená hladina z vodní části snímku; nejde o další skutečně vyfotografovanou krajinu. V nabídce **☰ → Širší záběr** lze režim přepnout pro všechny vody. Na šířku zůstává standardní pohled. Nastavení se ukládá.
 
@@ -16,7 +16,7 @@ Horní **Revír** nebo **Vybrat revír** na úvodní obrazovce: Vajgar, Malá vo
 
 **Jarošov nyní používá skutečnou fotografii této nádrže z reportáže Nachytáno.cz.** Originál se načítá přímo od vydavatele a není součástí repozitáře. Když zdroj neodpoví do 12 sekund, zobrazí se výslovně označená ilustrační náhrada z Matějovce. Vlkovská pískovna používá skutečný geolokovaný snímek této pískovny. Ve hře je zdůrazněno, že výkazy osádky se vztahují k celé soustavě Lužnice 7 B.
 
-## Dva pruty a širší výhled — 0.12.1
+## Dva pruty a širší výhled — 0.12.2
 
 Oba nahozené pruty mají současně vlastní očíslovaný optický náhled čihátka / špičky a stav záběru. Klepnutí na náhled záběru vybere odpovídající prut a vezme ho do ruky; následuje samostatný zásek. Během zdolávání se druhý prut sleduje dál, převzetí je zamčené do odložení prutu v ruce. Náhledy používají tutéž scénu a čas, které vidí hráč.
 
@@ -34,7 +34,7 @@ Druhý prut lze přidat rovnou v přípravě přes **+ DRUHÝ PRUT** (položená
 
 **PŘIPRAVIT VÝPRAVU** → Technika → Montáž → Nástraha → Krmení. Později horní tlačítko **Montáž**.
 
-- **Položená:** olovo, průběžné pružinové krmítko, vlasový přívěs s olovem, nebo **krmítko s vlasovým přívěsem**. Vždy mechanické čihátko. V přípravě je přímá zkratka **Položená s krmítkem**.
+- **Položená:** olovo, průběžné pružinové krmítko, vlasový přívěs s olovem, nebo **krmítko s vlasovým přívěsem**. Volitelné mechanické čihátko, swinger nebo elektronický hlásič se swingerem. V přípravě je přímá zkratka **Položená s krmítkem**.
 - **Feeder:** průběžné klecové krmítko nebo method feeder; záběr na barevné špičce.
 - **Plavaná:** pevný nebo průběžný splávek; nastavitelná hloubka a detail signalizace.
 
@@ -110,3 +110,5 @@ Katalog obsahuje **25 nástrah a 11 návnad** (plus volbu bez krmení). Nástrah
 Krmení má vlastní zásobu pro každý typ, společnou oběma prutům. Konopí a celá pšenice se nabízejí pro volné zakrmení; do krmítka se volí směsi nebo drobné složky. Doba působení směsí se liší a některé zvýhodňují větší úlovky. Šance, tempo a velikosti jsou herní parametry, nikoli změřené vlastnosti výrobků nebo populace Vajgaru. Značkové položky mají odkaz na zdroj; ilustrační kresby a fotografie nemusí zobrazovat konkrétní zvolený výrobek.
 
 Validace: 54 testů — celý cyklus lovu a záseku, dostupnost všech nástrah s platnou montáží, jemné háčky, filtrování, všechny zásoby / spotřeba krmení, zákaz celého partiklu v krmítku, doba rozpadu a vliv na úlovek, ukotvení pohledu a dopady na vodu před stanovištěm.
+
+Položená: v přípravě zvol **02 Montáž → Signalizace** (nebo Vybrat signalizaci záběru). Každý prut má vlastní čihátko, swinger či elektronický hlásič se swingerem. Hlásič bliká a při zapnutém zvuku pípá i u nevybraného prutu. Starší uložené sestavy dostanou mechanické čihátko.
