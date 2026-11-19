@@ -1,5 +1,8 @@
 # REVÍRY CZ — Vajgar: závazný směr nové verze
 
+## Aktualizace — verze 0.5
+Skutečné fotografie tří druhů na kartě úlovku a v deníku nahrazují 3D portrét. Přidána funkční příprava lovu: položená / feeder / plavaná, šest kompatibilních montáží, prut, vlasec, háček, návazec, zátěž, nástraha, krmení a hloubka splávku. Techniky se liší signalizací i zásekem, výběr ovlivňuje zjednodušený model lovu. Krmné místo má skutečný stav, zásoby a útlum účinku. 30 automatických testů a skutečný WebGL render nových technik prošly. Podvodní fyzika montáže není kompletní. Prostředí, ruce a ryba při zdolávání nadále nedosahují původního grafického cíle.
+
 ## Aktualizace — verze 0.4
 Dokončen další průchod blízkou scénou: spojitý ohyb prutu s odpovídajícími očky a vlas­cem, ukotvené vybavení, oblouk náhozu, model ryby a její skutečný 3D portrét, oprava pozice u břehu, vítr v trsech trávy, reliéf blízké půdy a úprava vody. Mapa a stanoviště zůstávají původní. Reliéf je výtvarná aproximace, nikoli zaměření. Snímky z renderu jsou ve `preview/`. 15 automatických testů prošlo. Finální fotorealismus, věrné modely jednotlivých druhů a test na fyzickém iPhonu zůstávají otevřené.
 

@@ -9,7 +9,8 @@ const nativeFetch=globalThis.fetch;globalThis.fetch=async(u)=>{if((typeof u==='s
 const {canvas,gl}=createWebGL2Context(width,height,{antialias:true});
 // The native adapter currently omits UNPACK_FLIP_Y for source-form texSubImage2D. Emulate the browser rule in the test harness.
 const subImage=gl.texSubImage2D.bind(gl);gl.texSubImage2D=(target,level,x,y,...args)=>{if(args.length===3&&gl.getParameter(gl.UNPACK_FLIP_Y_WEBGL)){const source=args[2],c=createCanvas(source.width,source.height),ctx=c.getContext('2d');ctx.translate(0,source.height);ctx.scale(1,-1);ctx.drawImage(source,0,0);args[2]=c;}return subImage(target,level,x,y,...args);};
-const {LakeScene}=await import(root+'src/scene.js');const game={phase:'waiting',distance:30,stamina:1,tension:.3,elapsed:0,castPower:0,reeling:false,lifting:false};
+const {LakeScene}=await import(root+'src/scene.js');const {methodPreset}=await import(root+'src/tackle.js');
+const game={loadout:methodPreset(process.env.RENDER_METHOD||'ledger'),phase:'waiting',distance:30,stamina:1,tension:.3,elapsed:0,castPower:0,reeling:false,lifting:false};
 const scene=await new LakeScene(canvas,game).init();
 if(process.env.RENDER_PHASE){game.phase=process.env.RENDER_PHASE;game.fish={name:'Kapr obecný',color:0xb79b5d,length:65};game.distance=3;game.tension=.7;}
 scene.yaw=Number(process.env.RENDER_YAW)||0;
@@ -18,7 +19,7 @@ for(let i=0;i<45;i++)scene.render(.016);
 const standBefore=scene.stand.matrixWorld.clone(),rigBefore=scene.rig.position.clone();
 scene.yaw+=.25;scene.render(.016);
 if(!scene.stand.matrixWorld.equals(standBefore))throw new Error('Bank stand moved while looking');
-if(game.phase==='waiting'&&scene.rig.position.distanceTo(rigBefore)>1e-8)throw new Error('Resting rod moved while looking');
+if(game.phase==='waiting'&&game.loadout.method!=='float'&&scene.rig.position.distanceTo(rigBefore)>1e-8)throw new Error('Resting rod moved while looking');
 scene.yaw-=.25;scene.render(.016);
 scene.scene.traverse(object=>{if(object.geometry){for(const name of ['position','normal']){const a=object.geometry.attributes[name];if(a&&!a.array.every(Number.isFinite))throw new Error('Non-finite '+name);}}});
 const visible=scene.fishGroup.visible;scene.updateReflection();if(scene.fishGroup.visible!==visible)throw new Error('Reflection changed fish visibility');

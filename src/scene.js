@@ -1,5 +1,6 @@
 import * as T from '../vendor/three.module.js';
-import {makeRodGeometry,updateRodGeometry,rodPoint,makeFishModel} from './models.js?v=0.4.0';
+import {RODS} from './tackle.js?v=0.5.0';
+import {makeRodGeometry,updateRodGeometry,rodPoint,makeFishModel} from './models.js?v=0.5.0';
 const UP=new T.Vector3(0,1,0);
 function seeded(seed=131){return ()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};}
 const rnd=seeded();
@@ -166,7 +167,7 @@ export class LakeScene {
 
  makeEquipment(){this.rig=new T.Group();this.camera.add(this.rig);this.scene.add(this.camera);this.rig.position.set(.40,-.44,-.65);this.rig.rotation.set(-.08,-.30,.05);
  this.carbon=mat(0x202c29,.27,.5);this.cork=mat(0xb3a070,.95);this.cork.map=texture('cork');this.metal=mat(0xa7b5ae,.23,.88);this.black=mat(0x18211f,.6,.25);this.lineMat=new T.LineBasicMaterial({color:0xc1cdbb,transparent:true,opacity:.54});
- this.rodGroup=new T.Group();this.rig.add(this.rodGroup);this.rodGeometry=makeRodGeometry();mesh(this.rodGeometry,this.carbon,this.rodGroup);
+ this.rodGroup=new T.Group();this.rig.add(this.rodGroup);this.rodGeometry=makeRodGeometry();this.rodGeometry.addGroup(0,3120,0);this.rodGeometry.addGroup(3120,720,1);this.tipMaterial=mat(0xef9b48,.55);this.feederMaterials=[this.carbon,this.tipMaterial];this.rodBlank=mesh(this.rodGeometry,this.carbon,this.rodGroup);
  mesh(new T.CylinderGeometry(.025,.024,.43,16),this.cork,this.rodGroup,0,.12,0);mesh(new T.CylinderGeometry(.026,.026,.09,16),this.black,this.rodGroup,0,-.12,0);for(const yy of [-.17,.34,.38])mesh(new T.CylinderGeometry(.026,.026,.012,16),this.metal,this.rodGroup,0,yy,0);
  this.guides=[];for(let i=0;i<7;i++){const ring=mesh(new T.TorusGeometry(.023-i*.0025,.002,6,14),this.metal,this.rodGroup,0,.54+i*.255,.028);this.guides.push(ring);}
  // Reel body, rotating spool, bail wire and handle are separate articulated objects.
@@ -186,6 +187,15 @@ export class LakeScene {
  this.fishingLine=new T.Line(new T.BufferGeometry().setFromPoints([new T.Vector3(),new T.Vector3()]),this.lineMat);this.fishingLine.frustumCulled=false;this.scene.add(this.fishingLine);
  this.landingNet=new T.Group();this.camera.add(this.landingNet);this.landingNet.position.set(-.66,-.9,-.9);this.landingNet.rotation.set(-.55,.2,-.5);const hoop=mesh(new T.TorusGeometry(.25,.012,6,32),this.black,this.landingNet,0,0,0);hoop.scale.set(1,1.2,1);cylinderBetween(new T.Vector3(0,-.25,0),new T.Vector3(0,-1.1,0),.016,this.carbon,this.landingNet);const netMat=new T.MeshBasicMaterial({color:0x415646,wireframe:true,transparent:true,opacity:.35});mesh(new T.ConeGeometry(.245,.4,18,7,true),netMat,this.landingNet,0,0,-.16).rotation.x=Math.PI/2;
  this.sinker=mesh(new T.SphereGeometry(.025,10,8),mat(0x595c52,.35,.6),this.scene);this.sinker.scale.set(1,1.6,1);this.sinker.visible=false;
+ this.feederCage=new T.Group();this.scene.add(this.feederCage);
+ const cageMat=mat(0x929c8c,.4,.7);for(let i=0;i<6;i++){const angle=i*Math.PI/3;cylinderBetween(new T.Vector3(Math.cos(angle)*.035,-.045,Math.sin(angle)*.035),new T.Vector3(Math.cos(angle)*.035,.045,Math.sin(angle)*.035),.002,cageMat,this.feederCage);}
+ for(const y of [-.045,0,.045]){const hoop=mesh(new T.TorusGeometry(.035,.0025,5,12),cageMat,this.feederCage,0,y,0);hoop.rotation.x=Math.PI/2;}
+ this.feederCage.visible=false;
+ this.float=new T.Group();this.scene.add(this.float);const body=mesh(new T.SphereGeometry(.028,14,10),mat(0xe1d1a3,.4),this.float);body.scale.set(1,2.8,1);
+ cylinderBetween(new T.Vector3(0,.045,0),new T.Vector3(0,.23,0),.0035,new T.MeshBasicMaterial({color:0xf59b52}),this.float);
+ for(const y of [.13,.19])mesh(new T.CylinderGeometry(.0038,.0038,.018,8),new T.MeshBasicMaterial({color:0xfff6c9}),this.float,0,y,0);
+ this.float.visible=false;
+ this.feedParticles=new T.InstancedMesh(new T.SphereGeometry(.018,5,4),mat(0xc6ac70),24);this.feedParticles.frustumCulled=false;this.feedParticles.visible=false;this.scene.add(this.feedParticles);this.feedThrow=null;
  this.castPoint=new T.Vector3();this.tipPoint=new T.Vector3();
  }
  makeFish(){this.fishGroup=makeFishModel();this.scene.add(this.fishGroup);this.fishGroup.visible=false;this.tail=this.fishGroup.userData.tail;}
@@ -194,8 +204,9 @@ export class LakeScene {
  resize(){this.camera.aspect=innerWidth/innerHeight;this.camera.fov=innerWidth<innerHeight?64:54;this.camera.updateProjectionMatrix();this.renderer.setSize(innerWidth,innerHeight);}
  setQuality(high){this.high=high;this.renderer.setPixelRatio(Math.min(devicePixelRatio,high?1.75:1));this.renderer.shadowMap.enabled=high;this.reflectionTarget.setSize(high?1024:512,high?1024:512);this.resize();try{localStorage.setItem('reviry-quality',high?'high':'low');}catch{}}
  setCastDirection(){this.camera.getWorldDirection(this.castDirection);this.castDirection.y=0;this.castDirection.normalize();}
+ scatterFeed(){this.feedThrow={time:this.clock,start:this.camera.position.clone().add(new T.Vector3(0,-.3,0)),end:this.castPoint.clone()};}
  splash(){this.waterMaterial.uniforms.ripple.value.set(this.castPoint.x,this.castPoint.z,this.clock,1);}
- updateReflection(){this.reflectionCamera.copy(this.camera,false);this.reflectionCamera.position.y=-this.camera.position.y;const direction=new T.Vector3();this.camera.getWorldDirection(direction);direction.y=-direction.y;this.reflectionCamera.up.set(0,-1,0);this.reflectionCamera.lookAt(this.reflectionCamera.position.clone().add(direction));this.reflectionCamera.updateMatrixWorld();this.textureMatrix.set(.5,0,0,.5,0,.5,0,.5,0,0,.5,.5,0,0,0,1);this.textureMatrix.multiply(this.reflectionCamera.projectionMatrix);this.textureMatrix.multiply(this.reflectionCamera.matrixWorldInverse);const hidden=[this.water,this.rig,this.stand,this.fishingLine,this.landingNet,this.fishGroup,this.sinker];
+ updateReflection(){this.reflectionCamera.copy(this.camera,false);this.reflectionCamera.position.y=-this.camera.position.y;const direction=new T.Vector3();this.camera.getWorldDirection(direction);direction.y=-direction.y;this.reflectionCamera.up.set(0,-1,0);this.reflectionCamera.lookAt(this.reflectionCamera.position.clone().add(direction));this.reflectionCamera.updateMatrixWorld();this.textureMatrix.set(.5,0,0,.5,0,.5,0,.5,0,0,.5,.5,0,0,0,1);this.textureMatrix.multiply(this.reflectionCamera.projectionMatrix);this.textureMatrix.multiply(this.reflectionCamera.matrixWorldInverse);const hidden=[this.water,this.rig,this.stand,this.fishingLine,this.landingNet,this.fishGroup,this.sinker,this.feederCage,this.float,this.feedParticles];
  const visibility=hidden.map(o=>o.visible);hidden.forEach(o=>o.visible=false);
  // Clip the mirrored scene at the water plane so the underside of terrain cannot occlude it.
  this.renderer.clippingPlanes=[new T.Plane(new T.Vector3(0,1,0),-.015)];
@@ -203,18 +214,22 @@ export class LakeScene {
  this.renderer.clippingPlanes=[];hidden.forEach((o,i)=>o.visible=visibility[i]);}
 
  render(dt){if(!this.basePosition)return;this.clock+=dt;if(this.windUniform)this.windUniform.value=this.clock;this.frameCount++;const g=this.game,t=this.clock;const target=this.baseDirection.clone().applyAxisAngle(UP,this.yaw);target.y+=this.pitch;this.camera.position.copy(this.basePosition);this.camera.position.y+=Math.sin(t*.7)*.006;this.camera.lookAt(this.camera.position.clone().add(target));
- const fight=g.phase==='fight',held=g.phase==='held',casting=g.phase==='casting',flying=g.phase==='flying';let rotX=-1.24,rotZ=.40;
+ const method=g.loadout?.method||'ledger',floating=method==='float',feeder=method==='feeder',floatHeld=floating&&['ready','waiting','bite','escaped'].includes(g.phase);
+ this.rodBlank.material=feeder?this.feederMaterials:this.carbon;this.rodGroup.scale.y=(RODS[g.loadout?.rod]?.length||3.6)/3.6;
+ const fight=g.phase==='fight',held=g.phase==='held',casting=g.phase==='casting',flying=g.phase==='flying';let rotX=floatHeld?-.95:-1.24,rotZ=floatHeld?.18:.40;
  if(casting){rotX=-.25+g.castPower*.85;rotZ=.16;}else if(flying){rotX=-1.35+Math.min(1,g.elapsed)*.2;}else if(held){rotX=-.68;rotZ=.18;}else if(fight){rotX=g.lifting?-.47:-.92;rotZ=.20+Math.sin(t*2)*g.stamina*.025;}
  this.rodGroup.rotation.x=T.MathUtils.damp(this.rodGroup.rotation.x,rotX,8,dt||.016);this.rodGroup.rotation.z=T.MathUtils.damp(this.rodGroup.rotation.z,rotZ,8,dt||.016);
- const bend=fight?g.tension*.52:casting?-g.castPower*.28:0;
+ const biteSignal=g.phase==='bite'?(Math.sin(g.elapsed*10)*.04+.07)*(g.biteStyle==='dropback'?-1:1):0;
+ const bend=fight?g.tension*.52:casting?-g.castPower*.28:feeder?.045+biteSignal:0;
  updateRodGeometry(this.rodGeometry,bend);
  for(let i=0;i<this.guides.length;i++){const f=(.54+i*.255)/2.2;rodPoint(f,bend,this.guides[i].position);this.guides[i].position.z+=.028;this.guides[i].rotation.x=-Math.PI/2+Math.atan(3*bend*f*f/2.2);}
 
  if(g.reeling&&fight){this.reelHandle.rotation.z+=dt*15;this.spool.rotation.z+=dt*8;}
- this.hand.visible=fight||held||casting||flying;
- const standVisible=['ready','casting','flying','waiting','bite','escaped'].includes(g.phase);this.stand.visible=standVisible;
- const lift=g.phase==='bite'?Math.sin(g.elapsed*12)*.07+Math.sin(g.elapsed*4)*.035:0;this.indicator.position.y=.20+lift;this.indicatorLine.geometry.attributes.position.setY(1,.20+lift);this.indicatorLine.geometry.attributes.position.needsUpdate=true;
- const inHand=fight||held||casting||flying;
+ this.hand.visible=fight||held||casting||flying||floatHeld;
+ const standVisible=!floating&&['ready','casting','flying','waiting','bite','escaped'].includes(g.phase);this.stand.visible=standVisible;
+ this.indicator.visible=method==='ledger';
+ const lift=g.phase==='bite'?(g.biteStyle==='dropback'?-1:1)*(.055+Math.sin(g.elapsed*8)*.035):0;this.indicator.position.y=.20+lift;this.indicatorLine.geometry.attributes.position.setY(1,.20+lift);this.indicatorLine.geometry.attributes.position.needsUpdate=true;
+ const inHand=fight||held||casting||flying||floatHeld;
  this.camera.updateMatrixWorld(true);
  const rigPosition=inHand?this.heldRig.getWorldPosition(new T.Vector3()):this.restRig.position;
  const rigRotation=inHand?this.heldRig.getWorldQuaternion(new T.Quaternion()):this.restRig.quaternion;
@@ -229,9 +244,17 @@ export class LakeScene {
  }
  this.castPoint.copy(this.basePosition).addScaledVector(forward,bankDistance+(g.distance||30));this.castPoint.y=.015;
  if(flying){const progress=T.MathUtils.clamp(g.elapsed/1.1,0,1),end=this.castPoint.clone();this.castPoint.copy(this.tipPoint).lerp(end,progress);this.castPoint.y+=Math.sin(progress*Math.PI)*(2+(g.distance||30)*.12);}
- this.sinker.visible=flying;this.sinker.position.copy(this.castPoint);
+ this.sinker.visible=flying&&!floating&&!feeder;this.sinker.position.copy(this.castPoint);this.sinker.scale.setScalar(Math.cbrt((g.loadout?.weight||40)/40));
+ this.feederCage.visible=flying&&feeder;this.feederCage.position.copy(this.castPoint);
+ this.float.visible=floating&&['waiting','bite','flying'].includes(g.phase);this.float.position.copy(this.castPoint);
+ if(!flying){this.float.position.y=.015+Math.sin(t*1.5)*.008-(g.phase==='bite'?.10+Math.sin(g.elapsed*6)*.035:0);this.float.rotation.z=Math.sin(t*1.7)*.03;}
+ if(this.feedThrow){const progress=Math.min(1,(t-this.feedThrow.time)/.9),dummy=new T.Object3D();
+  for(let i=0;i<24;i++){const end=this.feedThrow.end.clone().add(new T.Vector3(Math.sin(i*2.4)*.9,0,Math.cos(i*2.4)*.9));dummy.position.copy(this.feedThrow.start).lerp(end,progress);dummy.position.y+=Math.sin(progress*Math.PI)*(2+(i%4)*.15);dummy.updateMatrix();this.feedParticles.setMatrixAt(i,dummy.matrix);}
+  this.feedParticles.instanceMatrix.needsUpdate=true;this.feedParticles.visible=progress<1;if(progress>=1){this.feedThrow=null;this.splash();}
+ }
+
  const a=this.tipPoint,b=this.castPoint;const middle=a.clone().lerp(b,.45);if(!fight)middle.y-=.25;const curve=new T.QuadraticBezierCurve3(a.clone(),middle,b.clone());const linePoints=[this.rodGroup.localToWorld(new T.Vector3(0,.06,.11))];
- if(['waiting','bite'].includes(g.phase))linePoints.push(this.indicator.getWorldPosition(new T.Vector3()));
+ if(method==='ledger'&&['waiting','bite'].includes(g.phase))linePoints.push(this.indicator.getWorldPosition(new T.Vector3()));
  for(const guide of this.guides)linePoints.push(guide.getWorldPosition(new T.Vector3()));
  linePoints.push(...curve.getPoints(20));this.fishingLine.geometry.setFromPoints(linePoints);
 
