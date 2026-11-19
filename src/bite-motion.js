@@ -1,4 +1,4 @@
-import {strikeWindow,biteAge} from './strike-timing.js?v=0.11.0';
+import {strikeWindow,biteAge} from './strike-timing.js?v=0.11.1';
 // A single pose drives the tackle, optical detail and short movement caption.
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 export function biteMotion(game,clock=0){

@@ -95,3 +95,18 @@ test('complete resting assembly stays on the pier while only the feeder tip resp
  scene.setUiBounds({hudTop:225,headerBottom:133});scene.render(0);assert.deepEqual(scene.signals[0].anchor,anchor,'HUD changes must not reposition equipment');
  scene.dispose();
 });
+
+test('both optical views render independent simultaneous bites without changing session time',async()=>{
+ const {FishingSession}=await import('../src/session.js');
+ globalThis.innerWidth=390;globalThis.innerHeight=650;globalThis.devicePixelRatio=1;
+ globalThis.window={addEventListener(){},removeEventListener(){}};globalThis.localStorage={getItem:()=>null,setItem(){}};globalThis.document={createElement:()=>createCanvas(390,650)};
+ globalThis.Image=class extends NativeImage{set src(v){super.src=v.startsWith('file:')?fileURLToPath(v):v;}get src(){return super.src;}};
+ const canvas=createCanvas(390,650);canvas.addEventListener=()=>{};const session=new FishingSession(()=>.1);session.enableSecond();
+ session.rods.forEach(r=>{r.phase='waiting';r.distance=30;});
+ const scene=await new LakeScene(canvas,session).init(),a=createCanvas(240,180),b=createCanvas(240,180);scene.setUiBounds({hudTop:570,headerBottom:126});scene.setSignalViews([{index:0,canvas:a},{index:1,canvas:b}]);scene.render(0);
+ assert.equal(scene.signals.length,2);assert.ok(Math.abs(scene.signals[0].x-scene.signals[1].x)>100);
+ const left=a.toBuffer('image/png'),right=b.toBuffer('image/png'),clocks=session.rods.map(r=>r.time);
+ session.rods[0].phase='bite';session.rods[0].elapsed=3;session.rods[0].biteStyle='pull';scene.render(0);
+ assert.notDeepEqual(a.toBuffer('image/png'),left);assert.deepEqual(b.toBuffer('image/png'),right);
+ assert.deepEqual(session.rods.map(r=>r.time),clocks);assert.equal(scene.game,session);scene.dispose();
+});

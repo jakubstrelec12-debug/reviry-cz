@@ -84,3 +84,10 @@ body[data-phase="waiting"] .controls,body[data-phase="bite"] .controls{min-heigh
  body[data-phase="waiting"] .status-block #hint,body[data-phase="bite"] .status-block #hint,body[data-phase="escaped"] .status-block #hint{font-size:11px;max-width:240px;}
  body[data-phase="waiting"] #action{display:none;}
 }
+
+/* Both independent rods keep their own optical view and takeover control. */
+#rodSignals{position:fixed;z-index:3;right:18px;top:var(--station-note-top,145px);display:flex;gap:8px;pointer-events:auto}
+.rod-monitor{width:112px;padding:8px;border:1px solid #a9b59c55;border-radius:7px;background:#132e2de8;color:#dce4d3;text-align:left;box-shadow:0 3px 14px #081c2433;touch-action:manipulation}
+.rod-monitor.selected{border-color:#e3c88d}.rod-monitor.bite{border-color:#f2ba69;background:#54452ce8}.rod-monitor strong{display:block;font-size:9px;letter-spacing:.12em;margin-bottom:6px}.rod-monitor canvas{width:94px;height:70px;display:block;border-radius:4px;background:#263b38}.rod-monitor.empty canvas{opacity:.18}.monitor-state{display:block;font-size:9px;min-height:24px;margin-top:6px;line-height:1.3}.monitor-action{display:block;font-size:9px;font-weight:500;color:#e4ce9d;line-height:1.3}.rod-monitor:disabled{opacity:.65}
+@media(orientation:portrait){body.two-rods[data-phase="waiting"] .status-block,body.two-rods[data-phase="bite"] .status-block{display:none}#rodSignals{right:14px;gap:7px}.rod-monitor{width:109px}.rod-monitor canvas{width:91px;height:68px}}
+@media(orientation:landscape){#rodSignals{top:76px;right:16px}.rod-monitor{width:106px}.rod-monitor canvas{width:88px;height:66px}}

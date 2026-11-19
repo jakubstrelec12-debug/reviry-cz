@@ -1,10 +1,10 @@
-import {biteMotion} from './bite-motion.js?v=0.11.0';
-import {RODS,RIGS} from './tackle.js?v=0.11.0';
+import {biteMotion} from './bite-motion.js?v=0.11.1';
+import {RODS,RIGS} from './tackle.js?v=0.11.1';
 
 export const PHOTO={src:'assets/vajgar-photograph.webp',author:'Wwery',title:'Pohled na Jindřichův Hradec přes rybník Vajgar',source:'https://commons.wikimedia.org/wiki/File:Pohled_na_Jind%C5%99ich%C5%AFv_Hradec_p%C5%99es_rybn%C3%ADk_Vajgar.jpg',license:'CC BY-SA 4.0',licenseUrl:'https://creativecommons.org/licenses/by-sa/4.0/',waterStart:.575};
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 export function photoCrop(iw,ih,w,h,yaw=0,pitch=0){
- const scale=Math.max(w/iw,h/ih)*1.055,sw=w/scale,sh=h/scale;
+ const scale=Math.max(w/iw,h/ih),sw=w/scale,sh=h/scale;
  return {sx:clamp((iw-sw)/2+yaw*iw*.4,0,iw-sw),sy:clamp((ih-sh)/2+pitch*ih*.3,0,ih-sh),sw,sh,scale};
 }
 export function waterPoint(w,h,waterTop,distance,angle=0,waterBottom=null){
@@ -51,16 +51,19 @@ export class LakeScene{
  }
  setUiBounds(bounds){this.inset=bounds;}
  setSignalCanvas(canvas){this.signalCanvas=canvas;}
+ setSignalViews(views){this.signalViews=views;}
  setSignalVisible(visible){this.signalVisible=visible;}
  setCastDirection(){this.castYaw=this.yaw;}
  splash(index){const target=this.targets?.[index]||this.target;if(target)this.ripples.push({...target,time:this.clock});this.ripples=this.ripples.slice(-6);}
  scatterFeed(index){const target=this.targets?.[index]||this.target;if(target)this.feedThrow={time:this.clock,start:{x:this.width*.25,y:this.height},end:{...target}};}
  cachePhotograph(){
   const key=[this.yaw.toFixed(3),this.pitch.toFixed(3),this.width,this.height].join('/');if(key===this.lastView)return;
-  this.crop=photoCrop(this.image.width,this.image.height,this.width,this.height,this.yaw,this.pitch);const p=this.crop;
-  const lift=this.equipment.deck?this.height*.13:0;this.bctx.fillStyle='#1c2927';this.bctx.fillRect(0,0,this.width,this.height);this.bctx.drawImage(this.image,p.sx,p.sy,p.sw,p.sh,0,-lift,this.width,this.height);
   if(this.equipment.deck){const d=this.equipment.deck;this.deckCrop=photoCrop(d.width,d.height,this.width,this.height,this.yaw*.25,this.pitch*.25);this.shoreTop=clamp((d.height*.739-this.deckCrop.sy)*this.deckCrop.scale,0,this.height);}else this.shoreTop=this.height;
-  this.waterTop=clamp((this.image.height*PHOTO.waterStart-p.sy)*p.scale-lift,0,this.height);this.lastView=key;
+  // Frame the actual visible photograph above the pier, not the hidden area below it.
+  const viewHeight=this.equipment.deck?this.height*.82:this.height,photoY=this.equipment.deck?this.shoreTop+8-viewHeight:0;
+  this.crop=photoCrop(this.image.width,this.image.height,this.width,viewHeight,this.yaw,this.pitch);const p=this.crop;
+  this.bctx.fillStyle='#1c2927';this.bctx.fillRect(0,0,this.width,this.height);this.bctx.drawImage(this.image,p.sx,p.sy,p.sw,p.sh,0,photoY,this.width,viewHeight);
+  this.waterTop=clamp((this.image.height*PHOTO.waterStart-p.sy)*p.scale+photoY,0,this.height);this.lastView=key;
  }
  ellipse(x,y,rx,ry,fill,stroke=null,width=1){const c=this.ctx;c.beginPath();c.ellipse(x,y,Math.max(.1,rx),Math.max(.1,ry),0,0,Math.PI*2);if(fill){c.fillStyle=fill;c.fill();}if(stroke){c.strokeStyle=stroke;c.lineWidth=width;c.stroke();}}
  line(points,color,width=1){const c=this.ctx;c.beginPath();c.moveTo(points[0].x,points[0].y);for(const p of points.slice(1))c.lineTo(p.x,p.y);c.strokeStyle=color;c.lineWidth=width;c.lineCap='round';c.stroke();}
@@ -189,8 +192,8 @@ export class LakeScene{
  drawTerminal(p,size){const c=this.ctx,r=this.game.loadout.rig;
   if(RIGS[r].feeder){c.save();c.translate(p.x,p.y);c.rotate(this.clock*4);c.fillStyle='#8a7960';c.fillRect(-4*size,-7*size,8*size,14*size);for(let i=-3;i<=3;i+=2)this.line([{x:i*size,y:-7*size},{x:i*size,y:7*size}],'#bdc4a7',.6);for(const y of [-6,0,6])this.line([{x:-4*size,y:y*size},{x:4*size,y:y*size}],'#c6ceb0',.8);c.restore();}else this.ellipse(p.x,p.y,2*size,4*size,'#667363');
  }
- paintSignal(active){
-  const target=this.signals[active],canvas=this.signalCanvas;if(!target||!canvas||!this.signalVisible)return;
+ paintSignal(active,canvas=this.signalCanvas,force=false){
+  const target=this.signals[active];if(!target||!canvas||(!force&&!this.signalVisible))return;
   // Fixed optical axis: following the moving tip would hide the bite itself.
   const anchor=target.anchor||target,roi=target.kind==='float'?54:target.kind==='ledger'?110:130;
   const roiHeight=roi*canvas.height/canvas.width,sx=anchor.x-roi/2,sy=anchor.y-roiHeight/2-(target.kind==='float'?8:0);
@@ -199,7 +202,7 @@ export class LakeScene{
   ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,canvas.width,canvas.height);ctx.setTransform(canvas.width/roi,0,0,canvas.height/roiHeight,-sx*canvas.width/roi,-sy*canvas.height/roiHeight);
   try{this.ctx=ctx;this.drawFrame(0);}finally{this.ctx=mainCtx;ctx.restore();Object.assign(this,saved);this.metrics={...metrics,opticalDetail:true};}
  }
- render(dt){if(!this.image)return;this.clock+=Math.max(0,dt);this.cachePhotograph();this.drawFrame(dt);this.paintSignal(this.game.activeIndex||0);}
+ render(dt){if(!this.image)return;this.clock+=Math.max(0,dt);this.cachePhotograph();this.drawFrame(dt);if(this.signalViews?.length){for(const v of this.signalViews)this.paintSignal(v.index,v.canvas,true);}else this.paintSignal(this.game.activeIndex||0);}
  drawFrame(dt){this.water();this.ctx.save();this.ctx.beginPath();this.ctx.rect(0,this.waterTop,this.width,Math.max(0,this.shoreTop-this.waterTop));this.ctx.clip();this.drawRipples();this.ctx.restore();
   if(this.equipment.deck){const d=this.equipment.deck,p=this.deckCrop;this.ctx.drawImage(d,p.sx,p.sy,p.sw,p.sh,0,0,this.width,this.height);this.metrics.drawImages++;}
 

@@ -38,3 +38,26 @@ test('app flow: prepare float tackle, cast, strike, land, show real photo, store
  // Pick up a real dropback, hold the reeling control, then strike on the run.
  $('tackle').click();document.querySelector('[data-method="ledger"]').click();$('setupApply').click();tick();$('action').dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:' ',bubbles:true}));$('action').dispatchEvent(new dom.window.KeyboardEvent('keyup',{key:' ',bubbles:true}));for(let i=0;i<1000&&state().phase!=='bite';i++)tick();assert.equal(state().phase,'bite');$('action').dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:' ',bubbles:true}));$('action').dispatchEvent(new dom.window.KeyboardEvent('keyup',{key:' ',bubbles:true}));tick();assert.equal(state().phase,'held');assert.equal($('takeUp').classList.contains('hidden'),false);$('takeUp').dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:' ',bubbles:true}));for(let i=0;i<20;i++)tick();$('takeUp').dispatchEvent(new dom.window.KeyboardEvent('keyup',{key:' ',bubbles:true}));for(let i=0;i<100&&$('status').textContent!=='Teď zasekni.';i++)tick();$('action').dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:' ',bubbles:true}));$('action').dispatchEvent(new dom.window.KeyboardEvent('keyup',{key:' ',bubbles:true}));tick();assert.equal(state().phase,'fight');assert.equal($('fatal').classList.contains('hidden'),true);
 });
+
+test('two-rod UI keeps both live indicators and lets an inactive bite be picked up and landed',async()=>{
+ const dom=new JSDOM(fs.readFileSync(new URL('../index.html',import.meta.url),'utf8'),{url:'https://example.test',pretendToBeVisual:true}),document=dom.window.document;
+ globalThis.document=document;let frame,now=performance.now(),views=[];
+ class LakeStub{constructor(){this.high=true;this.assetWarnings=[];this.yaw=0;}async init(){return this;}render(){}setCastDirection(){}splash(){}scatterFeed(){}setSignalViews(value){views=value;}}
+ const code=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8').replace(/^import .*;\n/gm,'');
+ new Function('biteMotion','signalCaption','Preparation','METHODS','BAITS','FEEDS','setupSummary','validateLoadout','showCatchPhoto','photoFor','Fishing','LakeScene','window','document','localStorage','navigator','requestAnimationFrame','setTimeout','clearTimeout',code)(biteMotion,signalCaption,Preparation,tackle.METHODS,tackle.BAITS,tackle.FEEDS,tackle.setupSummary,tackle.validateLoadout,showCatchPhoto,photoFor,class extends Fishing{constructor(){super(()=>.1);}},LakeStub,dom.window,document,dom.window.localStorage,dom.window.navigator,callback=>{frame=callback;},()=>0,()=>{});
+ await new Promise(setImmediate);
+ const $=id=>document.getElementById(id),state=()=>dom.window.reviry.getState(),tick=()=>{now+=50;frame(now);},press=(id,type)=>$(id).dispatchEvent(new dom.window.KeyboardEvent(type,{key:' ',bubbles:true})),action=()=>{press('action','keydown');press('action','keyup');},cast=()=>{action();for(let i=0;i<25;i++)tick();};
+ $('start').click();$('setupApply').click();tick();cast();$('addRod').click();tick();cast();
+ assert.deepEqual(state().rods.map(r=>r.phase),['waiting','waiting']);assert.equal(views.length,2);assert.deepEqual(views.map(v=>v.index),[0,1]);
+ assert.equal($('rodSignals').classList.contains('hidden'),false);assert.equal($('rodSignals').querySelectorAll('canvas').length,2);assert.equal($('signalFocus').classList.contains('hidden'),true);
+ for(let i=0;i<1000&&state().rods[0].phase!=='bite';i++)tick();
+ assert.equal(state().activeRod,2);const first=document.querySelector('[data-signal-rod="0"]');assert.match(first.getAttribute('aria-label'),/Vzít prut 1/);assert.equal(first.disabled,false);first.click();tick();
+ assert.equal(state().activeRod,1);assert.equal(state().phase,'held');assert.match($('action').textContent,/ZASEKNOUT/);assert.equal(document.querySelector('[data-signal-rod="1"]').disabled,true);
+ if(!$('takeUp').classList.contains('hidden')){press('takeUp','keydown');for(let i=0;i<20;i++)tick();press('takeUp','keyup');}
+ for(let i=0;i<100&&$('status').textContent!=='Teď zasekni.';i++)tick();action();tick();assert.equal(state().phase,'fight');
+ for(let i=0;i<6000&&state().phase==='fight';i++){
+  $('drag').value=state().tension>.8?'20':'50';$('drag').dispatchEvent(new dom.window.Event('input',{bubbles:true}));press('action',state().tension<.78?'keydown':'keyup');tick();if(!$('net').disabled)$('net').click();
+ }
+ assert.equal(state().phase,'landed');assert.equal(state().catches,1);$('release').click();tick();
+ document.querySelector('[data-signal-rod="1"]').click();tick();assert.equal(state().activeRod,2);assert.equal($('fatal').classList.contains('hidden'),true);assert.equal(views.length,2);
+});
