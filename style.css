@@ -52,3 +52,7 @@ body[data-phase="waiting"] #action{display:none}
 @media(max-height:500px) and (orientation:landscape){
  #rodDock{top:76px}.rod-tab{padding:5px 9px}#signalFocus{top:128px;bottom:auto;width:127px;padding:0}#signalToggle{padding:8px 10px}
 }
+
+#signalFocus{top:149px;bottom:auto}
+@media(max-width:650px){#signalFocus{top:calc(132px + env(safe-area-inset-top));bottom:auto}}
+@media(max-height:500px) and (orientation:landscape){#sceneNote{display:none}#loadoutBadge{top:54px}#rodDock{top:76px}#signalFocus{top:128px;bottom:auto}}
