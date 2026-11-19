@@ -31,6 +31,14 @@ dotnet run --project Tests.Console/Tests.Console.csproj --configuration Release
 
 Další testy jsou připravené v Unity Test Runneru. Nebyly v něm spuštěné.
 
+## Přepracování vybavení — 19. 11. 2026
+
+Nový samostatný model `Resources/Equipment/RodAndReel.fbx` obsahuje vedení vlasce, keramická očka, korkové rukojeti, cívku s jednotlivými závity, překlapěč a oddělenou kličku. Zatím **nenahrazuje pracovní vybavení v herní scéně**. Import, materiály v URP a výkon čekají na ověření v editoru. Blenderové procedurální materiály se automaticky nepřenášejí do URP.
+
+Opakovatelný zdroj: `Tools/Art/build_fishing_rig.py` (Blender 4.3+). Autorský `.blend` vytváří mimo Assets; FBX patří do Resources. Kontrolní obrázek v `ArtReview` je offline render samotného modelu, nikoli snímek hry.
+
+Pokus o zprovoznění prostředí: oficiální Unity Hub 4.0.1 a Unity CLI 1.0.1 byly staženy. CLI hlásí `NOT_SIGNED_IN`, `LICENSE_CLIENT_UNREACHABLE` a nedostupné `https://services.api.unity.com` (`ECONNABORTED`). Editor nebyl instalován ani aktivován. Přihlášení samo není ověřeným řešením síťové překážky.
+
 ## Cesta k reálnému spuštění
 
 Pro následující kroky je nutné prostředí s aktivovaným Unity Editorem a příslušnými build moduly. V pracovním prostředí, ve kterém tento projekt vznikl, Unity Editor ani dostupná licence nejsou. Dostupné konektory nepřidaly službu, která by tuto kompilaci umožnila.
