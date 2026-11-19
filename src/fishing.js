@@ -1,8 +1,8 @@
-import {nextRun,runForce} from './encounter.js?v=0.14.1';
-import {DEFAULT_TRIP,activityFor} from './trip.js?v=0.14.1';
-import {getVenue,EXTRA_SPECIES,venueWeights} from './venues.js?v=0.14.1';
-import {strikeWindow,assessStrike,strikeReason} from './strike-timing.js?v=0.14.1';
-import {DEFAULT_LOADOUT, METHODS, RODS, RIGS, catchWeight, validateLoadout, cleanLoadout, feedInfluence, speciesWeights, biteDelay,createFeedStocks} from './tackle.js?v=0.14.1';
+import {nextRun,runForce} from './encounter.js?v=0.15.0';
+import {DEFAULT_TRIP,activityFor} from './trip.js?v=0.15.0';
+import {getVenue,EXTRA_SPECIES,venueWeights} from './venues.js?v=0.15.0';
+import {strikeWindow,assessStrike,strikeReason} from './strike-timing.js?v=0.15.0';
+import {DEFAULT_LOADOUT, METHODS, RODS, RIGS, catchWeight, validateLoadout, cleanLoadout, feedInfluence, speciesWeights, biteDelay,createFeedStocks} from './tackle.js?v=0.15.0';
 export const SPECIES = [
   {id:'carp',name:'Kapr obecný', min:1.4, max:7.8, power:0.85, color:0xb79b5d},
   {id:'tench',name:'Lín obecný', min:0.45, max:2.3, power:0.6, color:0x6d7841},
@@ -12,7 +12,7 @@ export class Fishing {
   constructor(random = Math.random) {
     this.trip={...DEFAULT_TRIP};this.venueId='vajgar';this.loadout={...DEFAULT_LOADOUT};this.feedSpot=null;this.feedStocks=createFeedStocks();this.castAngle=0;this.random=random; this.phase='ready'; this.time=0;this.castPower=0;this.distance=0;
     this.drag=0.48;this.tension=0.25;this.stamina=1;this.reeling=false;this.lifting=false;
-    this.elapsed=0;this.biteIn=0;this.biteElapsed=0;this.fish=null;this.result=null;
+    this.lineOutRate=0;this.lineInRate=0;this.elapsed=0;this.biteIn=0;this.biteElapsed=0;this.fish=null;this.result=null;
     this.probe=null;this.nextProbeAt=Infinity;this.run=null;this.fishBearing=0;this.biteWindow=null;this.slackToTake=0;this.hookQuality=1;this.lastStrike=null;this.lastStrikeAt=-Infinity;this.journal=[]; this.onChange=()=>{};this.onEvent=()=>{};this.paused=false;
   }
   emit(name, data={}) {this.onEvent(name,data);this.onChange(this);}
@@ -33,7 +33,7 @@ export class Fishing {
     this.biteIn=this.elapsed+Math.max(.5,(this.biteIn-this.elapsed)/(1+this.feedBonus*.7));this.emit('feed');return true;
   }
   startCast(){if(!['ready','escaped','landed'].includes(this.phase))return false;
-    this.probe=null;this.run=null;this.phase='casting';this.castPower=0;this.result=null;this.fish=null;this.biteWindow=null;this.biteElapsed=0;this.slackToTake=0;this.hookQuality=1;this.lastStrike=null;this.emit('cast-start');return true;}
+    this.probe=null;this.run=null;this.lineOutRate=0;this.lineInRate=0;this.phase='casting';this.castPower=0;this.result=null;this.fish=null;this.biteWindow=null;this.biteElapsed=0;this.slackToTake=0;this.hookQuality=1;this.lastStrike=null;this.emit('cast-start');return true;}
   releaseCast(){if(this.phase!=='casting')return false;
     const range=METHODS[this.loadout.method].cast;this.distance=range[0]+this.castPower*range[1]*(RODS[this.loadout.rod].length/3.6);this.throwDistance=this.distance;this.phase='flying';this.elapsed=0;
     this.reeling=false;this.lifting=false;this.emit('cast');return true;}
@@ -78,9 +78,11 @@ export class Fishing {
       if(!this.run||this.run.age>=this.run.duration)this.run=nextRun(this.random,this.run);
       this.run.age+=dt;const effort=runForce(this.run),surge=(.34+effort)*(0.28+this.stamina*.72)*strength;
       const direction=this.castAngle+this.run.direction*(this.run.mode==='surge'?1:.35);this.fishBearing+=(direction-this.fishBearing)*dt*.65;
+      const previousDistance=this.distance;
       const lineStrength=Math.pow(this.loadout.line/.25,.85);const target=(0.08+this.drag*surge*0.95+(this.reeling?0.16:0)+(this.lifting?0.2:0))/lineStrength;
       this.tension+=(target-this.tension)*Math.min(1,dt*2.4);
       this.distance=Math.max(2.2,this.distance+(surge*(1-this.drag)*2.3-(this.reeling?1.9*(0.35+this.drag)*RODS[this.loadout.rod].power:0)-(this.lifting?0.25:0))*dt);
+      this.lineOutRate=dt>0?Math.max(0,(this.distance-previousDistance)/dt):0;this.lineInRate=dt>0?Math.max(0,(previousDistance-this.distance)/dt):0;
       this.stamina=Math.max(0,this.stamina-dt*(.002+this.tension*.008+effort*.006+(this.reeling?.012:0)+(this.lifting?.010:0)));
       this.overload=this.tension>0.94?this.overload+dt:Math.max(0,this.overload-dt*2);
       this.slack=this.tension<0.13?this.slack+dt:0;

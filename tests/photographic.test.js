@@ -22,7 +22,7 @@ test('photographic renderer executes every phase and technique without a GPU',as
  for(const method of ['ledger','feeder','float']){g.loadout=methodPreset(method);g.fish={id:'carp',length:60};g.distance=3;g.tension=.7;
   for(const phase of ['ready','casting','flying','waiting','bite','held','fight','landed','escaped']){g.phase=phase;g.elapsed=.45;g.castPower=.6;scene.render(.05);if(phase==='waiting'){scene.splash();scene.scatterFeed();scene.render(.05);}}
  }
- g.loadout=methodPreset('ledger');g.phase='bite';for(const indicator of ['bobbin','swinger','electronic']){g.loadout.indicator=indicator;scene.render(.2);assert.equal(scene.signals[0].kind,'ledger');}
+ g.loadout=methodPreset('ledger');g.phase='bite';for(const indicator of ['bobbin','swinger','electronic']){g.loadout.indicator=indicator;for(let i=0;i<20;i++)scene.render(.05);assert.equal(scene.signals[0].kind,'ledger');}
  assert.equal(scene.metrics.engine,'photographic-2d');assert.ok(scene.metrics.drawImages>10);
  const pixels=scene.ctx.getImageData(10,10,300,100).data;assert.ok(pixels.some((v,i)=>i%4!==3&&v>50));
  const daylight=scene.ctx.getImageData(25,25,80,60).data,brightness=px=>px.reduce((sum,n,i)=>sum+(i%4===3?0:n),0);g.trip={date:'2026-06-15',time:'23:00'};const frozen=JSON.stringify(g);scene.render(0);assert.ok(brightness(scene.ctx.getImageData(25,25,80,60).data)<brightness(daylight)*.7);assert.equal(JSON.stringify(g),frozen);g.trip={date:'2026-06-15',time:'07:00'};
@@ -112,4 +112,12 @@ test('both optical views render independent simultaneous bites without changing 
  session.rods[0].phase='bite';session.rods[0].elapsed=3;session.rods[0].biteStyle='pull';scene.render(0);
  assert.notDeepEqual(a.toBuffer('image/png'),left);assert.deepEqual(b.toBuffer('image/png'),right);
  assert.deepEqual(session.rods.map(r=>r.time),clocks);assert.equal(scene.game,session);scene.dispose();
+});
+
+test('animated hands, empty stand and reeds use transparent local layers and optical repaint leaves gestures untouched',async()=>{
+ globalThis.innerWidth=844;globalThis.innerHeight=390;globalThis.devicePixelRatio=1;globalThis.window={addEventListener(){},removeEventListener(){}};globalThis.localStorage={getItem:()=>null,setItem(){}};globalThis.document={createElement:()=>createCanvas(844,390)};
+ globalThis.Image=class extends NativeImage{set src(v){super.src=v.startsWith('file:')?fileURLToPath(v):v;}get src(){return super.src;}};
+ const canvas=createCanvas(844,390);canvas.addEventListener=()=>{};const g=new Fishing(()=>.2);g.loadout=methodPreset('feeder');g.phase='held';g.reeling=true;g.fish={id:'carp',weight:3,length:60};const scene=await new LakeScene(canvas,g).init();scene.render(.2);assert.equal(scene.metrics.windingHand,true);
+ for(const key of ['animatedHeld','windingHand','emptyStand','reeds']){const image=scene.equipment[key];assert.ok(image);const check=createCanvas(image.width,image.height),c=check.getContext('2d');c.drawImage(image,0,0);const px=c.getImageData(0,0,image.width,image.height).data;assert.ok(px.some((v,i)=>i%4===3&&v===0));assert.ok(px.some((v,i)=>i%4===3&&v>240));}
+ const motion=JSON.stringify(scene.motionByRod),game=JSON.stringify(g),clock=scene.clock;scene.setSignalCanvas(createCanvas(320,320));scene.paintSignal(0);scene.paintSignal(0);assert.equal(JSON.stringify(scene.motionByRod),motion);assert.equal(JSON.stringify(g),game);assert.equal(scene.clock,clock);scene.dispose();
 });

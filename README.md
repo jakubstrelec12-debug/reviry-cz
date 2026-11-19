@@ -2,9 +2,19 @@
 
 Rybářská hra pro Safari na iPhonu. Výhled nově tvoří **skutečná fotografie Vajgaru** s animovanou hladinou, prutem, čihátkem, náhozem, splávkem a krmením. Zjednodušená 3D zástavba se v hlavní hře nepoužívá. Vykreslování běží přes Canvas 2D a nepotřebuje WebGL.
 
-**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.14.1
+**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.15.0
 
 Nejlépe na šířku. Všechny herní fotografie jsou přiložené lokálně. HD / ECO mění rozlišení a jemnost animace vody. Fotografie není 360° panorama: tažením jde pouze mírně posouvat výhled a směr náhozu. Nejde o volně průchozí 3D svět.
+
+## Ruce, náčiní a okolí — 0.15.0
+
+Po nahození a při zvednutí se prut přesouvá plynule mezi stojanem a rukou; prázdná trojnožka zůstává na původním místě. Nához má zpětný nápřah, švih a uklidnění. Při navíjení se samostatná levá ruka přiblíží ke kličce a sleduje její otáčení; při uvolnění navíjení zase ustoupí. Otáčení, drobný pohyb ruky, dobírání povoleného vlasce a zatížení při výpadu sdílejí stav ovládání.
+
+Rychlost odvíjení cívky vychází z reálného přírůstku vzdálenosti ryby v herním modelu. Odvíjení přes brzdu má vlastní zvuk; navíjení má jemné mechanické cvakání. Výpad a změna směru vytvoří pohyb vlasce a vlnky u ryby. Nezávislé náhledy obou indikátorů nepřičítají čas k pohybům rukou ani cívky.
+
+**Pro plný dojem zapni Zvuk.** Ruch hladiny, poryvy větru, vzácné vzdálené denní ptačí hlasy a jemné noční zvuky jsou syntetizované v prohlížeči. Nához, dopad montáže a práce s náčiním mají samostatné zvuky. Žádné nahrávky se nestahují a žádný mikrofon se nepoužívá. Zvuk se pozastavuje s výpravou a v pozadí; běžný prohlížeč může spuštění vyžadovat klepnutím na tlačítko.
+
+Řídké ilustrační trávy u levého dolního okraje se pohybují ve stejném modelovaném poryvu jako šum větru a drobné odlesky hladiny. Vegetace je společné herní popředí, ne nový geografický údaj o vybraném revíru. Fotografie a geometrie vzdáleného břehu se neohýbají. Podrobnosti o nových podkladech a zadání: [assets/ANIMATION.md](assets/ANIMATION.md).
 
 ## Průběh lovu — 0.14.1
 

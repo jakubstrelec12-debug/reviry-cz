@@ -1,7 +1,9 @@
-import {tripConditions} from './trip.js?v=0.14.1';
-import {getVenue} from './venues.js?v=0.14.1';
-import {biteMotion} from './bite-motion.js?v=0.14.1';
-import {RODS,RIGS} from './tackle.js?v=0.14.1';
+import {RodPresentation,environmentAt,releaseGesture} from './immersion.js?v=0.15.0';
+import {runForce} from './encounter.js?v=0.15.0';
+import {tripConditions} from './trip.js?v=0.15.0';
+import {getVenue} from './venues.js?v=0.15.0';
+import {biteMotion} from './bite-motion.js?v=0.15.0';
+import {RODS,RIGS} from './tackle.js?v=0.15.0';
 
 export const PHOTO=getVenue('vajgar').photo;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -39,11 +41,11 @@ function point(a,b,c,t){const u=1-t;return {x:u*u*a.x+2*u*t*b.x+t*t*c.x,y:u*u*a.
 export class LakeScene{
  constructor(canvas,game){
   this.canvas=canvas;this.game=game;this.ctx=canvas.getContext('2d',{alpha:false});if(!this.ctx)throw new Error('Canvas 2D není dostupný.');
-  this.clock=0;this.yaw=0;this.pitch=0;this.castYaw=0;this.pose=0;this.assetWarnings=[];this.venueId=getVenue(game.venueId).id;this.photo=getVenue(game.venueId).photo;this.geoAccurate=false;this.ripples=[];this.feedThrow=null;this.poseByRod=[0,0];this.inset={};this.signalCanvas=null;this.signalVisible=true;this.signals=[];this.metrics={engine:'photographic-2d',drawImages:0};
+  this.clock=0;this.yaw=0;this.pitch=0;this.castYaw=0;this.pose=0;this.assetWarnings=[];this.venueId=getVenue(game.venueId).id;this.photo=getVenue(game.venueId).photo;this.geoAccurate=false;this.ripples=[];this.feedThrow=null;this.poseByRod=[0,0];this.motionByRod=[];this.inset={};this.signalCanvas=null;this.signalVisible=true;this.signals=[];this.metrics={engine:'photographic-2d',drawImages:0};
   try{this.high=localStorage.getItem('reviry-quality')!=='low';const pref=localStorage.getItem('reviry-wide-view');this.widePreference=pref===null?null:pref==='on';this.wideView=this.widePreference??(this.venueId==='jarosov');}catch{this.high=true;this.widePreference=null;this.wideView=this.venueId==='jarosov';}
   this.photoLayer=document.createElement('canvas');this.photoCtx=this.photoLayer.getContext('2d');this.background=document.createElement('canvas');this.bctx=this.background.getContext('2d');this.lastView='';this.bindLook();this.onResize=()=>this.resize();window.addEventListener('resize',this.onResize);
  }
- async init(){const loaded=await this.loadVenuePhoto(this.photo);this.photo=loaded.photo;this.image=loaded.image;this.equipment={};await Promise.all([['rod','assets/equipment/rod-hand.webp'],['float','assets/equipment/waggler.webp'],['deck','assets/equipment/fishing-deck.webp'],['resting','assets/equipment/resting-feeder.webp'],['held','assets/equipment/held-feeder.webp']].map(async([key,path])=>{try{this.equipment[key]=await loadImage(path);}catch{this.assetWarnings.push(path);}}));this.resize();this.render(0);return this;}
+ async init(){const loaded=await this.loadVenuePhoto(this.photo);this.photo=loaded.photo;this.image=loaded.image;this.equipment={};await Promise.all([['rod','assets/equipment/rod-hand.webp'],['float','assets/equipment/waggler.webp'],['deck','assets/equipment/fishing-deck.webp'],['resting','assets/equipment/resting-feeder.webp'],['held','assets/equipment/held-feeder.webp'],['animatedHeld','assets/equipment/held-animated.webp'],['windingHand','assets/equipment/winding-hand.webp'],['emptyStand','assets/equipment/empty-tripod.webp'],['reeds','assets/equipment/shore-reeds.webp']].map(async([key,path])=>{try{this.equipment[key]=await loadImage(path);}catch{this.assetWarnings.push(path);}}));this.resize();this.render(0);return this;}
  async loadVenuePhoto(photo){try{return {photo,image:await loadImage(photo.src)};}catch(error){if(!photo.fallback)throw error;return {photo:{...photo.fallback,externalUnavailable:true},image:await loadImage(photo.fallback.src)};}}
  async setVenue(id){const loaded=await this.loadVenuePhoto(getVenue(id).photo);this.photo=loaded.photo;this.image=loaded.image;this.venueId=getVenue(id).id;if(this.widePreference===null)this.wideView=this.venueId==='jarosov';this.yaw=0;this.pitch=0;this.ripples=[];this.feedThrow=null;this.lastView='';this.render(0);}
  setWideView(value){this.wideView=Boolean(value);this.widePreference=this.wideView;try{localStorage.setItem('reviry-wide-view',this.wideView?'on':'off');}catch{}this.lastView='';this.render(0);}
@@ -91,6 +93,34 @@ export class LakeScene{
    c.drawImage(this.background,0,y*r,w*r,size*r,wave*depth*1.7,y,w,size);this.metrics.drawImages++;
   }
  }
+ drawSurface(){
+  const c=this.ctx,w=this.width,h=Math.max(0,this.shoreTop-this.waterTop),env=environmentAt(this.clock);if(h<4)return;
+  c.save();c.beginPath();c.rect(0,this.waterTop,w,h);c.clip();
+  for(let i=0;i<(this.high?32:18);i++){const x=((Math.sin(i*91.73)*43758.54)%1+1)%1*w,y=this.waterTop+h*(.15+((i*37%97)/97)*.85),phase=Math.sin(this.clock*(.65+i%3*.11)+i*2.13),alpha=Math.pow(Math.max(0,phase),8)*(.045+env.gust*.055);
+   if(alpha<.008)continue;this.line([{x:x-3-i%4,y},{x:x+3+i%4,y:y+.2}],`rgba(237,239,215,${alpha})`,.6);
+  }c.restore();
+ }
+ drawReeds(){const image=this.equipment?.reeds;if(!image)return;const c=this.ctx,h=this.height*(this.height>this.width?.30:.40),w=h*image.width/image.height,env=environmentAt(this.clock),x=-w*.1,y=this.height-h+8;
+  c.save();c.globalAlpha=.92;c.filter='saturate(.72) brightness(.84)';const step=this.high?8:16;
+  for(let sy=0;sy<image.height;sy+=step){const sh=Math.min(step,image.height-sy),v=sy/image.height,shift=env.sway*(1.2+env.gust*3)*Math.pow(1-v,2);c.drawImage(image,0,sy,image.width,sh,x+shift,y+v*h,w,sh/image.height*h+.15);}c.restore();
+ }
+ drawEmptyStand(){const image=this.equipment?.emptyStand;if(!image)return;const {x,y,width,height,at}=restingLayout(this.width,this.height,{index:this.drawIndex,count:this.drawCount,shoreTop:this.shoreTop});
+  for(const [u,v] of [[.225,.947],[.501,.909],[.783,.947]]){const p=at(u,v);this.ellipse(p.x,p.y+2,width*.044,height*.006,'rgba(9,17,16,.23)');}
+  this.ctx.save();this.ctx.filter='saturate(.76) brightness(.88)';this.ctx.drawImage(image,x,y,width,height);this.ctx.restore();
+ }
+ drawReel(image,x,y,scale,g,m){if(!this.equipment?.animatedHeld||!m)return;const c=this.ctx,ax=x+image.width*.681*scale,ay=y+image.height*.810*scale,ex=ax+Math.cos(m.crank)*48*scale,ey=ay+Math.sin(m.crank)*62*scale;
+  this.line([{x:ax,y:ay},{x:ex,y:ey}],'#303a39',5*scale);this.line([{x:ax-.6,y:ay-.5},{x:ex-.6,y:ey-.5}],'#aeb5ae',2.4*scale);this.ellipse(ex,ey,9*scale,5*scale,'#202a29','#7e8780',.5);
+  // Separate winding hand follows the handle; it does not orbit like a rigid arm.
+  if(this.equipment.windingHand&&m.reach>.015){const hand=this.equipment.windingHand;c.save();c.globalAlpha=m.reach;c.translate(ex,ey+(1-m.reach)*170*scale);c.rotate(Math.sin(m.crank)*.025);c.drawImage(hand,-280*scale,-72*scale,hand.width*scale,hand.height*scale);c.restore();this.metrics.windingHand=true;}
+  const sx=x+image.width*.65*scale,sy=y+image.height*.754*scale,turn=m.lineOut>.05?m.spool:m.rotor;
+  if(m.lineOut>.05||g.reeling){c.save();c.translate(sx,sy);c.rotate(-.22);c.beginPath();c.ellipse(0,0,30*scale,12*scale,0,turn,turn+Math.PI*.8);c.strokeStyle='rgba(224,232,215,.65)';c.lineWidth=1.5*scale;c.stroke();c.restore();}
+ }
+ drawWaterResponse(){const g=this.game;if(g.phase!=='fight')return;const c=this.ctx,p=this.target,effort=runForce(g.run),rate=Math.max(0,g.lineOutRate||0),near=clamp(13/Math.max(3,g.distance),.25,2),size=(3+effort*11+rate*3)*near;
+  c.save();c.beginPath();c.rect(0,this.waterTop,this.width,Math.max(0,this.shoreTop-this.waterTop));c.clip();
+  if(effort>.15||rate>.08){const trail=(g.fishBearing||0)*45;for(let i=0;i<3;i++){const age=((g.elapsed*1.2+i*.33)%1),r=size*(.3+age);this.ellipse(p.x-trail*age,p.y+age*3,r,r*.17,null,`rgba(215,231,217,${(1-age)*.16})`,.75);}}
+  if(g.distance<8&&effort>.6){for(let i=0;i<5;i++){const f=(g.run.age*2+i*.2)%1;this.ellipse(p.x+Math.sin(i*3.7)*size*f,p.y-Math.sin(f*Math.PI)*5*near,.65,.45,`rgba(226,238,224,${(1-f)*.25})`);}}
+  c.restore();
+ }
  drawLighting(){
   const c=this.ctx,{light,warmth,darkness,morning}=tripConditions(this.game.trip),w=this.width,h=this.height;
   // Grade the whole scene, including rods and foreground, in the same light.
@@ -127,22 +157,25 @@ export class LakeScene{
   c.restore();this.metrics.drawImages++;
  }
  drawPhotoHeld(){
-  const image=this.equipment?.held;if(!image)return false;
-  const c=this.ctx,g=this.game,cast=g.phase==='casting'?g.castPower:0,{scale,angle,base}=heldLayout(this.width,this.height,this.pose,cast);
+  const image=this.equipment?.animatedHeld||this.equipment?.held;if(!image)return false;
+  const c=this.ctx,g=this.game,m=this.presentation,cast=g.phase==='casting'?g.castPower:0,held=heldLayout(this.width,this.height,this.pose,cast),rest=restingLayout(this.width,this.height,{index:this.drawIndex,count:this.drawCount,shoreTop:this.shoreTop}),u=g.loadout.method==='float'?1:(m?.pickup??1);
+  const scale=mix(rest.height/image.height,held.scale,u),anchor=rest.at(.83,.88),base={x:mix(anchor.x,held.base.x,u),y:mix(anchor.y,held.base.y,u)},breath=Math.sin(this.clock*1.15+this.drawIndex)*.002;
+  const angle=(held.angle+releaseGesture(g)+breath+clamp((g.fishBearing||0)-(g.castAngle||0),-.18,.18)*.12)*u;
+
   const transform=(u,v)=>{const x=(u-.83)*image.width*scale,y=(v-.88)*image.height*scale;return {x:base.x+x*Math.cos(angle)-y*Math.sin(angle),y:base.y+x*Math.sin(angle)+y*Math.cos(angle)};};
   const flex=(g.phase==='held'&&g.loadout.method==='feeder'?biteMotion(g,this.clock).feederFlex:0)+(g.phase==='fight'?g.tension*24:0),shift=v=>Math.pow(Math.max(0,1-v/.42),2)*flex;
   const rawTip=transform(.049,.039),tip={x:rawTip.x+shift(.039)*Math.cos(angle),y:rawTip.y+shift(.039)*Math.sin(angle)};this.tip=tip;
   c.save();c.translate(base.x,base.y);c.rotate(angle);c.filter='saturate(0.76) brightness(0.88)';
   const cut=Math.round(image.height*.42),x=-.83*image.width*scale,y=-.88*image.height*scale;
   if(Math.abs(flex)<.01)c.drawImage(image,x,y,image.width*scale,image.height*scale);
-  else{c.drawImage(image,0,cut,image.width,image.height-cut,x,y+cut*scale,image.width*scale,(image.height-cut)*scale);for(let sy=0;sy<cut;sy+=3){const sh=Math.min(3,cut-sy);c.drawImage(image,0,sy,image.width,sh,x+shift(sy/image.height),y+sy*scale,image.width*scale,sh*scale+.2);}}
-  c.restore();
+  else{c.drawImage(image,0,cut,image.width,image.height-cut,x,y+cut*scale,image.width*scale,(image.height-cut)*scale);for(let sy=0;sy<cut;sy+=6){const sh=Math.min(6,cut-sy);c.drawImage(image,0,sy,image.width,sh,x+shift(sy/image.height),y+sy*scale,image.width*scale,sh*scale+.2);}}
+  this.drawReel(image,x,y,scale,g,m);c.restore();
   if(!['ready','casting','landed','escaped'].includes(g.phase)){
    let end=this.target;if(g.phase==='flying'){const f=clamp(g.elapsed/1.1,0,1);end={x:mix(tip.x,end.x,f),y:mix(tip.y,end.y,f)-Math.sin(Math.PI*f)*this.height*.20};if(g.loadout.method==='float')this.drawFloat(end,true);else this.drawTerminal(end,scale*3);}
    this.drawWaterLine(tip,end,g);
   }
   if(g.loadout.method==='feeder'&&g.phase==='held')this.signals[this.drawIndex]={...tip,anchor:rawTip,kind:'feeder'};
-  this.metrics.heldPhoto=true;this.metrics.drawImages+=Math.abs(flex)<.01?1:1+Math.ceil(cut/3);return true;
+  this.metrics.heldPhoto=true;this.metrics.drawImages+=Math.abs(flex)<.01?1:1+Math.ceil(cut/6);return true;
  }
  drawPhotoResting(){
   const image=this.equipment?.resting;if(!image)return false;
@@ -155,8 +188,8 @@ export class LakeScene{
   // Contact shadows under each foot tie the support to the wood rather than to the viewport.
   for(const [u,v] of [[.225,.947],[.501,.909],[.783,.947]]){const p=at(u,v);this.ellipse(p.x,p.y+2,width*.044,height*.006,'rgba(9,17,16,.23)');}
   const cut=Math.round(image.height*.42);if(Math.abs(flex)<.01){c.drawImage(image,x,y,width,height);}else{c.drawImage(image,0,cut,image.width,image.height-cut,x,y+height*cut/image.height,width,height*(1-cut/image.height));
-  for(let sy=0;sy<cut;sy+=3){const sh=Math.min(3,cut-sy),v=sy/image.height;c.drawImage(image,0,sy,image.width,sh,x+shift(v),y+height*v,width,height*sh/image.height+.2);}}
-  c.restore();this.metrics.restingPhoto=true;this.metrics.drawImages+=Math.abs(flex)<.01?1:1+Math.ceil(cut/3);
+  for(let sy=0;sy<cut;sy+=6){const sh=Math.min(6,cut-sy),v=sy/image.height;c.drawImage(image,0,sy,image.width,sh,x+shift(v),y+height*v,width,height*sh/image.height+.2);}}
+  c.restore();this.metrics.restingPhoto=true;this.metrics.drawImages+=Math.abs(flex)<.01?1:1+Math.ceil(cut/6);
   const guides=[[.096,.079],[.139,.117],[.178,.157],[.231,.214],[.305,.295],[.407,.413]].map(([u,v])=>{const p=at(u,v);return {x:p.x+shift(v),y:p.y};});
   const reel=at(.65,.762),points=[reel];
   if(!feeder&&['waiting','bite'].includes(g.phase)){
@@ -195,7 +228,7 @@ export class LakeScene{
  }
 
  drawRig(){const c=this.ctx,g=this.game,w=this.width,h=this.height,method=g.loadout.method,floating=method==='float',fighting=g.phase==='fight',held=g.phase==='held',casting=g.phase==='casting',flying=g.phase==='flying';
-  const hand=floating||fighting||held||casting||flying||g.time-g.lastStrikeAt<.55;if(hand&&this.drawPhotoHeld())return;if(!hand&&this.drawPhotoResting())return;const layout=gearLayout(w,h,{...this.inset,index:this.drawIndex,count:this.drawCount,pose:this.pose,waterTop:this.waterTop});const {base,size}=layout;let tip={...layout.tip};
+  const hand=floating||fighting||held||casting||flying||g.time-g.lastStrikeAt<.55||(this.presentation?.pickup||0)>0;if(hand){if(!floating)this.drawEmptyStand();if(this.drawPhotoHeld())return;}if(!hand&&this.drawPhotoResting())return;const layout=gearLayout(w,h,{...this.inset,index:this.drawIndex,count:this.drawCount,pose:this.pose,waterTop:this.waterTop});const {base,size}=layout;let tip={...layout.tip};
   if(casting){tip.x+=w*g.castPower*.14;tip.y-=h*g.castPower*.15;}
   const bend=fighting?g.tension*48:method==='feeder'?7+(g.phase==='bite'?(8+Math.sin(g.elapsed*10)*6)*(g.biteStyle==='dropback'?-1:1):0):0;
   const control={x:mix(base.x,tip.x,.48)+bend*size,y:mix(base.y,tip.y,.45)-bend*.3*size};
@@ -243,20 +276,21 @@ export class LakeScene{
   const anchor=target.anchor||target,roi=target.kind==='float'?54:target.kind==='ledger'?110:130;
   const roiHeight=roi*canvas.height/canvas.width,sx=anchor.x-roi/2,sy=anchor.y-roiHeight/2-(target.kind==='float'?8:0);
   const ctx=canvas.getContext('2d'),mainCtx=this.ctx,metrics={...this.metrics};
-  const saved={signals:this.signals,targets:this.targets,target:this.target,tip:this.tip,drawIndex:this.drawIndex,pose:this.pose};
+  const saved={signals:this.signals,targets:this.targets,target:this.target,tip:this.tip,drawIndex:this.drawIndex,pose:this.pose,presentation:this.presentation};
   ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,canvas.width,canvas.height);ctx.setTransform(canvas.width/roi,0,0,canvas.height/roiHeight,-sx*canvas.width/roi,-sy*canvas.height/roiHeight);
   try{this.ctx=ctx;this.drawFrame(0);}finally{this.ctx=mainCtx;ctx.restore();Object.assign(this,saved);this.metrics={...metrics,opticalDetail:true};}
  }
- render(dt){if(!this.image)return;this.clock+=Math.max(0,dt);this.cachePhotograph();this.drawFrame(dt);if(this.signalViews?.length){for(const v of this.signalViews)this.paintSignal(v.index,v.canvas,true);}else this.paintSignal(this.game.activeIndex||0);}
- drawFrame(dt){this.water();this.ctx.save();this.ctx.beginPath();this.ctx.rect(0,this.waterTop,this.width,Math.max(0,this.shoreTop-this.waterTop));this.ctx.clip();this.drawRipples();this.ctx.restore();
+ render(dt){if(!this.image)return;dt=Math.max(0,dt);this.clock+=dt;const rods=this.game.enabledRods||[this.game];for(let i=0;i<rods.length;i++){const g=rods[i],m=this.motionByRod[i]??=new RodPresentation();m.update(g,dt);const strikePulse=Math.max(0,1-(g.time-g.lastStrikeAt)/.55),targetPose=Math.max(['held','fight'].includes(g.phase)?.5+m.pump*.4:0,strikePulse*.85);this.poseByRod[i]=mix(this.poseByRod[i],targetPose,1-Math.exp(-dt*8));}this.cachePhotograph();this.drawFrame(dt);if(this.signalViews?.length){for(const v of this.signalViews)this.paintSignal(v.index,v.canvas,true);}else this.paintSignal(this.game.activeIndex||0);}
+ drawFrame(dt){this.water();this.drawSurface();this.ctx.save();this.ctx.beginPath();this.ctx.rect(0,this.waterTop,this.width,Math.max(0,this.shoreTop-this.waterTop));this.ctx.clip();this.drawRipples();this.ctx.restore();
   if(this.equipment.deck){const d=this.equipment.deck,p=this.deckCrop;this.ctx.drawImage(d,p.sx,p.sy,p.sw,p.sh,0,0,this.width,this.height);this.metrics.drawImages++;}
 
+  this.drawReeds();
   const session=this.game,rods=session.enabledRods||[session],active=session.activeIndex||0;this.drawCount=rods.length;this.targets=[];this.signals=[];
   for(let i=0;i<rods.length;i++){
    const g=rods[i];this.game=g;this.drawIndex=i;
-   const strikePulse=Math.max(0,1-(g.time-g.lastStrikeAt)/.55);const targetPose=Math.max(['held','fight'].includes(g.phase)?g.lifting?.9:.5:0,strikePulse*.85);this.poseByRod[i]=mix(this.poseByRod[i],targetPose,1-Math.exp(-Math.max(0,dt)*8));this.pose=this.poseByRod[i];
+   this.presentation=this.motionByRod[i];this.pose=this.poseByRod[i];
    this.target=waterPoint(this.width,this.height,this.waterTop,g.distance||30,(g.phase==='fight'?(g.fishBearing??g.castAngle):g.castAngle||0)-this.yaw+(rods.length>1?(i===0?-.05:.05):0),this.equipment.deck?this.shoreTop:null);if(g.loadout.method==='float')this.target.x-=this.width*.12;this.targets.push({...this.target});
-   this.drawFish();if(g.loadout.method==='float'&&['waiting','bite'].includes(g.phase))this.drawFloat(this.target,false);this.drawRig();
+   this.drawFish();this.drawWaterResponse();if(g.loadout.method==='float'&&['waiting','bite'].includes(g.phase))this.drawFloat(this.target,false);this.drawRig();
   }
   this.game=session;this.target=this.targets[active];this.drawLighting();
  }
