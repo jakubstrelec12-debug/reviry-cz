@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {JSDOM} from 'jsdom';
-import {Fishing} from '../src/fishing.js';
+import {FishingSession as Fishing} from '../src/session.js';
 import {Preparation} from '../src/preparation.js';
 import * as tackle from '../src/tackle.js';
 import {showCatchPhoto,photoFor} from '../src/fish-photos.js';

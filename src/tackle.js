@@ -5,12 +5,12 @@ export const METHODS = {
  float:{name:'Plavaná',subtitle:'Splávek · nastavitelná hloubka',indicator:'splávek',description:'Prut držíš v ruce a sleduješ anténku splávku. Při ponoření zasekneš přímo, bez braní prutu ze stojanu.',rigs:['fixed','sliding'],rods:['match','bolo'],weights:[2,3,5],cast:[7,19]},
 };
 export const RODS={
- carp:{name:'Kaprový 3,60 m · 2,75 lb',length:3.6,maxWeight:60,power:1},
- 'carp-heavy':{name:'Kaprový 3,60 m · 3,00 lb',length:3.6,maxWeight:80,power:1.08},
- 'feeder-light':{name:'Feeder 3,30 m · do 60 g',length:3.3,maxWeight:60,power:.91},
- 'feeder-heavy':{name:'Feeder 3,60 m · do 90 g',length:3.6,maxWeight:90,power:1},
- match:{name:'Match 3,90 m · 5–20 g',length:3.9,maxWeight:20,power:.82},
- bolo:{name:'Bolo 5,00 m · 3–15 g',length:5,maxWeight:15,power:.78},
+ carp:{brand:'Mivardi',model:'Spotter',source:'https://www.rybina.cz/rybarske-pruty/kaprove-pruty/%28p%29-mivardi/',name:'Mivardi Spotter · 3,60 m · 2,75 lb',length:3.6,maxWeight:60,power:1},
+ 'carp-heavy':{brand:'Mivardi',model:'Vector MK2 FC',source:'https://www.mivardi.cz/prut-vector-mk2-fc-360h',name:'Mivardi Vector MK2 FC · 3,60 m · 3 lb',length:3.6,maxWeight:80,power:1.08},
+ 'feeder-light':{brand:'Mivardi',model:'Symphony Feeder 360M',source:'https://www.mivardi.cz/symphony-feeder-360m-25-75-g',name:'Mivardi Symphony 360M · 3,60 m · 25–75 g',length:3.6,maxWeight:75,power:.91},
+ 'feeder-heavy':{brand:'Mivardi',model:'Symphony Feeder 360H',source:'https://www.mivardi.cz/symphony-feeder-360h-40-90-g',name:'Mivardi Symphony 360H · 3,60 m · 40–90 g',length:3.6,maxWeight:90,power:1},
+ match:{brand:'Mivardi',model:'Easy Match II 390',source:'https://www.mivardi.cz/easy-match-ii-390',name:'Mivardi Easy Match II · 3,90 m · 5–20 g',length:3.9,maxWeight:20,power:.82},
+ bolo:{brand:'Mivardi',model:'Phenomena TMX Bolo 500',source:'https://www.mivardi.cz/prut-phenomena-tmx-bolo-500',name:'Mivardi Phenomena TMX · 5,00 m · 10–20 g',length:5,maxWeight:20,power:.78},
 };
 export const RIGS={
  running:{name:'Průběžné olovo',detail:'Kmenový vlasec → průběžné olovo → obratlík → návazec → háček',baits:['corn','worm','maggots','bread']},
@@ -27,28 +27,28 @@ export const BAITS={
  worm:{name:'Žížala',detail:'Živá nástraha přímo na háček',weights:[.7,3,1.5],sizeBias:1.7},
  maggots:{name:'Bílí červi',detail:'Drobná nástraha pro jemnější sestavy',weights:[.2,1.1,4],sizeBias:2.2},
  bread:{name:'Pečivo',detail:'Menší kousek na háčku',weights:[.7,.5,3.5],sizeBias:1.8},
- boilie:{name:'Boilies 15 mm',detail:'Jedna kulička na vlasovém přívěsu; háček č. 6–10',weights:[12,.18,.07],sizeBias:.85,minWeights:{carp:2.5}},
- boilie20:{name:'Boilies 20 mm',detail:'Větší kulička na vlasovém přívěsu; háček č. 6 nebo 8. V této hře cílí na větší kapry.',weights:[25,0,0],sizeBias:.75,minWeights:{carp:4}},
- pellet:{name:'Peleta 8 mm',detail:'Na vlasový přívěs',weights:[6,.8,.5],sizeBias:1,minWeights:{carp:1.8}},
+ boilie:{brand:'Nikl',model:'Ready boilie Kill Krill',source:'https://www.nikl.cz/nikl-ready-boilie-kill-krill_z39082/',name:'Boilies 15 mm · Nikl Kill Krill',detail:'Jedna kulička na vlasovém přívěsu; háček č. 6–10',weights:[12,.18,.07],sizeBias:.85,minWeights:{carp:2.5}},
+ boilie20:{brand:'Nikl',model:'Ready boilie Kill Krill',source:'https://www.nikl.cz/nikl-ready-boilie-kill-krill_z39082/',name:'Boilies 20 mm · Nikl Kill Krill',detail:'Větší kulička na vlasovém přívěsu; háček č. 6 nebo 8. V této hře cílí na větší kapry.',weights:[25,0,0],sizeBias:.75,minWeights:{carp:4}},
+ pellet:{brand:'Mivardi',model:'Rapid SweetCorn',source:'https://www.mivardi.cz/rapid-pelety-sweetcorn',name:'Peleta 8 mm · Mivardi Rapid SweetCorn',detail:'Na vlasový přívěs',weights:[6,.8,.5],sizeBias:1,minWeights:{carp:1.8}},
 };
 export const FEEDS={
  none:{name:'Bez krmení',detail:'Pouze nástraha; nic se nespotřebovává',weights:[1,1,1]},
  grain:{name:'Partikl s kukuřicí',detail:'Zakrmování místa při položené nebo plavané',weights:[1.6,1.25,.8]},
- groundbait:{name:'Jemná vnadicí směs',detail:'Do krmítka i pro zakrmení ze břehu',weights:[1.05,1.1,1.7]},
+ groundbait:{brand:'Sonubaits',model:'Supercrush Green',source:'https://www.sonubaits.com/en/products/groundbait/sp-10474',name:'Sonubaits Supercrush Green',detail:'Do krmítka i pro zakrmení ze břehu',weights:[1.05,1.1,1.7]},
  micro:{name:'Mikropelety 2 mm',detail:'Do krmítka i k vytvoření krmného místa',weights:[1.8,1.1,.7]},
 };
-export const DEFAULT_LOADOUT=Object.freeze({method:'ledger',rod:'carp',rig:'running',line:.25,hook:8,leader:40,weight:40,bait:'corn',feed:'none',feedPortion:150,depth:2});
+export const DEFAULT_LOADOUT=Object.freeze({method:'ledger',rod:'carp',rig:'running',line:.255,hook:8,leader:40,weight:40,bait:'corn',feed:'none',feedPortion:150,depth:2});
 export function methodPreset(method,current=DEFAULT_LOADOUT){
  const m=METHODS[method];if(!m)throw new Error('Neznámý způsob lovu.');
  const rig=m.rigs[0];
- return {...DEFAULT_LOADOUT,...current,method,rod:m.rods[0],rig,weight:m.weights[1],leader:method==='feeder'?20:40,line:method==='float'?.20:.25,feed:method==='feeder'?'groundbait':current.feed,bait:RIGS[rig].baits.includes(current.bait)?current.bait:'corn'};
+ return {...DEFAULT_LOADOUT,...current,method,rod:m.rods[0],rig,weight:m.weights[1],leader:method==='feeder'?20:40,line:method==='float'?.205:.255,feed:method==='feeder'?'groundbait':current.feed,bait:RIGS[rig].baits.includes(current.bait)?current.bait:'corn'};
 }
 export function validateLoadout(value){
  if(!value||typeof value!=='object')return ['Chybí sestava.'];
  const v=value,m=METHODS[v.method],errors=[];if(!m)return ['Vyber způsob lovu.'];
  if(!m.rods.includes(v.rod))errors.push('Tento prut nepatří ke zvolené technice.');
  if(!m.rigs.includes(v.rig))errors.push('Montáž neodpovídá technice.');
- if(![.16,.20,.25,.30,.35].includes(v.line))errors.push('Vyber průměr vlasce.');
+ if(![.16,.20,.25,.30,.35,...LINE_DIAMETERS].includes(v.line))errors.push('Vyber průměr vlasce.');
  if(![6,8,10,12,14].includes(v.hook))errors.push('Vyber velikost háčku.');
  if(![10,20,40,60].includes(v.leader))errors.push('Vyber délku návazce.');
  if(!m.weights.includes(v.weight))errors.push('Zátěž neodpovídá technice.');
@@ -94,3 +94,7 @@ export function catchWeight(species,loadout,random){
  return Math.round((minimum+Math.pow(Math.max(0,Math.min(1,random)),bait.sizeBias||1)*(species.max-minimum))*100)/100;
 }
 export function baitChances(loadout,feedBonus=0){const weights=speciesWeights(loadout,feedBonus),total=weights.reduce((a,b)=>a+b,0);return weights.map(w=>w/total);}
+
+export const LINE_DIAMETERS=[.165,.185,.205,.225,.255,.285,.305];
+export const LINE_PRODUCT={brand:'Mivardi',model:'Carp & Feeder',length:200,source:'https://www.mivardi.com/carp-a-feeder-200-m'};
+export function lineName(value){return LINE_DIAMETERS.includes(value)?`Mivardi Carp & Feeder · ${value.toFixed(3)} mm`:`Vlastní monofil · ${value.toFixed(2)} mm`;}

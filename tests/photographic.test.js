@@ -43,3 +43,16 @@ test('bait gate is applied to actual catches: 20 mm boilies never select tench o
 test('spring feeder on ledger consumes feed while preserving the mechanical-indicator method',()=>{
  const g=new Fishing(()=>.1);g.setLoadout({...DEFAULT_LOADOUT,rig:'spring',feed:'groundbait'});g.startCast();g.releaseCast();for(let i=0;i<25;i++)g.tick(.05);assert.equal(g.phase,'waiting');assert.equal(g.feedStocks.groundbait,980);assert.equal(g.loadout.method,'ledger');
 });
+
+test('rod tips, reels and indicators remain above the actual mobile controls for both rods',async()=>{
+ const {FishingSession}=await import('../src/session.js');
+ for(const [w,h,hudTop,headerBottom] of [[390,844,620,160],[844,390,280,133],[844,390,225,133]]){
+  globalThis.innerWidth=w;globalThis.innerHeight=h;globalThis.devicePixelRatio=1;globalThis.window={addEventListener(){},removeEventListener(){}};globalThis.localStorage={getItem:()=>null,setItem(){}};globalThis.document={createElement:()=>createCanvas(w,h)};
+  globalThis.Image=class extends NativeImage{set src(v){super.src=v.startsWith('file:')?fileURLToPath(v):v;}get src(){return super.src;}};
+  const canvas=createCanvas(w,h);canvas.addEventListener=()=>{};const s=new FishingSession();s.enableSecond();s.rods.forEach(r=>{r.phase='waiting';r.distance=25;});
+  const scene=await new LakeScene(canvas,s).init();scene.setUiBounds({hudTop,headerBottom});scene.setSignalCanvas(createCanvas(300,180));scene.render(.05);
+  assert.equal(scene.signals.length,2);for(const signal of scene.signals){assert.ok(signal.x>0&&signal.x<w);assert.ok(signal.y+16<hudTop,JSON.stringify({w,h,signal,hudTop}));assert.ok(signal.y>headerBottom);}
+  const still=scene.signals[1].y;s.rods[1].phase='bite';s.rods[1].biteStyle='pull';s.rods[1].elapsed=.1;scene.render(.05);assert.notEqual(scene.signals[1].y,still);
+  s.rods[1].loadout=methodPreset('feeder');scene.render(.05);assert.equal(scene.signals[1].kind,'feeder');assert.ok(scene.signals[1].y<headerBottom+150);scene.dispose();
+ }
+});

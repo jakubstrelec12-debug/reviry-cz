@@ -1,8 +1,8 @@
-# REVÍRY CZ — Vajgar 0.6.1
+# REVÍRY CZ — Vajgar 0.7
 
 Rybářská hra pro Safari na iPhonu. Výhled nově tvoří **skutečná fotografie Vajgaru** s animovanou hladinou, prutem, čihátkem, náhozem, splávkem a krmením. Zjednodušená 3D zástavba se v hlavní hře nepoužívá. Vykreslování běží přes Canvas 2D a nepotřebuje WebGL.
 
-**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.6.1
+**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.7.0
 
 Nejlépe na šířku. Všechny herní fotografie jsou přiložené lokálně. HD / ECO mění rozlišení a jemnost animace vody. Fotografie není 360° panorama: tažením jde pouze mírně posouvat výhled a směr náhozu. Nejde o volně průchozí 3D svět.
 
@@ -45,8 +45,18 @@ Karta úlovku používá skutečné **ilustrační fotografie druhů** (kapr, l�
 
 `npm ci`, `npm test`, `npm run dev` → http://localhost:3000. `npm run render` ukládá skutečný snímek fotografické scény bez HTML ovládání. Parametry `RENDER_METHOD`, `RENDER_PHASE`, `RENDER_WIDTH`, `RENDER_HEIGHT` umožňují ověřovat techniky, stavy a orientace.
 
-37 automatických testů: herní cyklus, DOM ovládání přípravy a karty úlovku, kompatibilita montáží, vliv nástrahy na skutečně vybrané druhy i velikosti, krmítko na položenou, ořez fotografie a vykreslení všech stavů tří technik přes stejný Canvas 2D modul bez GPU. `tools/ui-matrix.html` zobrazuje skutečné komponenty přípravy v rozměrech telefonu s označenými testovacími údaji. Test cílového fyzického telefonu nenahrazují.
+41 automatických testů: herní cyklus, DOM ovládání přípravy a karty úlovku, kompatibilita montáží, vliv nástrahy na skutečně vybrané druhy i velikosti, krmítko na položenou, ořez fotografie a vykreslení všech stavů tří technik přes stejný Canvas 2D modul bez GPU. `tools/ui-matrix.html` zobrazuje skutečné komponenty přípravy v rozměrech telefonu s označenými testovacími údaji. Test cílového fyzického telefonu nenahrazují.
 
 Původní procedurální 3D modul a jeho testovací nástroje zůstávají v repozitáři pro historii; nejsou načítané vstupem hry 0.6. Jeho render je `npm run render:legacy3d`. Nejstarší samostatná 2D verze je v `legacy/`.
 
 Oprava 0.6.1: při nižším snímkování se herní čas posouvá v malých simulačních krocích, namísto zahazování každé části snímku přes 50 ms. Jednorázový skok je omezený na 250 ms; odchod do pozadí se nadále pozastavuje.
+
+## Změny 0.7
+
+Montáže se vybírají na kartách se schématem, včetně odlišeného pružinového, klecového a method krmítka. Podnabídky Prut a Vlasec obsahují ilustrace vybavení. Katalog obsahuje skutečné modely Mivardi (Spotter, Vector MK2 FC, Symphony, Easy Match II, Phenomena TMX), vlasce Carp & Feeder v ověřených průměrech 0,165–0,305 mm, Nikl Kill Krill 15/20 mm, Mivardi Rapid SweetCorn 8 mm a Sonubaits Supercrush Green. Přírodní a další obecné nástrahy zůstávají neznačkové. Primární zdroje jsou v `docs/PRODUCTS.md` a odkazy v přípravě. Žádné skladové stavy ani ceny se ve hře neslibují. Obrázky vybavení jsou originální herní ilustrace typu, nikoli převzaté produktové fotografie. Herní koeficienty účinnosti a zdolávání nejsou výrobcem deklarované parametry.
+
+Pruty a čihátka se kreslí do oblasti nad aktuálním ovládáním. Zvětšený detail čihátka nebo špičky je výřez skutečného vykresleného prutu; nereprodukuje nezávislou falešnou animaci. Záběr označí i příslušný prut v horním přepínači.
+
+Tlačítko **+ Druhý prut** přidá druhý samostatný prut a přepne na něj. Každý má vlastní sestavu, nástrahu, vzdálenost, čas čekání a záběr. Náhozy i čekání běží současně, krmení a deník jsou společné. Karty **PRUT 1 / PRUT 2** přepínají ovládání. Během náhozu, braní prutu a zdolávání přepnout nelze. Druhý záběr může při dlouhém ignorování zaniknout; otevřená příprava, deník a karta úlovku pozastavují oba. Druhý prut je dostupný pouze pro položenou a feeder; pro plavanou jej nejprve slož. Uložení zachovává obě sestavy, nikoli živý nához při zavření stránky.
+
+41 automatických testů včetně souběžných náhozů a záběrů, společných zásob a deníku, omezení dvou prutů a skutečného Canvas vykreslení viditelných čihátek nad ovládáním v obou orientacích telefonu. Fyzický iPhone stále nebyl vývojářem změřen.
