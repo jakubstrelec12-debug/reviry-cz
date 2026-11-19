@@ -106,3 +106,5 @@ body[data-phase="waiting"] .controls,body[data-phase="bite"] .controls{min-heigh
 body:is([data-phase=waiting],[data-phase=bite],[data-phase=held],[data-phase=fight]) #crosshair{display:none}
 
 .welcome #welcomeTrip{max-width:none;width:100%;padding:12px}.rod-monitor.empty canvas{display:none}.rod-monitor.empty .monitor-state{min-height:0}
+
+#intro .welcome{max-height:calc(100dvh - 32px);overflow-y:auto}
