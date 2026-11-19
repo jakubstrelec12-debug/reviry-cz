@@ -1,8 +1,8 @@
-# REVÍRY CZ — Vajgar 0.8
+# REVÍRY CZ — Vajgar 0.9
 
 Rybářská hra pro Safari na iPhonu. Výhled nově tvoří **skutečná fotografie Vajgaru** s animovanou hladinou, prutem, čihátkem, náhozem, splávkem a krmením. Zjednodušená 3D zástavba se v hlavní hře nepoužívá. Vykreslování běží přes Canvas 2D a nepotřebuje WebGL.
 
-**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.8.0
+**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.9.0
 
 Nejlépe na šířku. Všechny herní fotografie jsou přiložené lokálně. HD / ECO mění rozlišení a jemnost animace vody. Fotografie není 360° panorama: tažením jde pouze mírně posouvat výhled a směr náhozu. Nejde o volně průchozí 3D svět.
 
@@ -66,3 +66,13 @@ Prut má nižší polohu a míří k hladině, naviják je menší a tmavší. C
 
 ### Fotografické náčiní 0.8
 Plavaná zobrazuje výřez skutečné fotografie ruky, rukojeti a navijáku. Při záseku a zdolávání se celá sestava zvedá; horní část prutu se prohýbá podle tahu. Stejný fotografický základ se používá při práci s prutem u ostatních technik a naviják také u odložených prutů. Splávek J-Range je založený na skutečné fotografii, při záběru klesá pod skutečnou hladinu. Tlačítko detailu ukazuje výřez této stejné scény. Podklady mají průhledné pozadí připravené pomocí AI, celkem asi 116 kB WebP; jde o ilustrační fotografie, nikoli přesné zobrazení vybraného modelu. Podrobný původ a úpravy: `assets/CREDITS.md`, rovněž přímo v deníku hry.
+
+### Signalizace a načasování záseku 0.9
+
+Detail je volitelná kulatá optická lupa. Vykresluje tutéž scénu přímo ve vyšším rozlišení; čas ani herní stav neposouvá. Její osa zůstává u klidové polohy špičky / čihátka, aby sledováním pohybu nezrušila samotný signál. Zavřená lupa se nepřekresluje. U plavané se liší jemné ťukání, souvislé potápění, přizvednutí a naklonění; při pouštění nástrahy záběr slábne.
+
+Zaseknout lze i při čekání tlačítkem Zaseknout: bez záběru to skončí do prázdna. Při dotecích je zásek předčasný; při souvislém záběru je možné rybu zachytit, při pouštění nástrahy už přijde pozdě. Výsledek uvádí odchylku v sekundách. Délku záběru ovlivňuje technika, montáž, nástraha a druh ryby. Jde o čitelný herní model, nikoli změřené biologické časy nebo návod pro skutečný rybolov.
+
+U položené a feederu je stále nutné vzít prut. To **nezastaví ani neobnoví** čas ryby na nástraze. Při padavém záběru je po zvednutí prutu potřeba podržet Dobrat vlasec a teprve potom zaseknout. Navíjení skutečně ubírá povolení a současně běží čas záběru. Hraniční, ale platný zásek má slabší kontakt: při zdolávání hůře snáší povolený vlasec. Karta úlovku a deník uchovávají kvalitu záseku.
+
+Validace: 49 testů, včetně brzkého / čistého / pozdního záseku pro každou techniku, záseku bez ryby, dobírání vlasce, pauzy, společné časové osy po zvednutí prutu, celého UI cyklu a zachování herního stavu při optickém vykreslení.

@@ -1,11 +1,11 @@
-<!doctype html><html lang="cs"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>REVÍRY · kontrola rozhraní</title><link rel="stylesheet" href="../style.css?v=0.8.0"><style>body{background:#13292b}.preview-note{position:fixed;top:0;left:0;right:0;background:#142328;color:#cfba83;text-align:center;font:9px system-ui;padding:5px;z-index:25}#setupOverlay{padding-top:28px}#catchOverlay{padding-top:28px}</style>
+<!doctype html><html lang="cs"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>REVÍRY · kontrola rozhraní</title><link rel="stylesheet" href="../style.css?v=0.9.0"><style>body{background:#13292b}.preview-note{position:fixed;top:0;left:0;right:0;background:#142328;color:#cfba83;text-align:center;font:9px system-ui;padding:5px;z-index:25}#setupOverlay{padding-top:28px}#catchOverlay{padding-top:28px}</style>
 <div class="preview-note">KONTROLA ROZHRANÍ · TESTOVACÍ ÚDAJE · BEZ 3D SCÉNY</div>
 <script type="module">
-import {Fishing} from '../src/fishing.js?v=0.8.0';
-import {Preparation} from '../src/preparation.js?v=0.8.0';
-import {methodPreset,setupSummary} from '../src/tackle.js?v=0.8.0';
-import {FISH_PHOTOS,showCatchPhoto} from '../src/fish-photos.js?v=0.8.0';
-const html=await (await fetch('../index.html?v=0.8.0')).text(),source=new DOMParser().parseFromString(html,'text/html');
+import {Fishing} from '../src/fishing.js?v=0.9.0';
+import {Preparation} from '../src/preparation.js?v=0.9.0';
+import {methodPreset,setupSummary} from '../src/tackle.js?v=0.9.0';
+import {FISH_PHOTOS,showCatchPhoto} from '../src/fish-photos.js?v=0.9.0';
+const html=await (await fetch('../index.html?v=0.9.0')).text(),source=new DOMParser().parseFromString(html,'text/html');
 for(const id of ['setupOverlay','catchOverlay'])document.body.append(document.importNode(source.getElementById(id),true));
 const game=new Fishing(),params=new URLSearchParams(location.search);game.setLoadout(methodPreset(params.get('method')||'ledger'));
 const preparation=new Preparation({game,onApply:loadout=>{game.setLoadout(loadout);document.querySelector('.preview-note').textContent='SESTAVA JE PLATNÁ · '+setupSummary(loadout);},onClose:()=>{preparation.close();preparation.open();}});

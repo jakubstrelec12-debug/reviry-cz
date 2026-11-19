@@ -1,8 +1,9 @@
-import {Preparation} from './preparation.js?v=0.8.0';
-import {METHODS,BAITS,FEEDS,setupSummary,validateLoadout} from './tackle.js?v=0.8.0';
-import {showCatchPhoto,photoFor} from './fish-photos.js?v=0.8.0';
-import {FishingSession as Fishing} from './session.js?v=0.8.0';
-import {LakeScene} from './photo-scene.js?v=0.8.0a';
+import {biteMotion,signalCaption} from './bite-motion.js?v=0.9.0';
+import {Preparation} from './preparation.js?v=0.9.0';
+import {METHODS,BAITS,FEEDS,setupSummary,validateLoadout} from './tackle.js?v=0.9.0';
+import {showCatchPhoto,photoFor} from './fish-photos.js?v=0.9.0';
+import {FishingSession as Fishing} from './session.js?v=0.9.0';
+import {LakeScene} from './photo-scene.js?v=0.9.0';
 const $=id=>document.getElementById(id);const game=new Fishing();let lake;let last=performance.now(),started=false,drawerOpen=false,audio=null,soundOn=false,toastTimer;
 const setHidden=(id,hidden)=>$(id).classList.toggle('hidden',hidden);
 function toast(message){$('toast').textContent=message;setHidden('toast',false);clearTimeout(toastTimer);toastTimer=setTimeout(()=>setHidden('toast',true),4000);}
@@ -26,11 +27,22 @@ function updateRodDock(){
  const locked=['casting','flying','held','fight','landed'].includes(game.phase);
  $('rodDock').innerHTML=game.enabledRods.map((r,i)=>`<button type="button" data-rod="${i}" class="rod-tab ${i===game.activeIndex?'selected':''} ${r.phase==='bite'?'bite':''}" ${locked&&i!==game.activeIndex?'disabled':''} aria-pressed="${i===game.activeIndex}"><strong>PRUT ${i+1}</strong><span>${labels[r.phase]}</span></button>`).join('')+(game.secondEnabled?`<button id="foldRod" class="rod-extra" ${locked?'disabled':''}>Složit 2. prut</button>`:game.loadout.method!=='float'?`<button id="addRod" class="rod-extra" ${locked?'disabled':''}>+ Druhý prut</button>`:'');
 }
-$('signalToggle').onclick=()=>{const expanded=$('signalFocus').classList.toggle('expanded');$('signalToggle').setAttribute('aria-expanded',String(expanded));};
+$('signalToggle').onclick=()=>{const expanded=$('signalFocus').classList.toggle('expanded');$('signalToggle').setAttribute('aria-expanded',String(expanded));$('signalToggle').setAttribute('aria-label',expanded?'Skrýt optický detail':'Zvětšit signalizaci');};
 $('rodDock').addEventListener('click',e=>{const button=e.target.closest('[data-rod]');if(button){if(!game.select(Number(button.dataset.rod)))toast('Nejprve dokonči práci s prutem v ruce.');}else if(e.target.closest('#addRod')){game.enableSecond();}else if(e.target.closest('#foldRod')){if(!game.foldSecond())toast('Druhý prut nejprve bezpečně stáhni.');}renderedPhase='';renderedDock='';saveSetup();});
 function updateUI(){const p=game.phase,t=phaseText[p],method=METHODS[game.loadout.method],isFloat=game.loadout.method==='float';if(p!==renderedPhase){$('drag').value=String(Math.round(game.drag*100));$('dragValue').textContent=`${Math.round(game.drag*100)} %`;document.body.dataset.phase=p;$('eyebrow').textContent=p==='ready'?`${method.name.toUpperCase()} · ${method.indicator.toUpperCase()}`:p==='bite'?`ZÁBĚR · ${method.indicator.toUpperCase()}`:t[0];$('status').textContent=t[1];$('hint').textContent=p==='escaped'?game.result.reason:p==='waiting'?`Sleduj ${method.indicator}. Nástraha: ${BAITS[game.loadout.bait].name}.`:p==='bite'?(isFloat?'Splávek se potápí. Teď zasekni.':'Vezmi prut a potom zasekni.'):t[2];$('action').replaceChildren(document.createTextNode(p==='bite'&&isFloat?'ZASEKNOUT':t[3]));if(t[4]){const span=document.createElement('span');span.textContent=t[4];$('action').append(span);}$('action').disabled=['flying','waiting','landed'].includes(p);setHidden('fightPanel',p!=='fight');setHidden('lift',p!=='fight');setHidden('net',p!=='fight');setHidden('retrieve',!['waiting','bite','held'].includes(p));setHidden('castMeter',p!=='casting');renderedPhase=p;}
  updateRodDock();
- const showSignal=['waiting','bite'].includes(p);setHidden('signalFocus',!showSignal);$('signalTitle').textContent=`PRUT ${game.activeIndex+1} · ${isFloat?'SPLÁVEK':game.loadout.method==='feeder'?'ŠPIČKA':'ČIHÁTKO'}`;$('signalState').textContent=p==='bite'?(isFloat?'SPLÁVEK SE POTÁPÍ — ZASEKNI':game.biteStyle==='dropback'?'POVOLENÝ ZÁBĚR':'ZÁBĚR — VEZMI PRUT'):'Čekání na pohyb';$('signalFocus').classList.toggle('bite',p==='bite');
+ const showSignal=['waiting','bite'].includes(p)||(p==='held'&&game.loadout.method==='feeder'),motion=biteMotion(game,game.time);setHidden('signalFocus',!showSignal);
+ $('signalTitle').textContent=`${isFloat?'Splávek':game.loadout.method==='feeder'?'Špička':'Čihátko'} · ${game.activeIndex+1}`;$('signalState').textContent=signalCaption(game);
+ $('signalFocus').classList.toggle('bite',motion.stage==='run');$('signalFocus').classList.toggle('touch',motion.stage==='touch');$('signalFocus').classList.toggle('fading',motion.stage==='fading');
+ lake?.setSignalVisible?.(showSignal&&$('signalFocus').classList.contains('expanded'));
+ setHidden('earlyStrike',p!=='waiting');setHidden('takeUp',p!=='held'||game.slackToTake<=.02);
+ $('takeUp').textContent=game.reeling?'Dobírám vlasec…':'Dobrat vlasec · podrž';
+ if(['bite','held'].includes(p)){
+  const loose=p==='held'&&game.slackToTake>.02;
+  $('status').textContent=loose?'Nejprve dober vlasec.':motion.stage==='touch'?'Ryba nástrahu ochutnává.':motion.stage==='fading'?'Záběr slábne.':isFloat||p==='held'?'Teď zasekni.':'Vezmi prut a zasekni.';
+  $('eyebrow').textContent=loose?'POVOLENÝ VLASEC':motion.stage==='touch'?'DOTYKY NÁSTRAHY':motion.stage==='fading'?'RYBA POUŠTÍ NÁSTRAHU':'SOUVISLÝ ZÁBĚR';
+  $('hint').textContent=loose?'Krátce podrž DOBRAT VLASEC, potom zasekni.':motion.stage==='touch'?'Krátké ťuknutí ještě není jistý záběr.':signalCaption(game);
+ }
  $('loadoutBadge').textContent=setupSummary(game.loadout);
  $('tackle').disabled=['fight','casting','flying','landed'].includes(p);
  const canFeed=p==='waiting'&&game.loadout.feed!=='none';setHidden('feed',!canFeed);
@@ -45,7 +57,10 @@ $('action').addEventListener('pointerdown',e=>{if(e.button!==0)return;$('action'
 $('action').addEventListener('keydown',e=>{if([' ','Enter'].includes(e.key)&&!e.repeat)actionDown(e);});$('action').addEventListener('keyup',e=>{if([' ','Enter'].includes(e.key))actionUp(e);});
 $('lift').addEventListener('pointerdown',e=>{e.preventDefault();if(game.paused)return;$('lift').setPointerCapture(e.pointerId);game.lifting=true;});for(const type of ['pointerup','pointercancel','lostpointercapture'])$('lift').addEventListener(type,()=>game.lifting=false);
 $('lift').addEventListener('keydown',e=>{if([' ','Enter'].includes(e.key)){e.preventDefault();game.lifting=true;}});$('lift').addEventListener('keyup',()=>game.lifting=false);
-$('drag').addEventListener('input',e=>{game.drag=Number(e.target.value)/100;$('dragValue').textContent=`${e.target.value} %`;});$('net').onclick=()=>game.net();$('retrieve').onclick=()=>game.retrieve();
+$('drag').addEventListener('input',e=>{game.drag=Number(e.target.value)/100;$('dragValue').textContent=`${e.target.value} %`;});$('earlyStrike').onclick=()=>{if(!game.paused)game.strike();};
+$('takeUp').addEventListener('pointerdown',e=>{e.preventDefault();if(game.paused||game.phase!=='held')return;$('takeUp').setPointerCapture(e.pointerId);game.reeling=true;});for(const type of ['pointerup','pointercancel','lostpointercapture'])$('takeUp').addEventListener(type,()=>game.reeling=false);
+$('takeUp').addEventListener('keydown',e=>{if([' ','Enter'].includes(e.key)){e.preventDefault();if(!game.paused&&game.phase==='held')game.reeling=true;}});$('takeUp').addEventListener('keyup',()=>game.reeling=false);
+$('net').onclick=()=>game.net();$('retrieve').onclick=()=>game.retrieve();
 const preparation=new Preparation({game,onApply:loadout=>{
  if(['waiting','bite','held'].includes(game.phase))game.retrieve();
  if(!game.setLoadout(loadout)){toast('Sestavu teď nelze použít. Nejprve dokonči lov.');return;}
@@ -69,13 +84,13 @@ game.onEvent=(event,data)=>{
  if(event==='cast'){lake?.setCastDirection(index);rod.castAngle=lake?.yaw||0;}
  if(event==='splash')lake?.splash(index);
  if(event==='feed'){lake?.scatterFeed(index);toast(`${prefix}Zakrmil jsi ${rod.loadout.feedPortion} g. Zbývá ${rod.feedStocks[rod.loadout.feed]} g.`);}
- if(event==='bite'){toast(prefix+(rod.loadout.method==='float'?'Splávek! Zasekni.':rod.loadout.method==='feeder'?'Špička se ohýbá! Vezmi prut a zasekni.':'Čihátko! Vezmi prut a zasekni.'));navigator.vibrate?.([60,80,60]);}
- if(event==='hooked'){toast(prefix+'Sedí! Drž NAVÍJET a hlídej napětí.');navigator.vibrate?.(80);}
+ if(event==='bite'){if(index!==game.activeIndex)toast(prefix+(rod.loadout.method==='float'?'Splávek! Zasekni.':rod.loadout.method==='feeder'?'Špička se ohýbá! Vezmi prut a zasekni.':'Čihátko! Vezmi prut a zasekni.'));navigator.vibrate?.([60,80,60]);}
+ if(event==='hooked'){toast(prefix+(data.strike?.quality<.8?'Slabší zásek. Udržuj napnutý vlasec.':'Čistý zásek. Drž NAVÍJET a hlídej napětí.'));navigator.vibrate?.(80);}
  if(event==='escaped')toast(prefix+data.reason);
- if(event==='landed'){showCatchPhoto(data,$('fishIllustration'),$('fishPhotoCredit'));$('catchSetup').textContent=setupSummary(data.loadout);$('fishName').textContent=data.name;$('fishWeight').textContent=data.weight.toLocaleString('cs-CZ');$('fishLength').textContent=data.length;setHidden('catchOverlay',false);saveJournal();setPause();}
+ if(event==='landed'){showCatchPhoto(data,$('fishIllustration'),$('fishPhotoCredit'));$('catchSetup').textContent=setupSummary(data.loadout)+(data.strike?' · Zásek: '+(data.strike.quality>=.8?'čistý kontakt':'slabší kontakt'):'');$('fishName').textContent=data.name;$('fishWeight').textContent=data.weight.toLocaleString('cs-CZ');$('fishLength').textContent=data.length;setHidden('catchOverlay',false);saveJournal();setPause();}
 };
 async function boot(){loadJournal();try{const session=JSON.parse(localStorage.getItem('reviry-session-setup')||'null');if(!game.restoreSetup(session)){const saved=JSON.parse(localStorage.getItem('reviry-loadout')||'null');if(saved&&validateLoadout(saved).length===0)game.setLoadout(saved);}}catch{}setPause();try{lake=await new LakeScene($('world'),game).init();lake.setSignalCanvas?.($('signalCanvas'));$('quality').textContent=lake.high?'HD':'ECO';$('geoCredit').textContent='Výhled tvoří skutečná fotografie Vajgaru od Wwery, doplněná o pohyb vody a vybavení. Prut a naviják vycházejí z fotografie JaredMcKenzie (CC0); splávek Geotek (CC BY-SA 3.0). Pozadí náčiní bylo odstraněno pomocí AI, grafika je ilustrační a nemusí odpovídat vybranému modelu. Jde o fotografický pohled s omezeným posunem kamery. Hloubky a chování ryb jsou herní model.';setHidden('loading',true);if(lake.assetWarnings.length)toast('Část grafických podkladů se nenačetla. Zkus obnovit stránku.');requestAnimationFrame(frame);}catch(error){fatal(error);}}
 function frame(now){const dt=Math.min(.25,Math.max(0,(now-last)/1000));last=now;try{game.advance(dt);updateUI();document.documentElement.style.setProperty('--fishing-hud-height',`${window.innerHeight-$('fishingUI').getBoundingClientRect().top}px`);lake.setUiBounds?.({hudTop:$('fishingUI').getBoundingClientRect().top,headerBottom:Math.max(document.querySelector('header').getBoundingClientRect().bottom,$('rodDock').getBoundingClientRect().bottom)});if(!document.hidden)lake.render(game.paused?0:dt);}catch(error){fatal(error);return;}requestAnimationFrame(frame);}
 // Diagnostics expose observable state only; normal play never depends on this interface.
-window.reviry={getState:()=>({activeRod:game.activeIndex+1,rodCount:game.enabledRods.length,rods:game.enabledRods.map(r=>({phase:r.phase,loadout:{...r.loadout},distance:r.distance})),phase:game.phase,loadout:{...game.loadout},feedBonus:game.feedBonus,feedStocks:{...game.feedStocks},distance:game.distance,stamina:game.stamina,tension:game.tension,catches:game.journal.length,paused:game.paused,engine:lake?.metrics?.engine,assetWarnings:lake?.assetWarnings,drawImages:lake?.metrics?.drawImages}),version:'0.8.0'};
+window.reviry={getState:()=>({activeRod:game.activeIndex+1,rodCount:game.enabledRods.length,rods:game.enabledRods.map(r=>({phase:r.phase,loadout:{...r.loadout},distance:r.distance})),phase:game.phase,loadout:{...game.loadout},feedBonus:game.feedBonus,feedStocks:{...game.feedStocks},distance:game.distance,stamina:game.stamina,tension:game.tension,catches:game.journal.length,paused:game.paused,engine:lake?.metrics?.engine,assetWarnings:lake?.assetWarnings,drawImages:lake?.metrics?.drawImages}),version:'0.9.0'};
 boot();

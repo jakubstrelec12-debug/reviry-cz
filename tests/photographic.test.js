@@ -53,7 +53,7 @@ test('rod tips, reels and indicators remain above the actual mobile controls for
   const scene=await new LakeScene(canvas,s).init();scene.setUiBounds({hudTop,headerBottom});scene.setSignalCanvas(createCanvas(300,180));scene.render(.05);
   assert.equal(scene.signals.length,2);for(const signal of scene.signals){assert.ok(signal.x>0&&signal.x<w);assert.ok(signal.y+16<hudTop,JSON.stringify({w,h,signal,hudTop}));assert.ok(signal.y>headerBottom);}
   const still=scene.signals[1].y;s.rods[1].phase='bite';s.rods[1].biteStyle='pull';s.rods[1].elapsed=.1;scene.render(.05);assert.notEqual(scene.signals[1].y,still);
-  s.rods[1].loadout=methodPreset('feeder');scene.render(.05);assert.equal(scene.signals[1].kind,'feeder');assert.ok(scene.signals[1].y>headerBottom&&scene.signals[1].y<hudTop-40);scene.dispose();
+  s.rods[1].loadout=methodPreset('feeder');s.rods[1].phase='waiting';scene.render(0);const anchor={...scene.signals[1].anchor};s.rods[1].phase='bite';s.rods[1].elapsed=3;scene.render(0);assert.deepEqual(scene.signals[1].anchor,anchor);assert.ok(Math.hypot(scene.signals[1].x-anchor.x,scene.signals[1].y-anchor.y)>3);assert.equal(scene.signals[1].kind,'feeder');assert.ok(scene.signals[1].y>headerBottom&&scene.signals[1].y<hudTop-40);scene.dispose();
  }
 });
 
@@ -66,5 +66,5 @@ test('photographic equipment has real alpha; float visibly submerges and its foc
  assert.equal(scene.assetWarnings.length,0);assert.equal(scene.metrics.heldPhoto,true);assert.equal(scene.signals[0].kind,'float');
  for(const key of ['rod','float']){const sprite=scene.equipment[key],check=createCanvas(sprite.width,sprite.height),ctx=check.getContext('2d');ctx.drawImage(sprite,0,0);const px=ctx.getImageData(0,0,sprite.width,sprite.height).data;assert.ok(px.some((v,i)=>i%4===3&&v===0));assert.ok(px.some((v,i)=>i%4===3&&v>240));}
  const red=()=>{const t=scene.signals[0],px=scene.ctx.getImageData(Math.round(t.x)-8,Math.round(t.y)-25,16,25).data;let n=0;for(let i=0;i<px.length;i+=4)if(px[i]>150&&px[i]>px[i+1]*1.8&&px[i]>px[i+2]*1.8)n++;return n;};
- const before=red();assert.ok(before>5);const zoomBefore=focus.toBuffer('image/png');game.phase='bite';game.elapsed=6;scene.render(0);assert.ok(red()<before/2);assert.notDeepEqual(focus.toBuffer('image/png'),zoomBefore);scene.dispose();
+ const before=red();assert.ok(before>5);const zoomBefore=focus.toBuffer('image/png');game.phase='bite';game.elapsed=3;scene.render(0);assert.ok(red()<before/2);assert.notDeepEqual(focus.toBuffer('image/png'),zoomBefore);const frozen=JSON.stringify(game),clock=scene.clock,context=scene.ctx;scene.render(0);assert.equal(scene.clock,clock);assert.equal(JSON.stringify(game),frozen);assert.equal(scene.ctx,context);scene.setSignalVisible(false);const hidden=focus.toBuffer('image/png');game.elapsed=.2;scene.render(0);assert.deepEqual(focus.toBuffer('image/png'),hidden);scene.setSignalVisible(true);scene.render(0);assert.notDeepEqual(focus.toBuffer('image/png'),hidden);scene.dispose();
 });

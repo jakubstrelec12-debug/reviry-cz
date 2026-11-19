@@ -56,3 +56,14 @@ body[data-phase="waiting"] #action{display:none}
 #signalFocus{top:149px;bottom:auto}
 @media(max-width:650px){#signalFocus{top:calc(132px + env(safe-area-inset-top));bottom:auto}}
 @media(max-height:500px) and (orientation:landscape){#sceneNote{display:none}#loadoutBadge{top:54px}#rodDock{top:76px}#signalFocus{top:128px;bottom:auto}}
+
+/* 0.9: a fixed optical lens, rather than an enlarged bitmap dashboard. */
+#signalFocus,#signalFocus.expanded{width:136px;background:none;border:0;box-shadow:none;padding:0;backdrop-filter:none;pointer-events:none}
+#signalToggle{pointer-events:auto;border:1px solid #d5dcc13d;border-radius:22px;background:#142e2bd6;backdrop-filter:blur(10px);padding:8px 10px;gap:4px;min-height:34px}
+#signalTitle{font-size:9px;letter-spacing:.02em;text-transform:none}.signal-expand{font-size:16px;line-height:1}
+#signalFocus.expanded #signalCanvas{display:block;width:136px;height:136px;aspect-ratio:1;border-radius:50%;margin:8px 0 0;border:2px solid #d6ddc78c;box-shadow:0 4px 22px #071b2955,0 0 0 3px #142e2b66}
+#signalFocus.expanded #signalState{display:block;margin:8px 0 0;padding:5px 7px;min-height:24px;border-radius:12px;background:#142e2bd9;font-size:9px;text-align:center;letter-spacing:0;color:#d2ddcd}
+#signalFocus.touch #signalCanvas{border-color:#e0ca86}#signalFocus.bite #signalCanvas{border-color:#efc17c;box-shadow:0 0 0 3px #e1b57238,0 5px 22px #051c27aa}#signalFocus.bite #signalToggle{border-color:#efc17c}#signalFocus.bite #signalState{color:#ffdaa0}#signalFocus.fading #signalState{color:#d7b8a5}
+body[data-phase="waiting"] .controls,body[data-phase="bite"] .controls{min-height:56px}
+@media(max-width:650px){#signalFocus,#signalFocus.expanded{width:116px}#signalFocus.expanded #signalCanvas{width:116px;height:116px}#signalTitle{font-size:8px}#signalToggle{padding:7px 9px;min-height:32px}#signalFocus.expanded #signalState{font-size:8px;padding:5px 4px}body[data-phase="waiting"] .status-block,body[data-phase="bite"] .status-block{min-height:32px}body[data-phase="bite"] .status-block h1{font-size:19px}body[data-phase="bite"] .eyebrow,body[data-phase="bite"] #hint{display:none}body[data-phase="waiting"] .controls button,body[data-phase="bite"] .controls button{min-height:56px}.controls #earlyStrike{flex:.9;max-width:none}#takeUp{max-width:none}}
+@media(max-height:500px) and (orientation:landscape){#signalFocus,#signalFocus.expanded{width:112px}#signalFocus.expanded #signalCanvas{width:112px;height:112px}#signalFocus{top:122px}#signalTitle{font-size:8px}#signalFocus.expanded #signalState{font-size:8px}}

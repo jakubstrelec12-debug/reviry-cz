@@ -5,7 +5,9 @@ import {METHODS,RIGS,DEFAULT_LOADOUT,methodPreset,validateLoadout,speciesWeights
 import {FISH_PHOTOS,photoFor} from '../src/fish-photos.js';
 import fs from 'node:fs';
 function step(g,seconds){for(let i=0;i<seconds*20;i++)g.tick(.05);}
-function bite(method='ledger',loadout={}){const g=new Fishing(()=>.1);assert.ok(g.setLoadout({...methodPreset(method),...loadout}));g.startCast();step(g,.6);g.releaseCast();for(let i=0;i<1500&&g.phase!=='bite';i++)g.tick(.05);assert.equal(g.phase,'bite');return g;}
+function bite(method='ledger',loadout={}){const g=new Fishing(()=>.1);assert.ok(g.setLoadout({...methodPreset(method),...loadout}));g.startCast();step(g,.6);g.releaseCast();for(let i=0;i<1500&&g.phase!=='bite';i++)g.tick(.05);assert.equal(g.phase,'bite');while(g.elapsed<g.biteWindow.openAt+.7)g.tick(.05);return g;}
+
+function hook(g){if(g.loadout.method!=='float'&&g.phase==='bite')assert.equal(g.grab(),true);g.reeling=true;step(g,g.slackToTake+.05);g.reeling=false;assert.equal(g.strike(),true);}
 
 test('all technique presets and every offered rig have a playable compatible bait',()=>{
  assert.deepEqual(validateLoadout(DEFAULT_LOADOUT),[]);
@@ -19,13 +21,13 @@ test('invalid saved values, incompatible rigs and terminal presentations are rej
 });
 test('float has a direct strike and each technique completes the full catch cycle',()=>{
  for(const method of Object.keys(METHODS)){
-  const g=bite(method);if(method!=='float'){assert.equal(g.strike(),false);assert.equal(g.grab(),true);}assert.equal(g.strike(),true);
+  const g=bite(method);if(method!=='float'){assert.equal(g.strike(),false);assert.equal(g.grab(),true);}hook(g);
   for(let i=0;i<6000&&g.phase==='fight';i++){g.drag=g.tension>.8?.2:.5;g.reeling=g.tension<.78;g.tick(.05);if(g.distance<=4&&g.stamina<=.22)g.net();}
   assert.equal(g.phase,'landed',method);assert.equal(g.result.loadout.method,method);assert.ok(photoFor(g.result));
  }
 });
 test('active fish cannot be replaced by changing the setup; catch stores a snapshot',()=>{
- const g=bite();g.grab();g.strike();assert.equal(g.setLoadout(methodPreset('float')),false);g.distance=3;g.stamina=.1;g.net();const old=g.result.loadout.bait;g.loadout.bait='worm';assert.equal(g.result.loadout.bait,old);
+ const g=bite();hook(g);assert.equal(g.setLoadout(methodPreset('float')),false);g.distance=3;g.stamina=.1;g.net();const old=g.result.loadout.bait;g.loadout.bait='worm';assert.equal(g.result.loadout.bait,old);
 });
 test('the selected bait changes species selection rather than merely a label',()=>{
  const corn=speciesWeights(DEFAULT_LOADOUT),worm=speciesWeights({...DEFAULT_LOADOUT,bait:'worm'}),boilie=speciesWeights({...DEFAULT_LOADOUT,rig:'hair',bait:'boilie'});
@@ -44,7 +46,7 @@ test('feeder deposits 20 g at splash and never creates negative inventory',()=>{
  g.retrieve();g.feedStocks.groundbait=10;g.startCast();g.releaseCast();step(g,2);assert.equal(g.feedStocks.groundbait,10);
 });
 test('line diameter affects fight tension and depth affects float bite delay',()=>{
- const thin=bite('ledger',{line:.16}),thick=bite('ledger',{line:.35});for(const g of [thin,thick]){g.grab();g.strike();g.reeling=true;step(g,1);}assert.ok(thin.tension>thick.tension);
+ const thin=bite('ledger',{line:.16}),thick=bite('ledger',{line:.35});for(const g of [thin,thick]){hook(g);g.reeling=true;step(g,1);}assert.ok(thin.tension>thick.tension);
  const v=methodPreset('float');assert.ok(biteDelay({...v,depth:.5},.5)>biteDelay({...v,depth:2},.5));
 });
 test('pause freezes feed ageing along with fishing timers',()=>{const g=new Fishing();g.setLoadout({...DEFAULT_LOADOUT,feed:'grain'});g.phase='waiting';g.distance=25;g.feed();g.paused=true;const snapshot=JSON.stringify(g);step(g,300);assert.equal(JSON.stringify(g),snapshot);});

@@ -1,4 +1,5 @@
-import {RODS,RIGS} from './tackle.js?v=0.8.0';
+import {biteMotion} from './bite-motion.js?v=0.9.0';
+import {RODS,RIGS} from './tackle.js?v=0.9.0';
 
 export const PHOTO={src:'assets/vajgar-photograph.webp',author:'Wwery',title:'Pohled na Jindřichův Hradec přes rybník Vajgar',source:'https://commons.wikimedia.org/wiki/File:Pohled_na_Jind%C5%99ich%C5%AFv_Hradec_p%C5%99es_rybn%C3%ADk_Vajgar.jpg',license:'CC BY-SA 4.0',licenseUrl:'https://creativecommons.org/licenses/by-sa/4.0/',waterStart:.575};
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -27,7 +28,7 @@ function point(a,b,c,t){const u=1-t;return {x:u*u*a.x+2*u*t*b.x+t*t*c.x,y:u*u*a.
 export class LakeScene{
  constructor(canvas,game){
   this.canvas=canvas;this.game=game;this.ctx=canvas.getContext('2d',{alpha:false});if(!this.ctx)throw new Error('Canvas 2D není dostupný.');
-  this.clock=0;this.yaw=0;this.pitch=0;this.castYaw=0;this.pose=0;this.assetWarnings=[];this.photo=PHOTO;this.geoAccurate=false;this.ripples=[];this.feedThrow=null;this.poseByRod=[0,0];this.inset={};this.signalCanvas=null;this.signals=[];this.metrics={engine:'photographic-2d',drawImages:0};
+  this.clock=0;this.yaw=0;this.pitch=0;this.castYaw=0;this.pose=0;this.assetWarnings=[];this.photo=PHOTO;this.geoAccurate=false;this.ripples=[];this.feedThrow=null;this.poseByRod=[0,0];this.inset={};this.signalCanvas=null;this.signalVisible=true;this.signals=[];this.metrics={engine:'photographic-2d',drawImages:0};
   try{this.high=localStorage.getItem('reviry-quality')!=='low';}catch{this.high=true;}
   this.background=document.createElement('canvas');this.bctx=this.background.getContext('2d');this.lastView='';this.bindLook();this.onResize=()=>this.resize();window.addEventListener('resize',this.onResize);
  }
@@ -41,6 +42,7 @@ export class LakeScene{
  }
  setUiBounds(bounds){this.inset=bounds;}
  setSignalCanvas(canvas){this.signalCanvas=canvas;}
+ setSignalVisible(visible){this.signalVisible=visible;}
  setCastDirection(){this.castYaw=this.yaw;}
  splash(index){const target=this.targets?.[index]||this.target;if(target)this.ripples.push({...target,time:this.clock});this.ripples=this.ripples.slice(-6);}
  scatterFeed(index){const target=this.targets?.[index]||this.target;if(target)this.feedThrow={time:this.clock,start:{x:this.width*.25,y:this.height},end:{...target}};}
@@ -67,15 +69,14 @@ export class LakeScene{
  drawFloat(target,flying){
   const c=this.ctx,g=this.game,image=this.equipment?.float;if(!image)return;
   const height=clamp(23/Math.sqrt(Math.max(3,g.distance||20)),3.7,9)*10,width=height*image.width/image.height;
-  const bob=Math.sin(this.clock*1.6)*.7,sink=g.phase==='bite'?clamp(g.elapsed*4,0,24)+Math.sin(g.elapsed*4)*1.5:bob;
-  const angle=flying?.65:Math.sin(this.clock*1.6)*.025;
-  this.signals[this.drawIndex]={x:target.x,y:target.y,kind:'float'};
+  const motion=biteMotion(g,this.clock),sink=motion.floatSink*height;
+  const angle=flying?.65:motion.floatTilt;
+  this.signals[this.drawIndex]={x:target.x,y:target.y,anchor:{...target},kind:'float'};
   c.save();c.translate(target.x,target.y);
   if(!flying){
    c.save();c.beginPath();c.rect(-width,-height,width*2,height);c.clip();c.translate(0,sink);c.rotate(angle);c.drawImage(image,-width/2,-height*.24,width,height);c.restore();
    // Light transmission below the real waterline, using the very same sprite.
    c.save();c.beginPath();c.rect(-width,0,width*2,height);c.clip();c.globalAlpha=.10;c.translate(0,sink);c.rotate(angle);c.drawImage(image,-width/2,-height*.24,width,height);c.restore();
-   this.ellipse(0,0,4,1,null,'rgba(229,236,222,.45)',.6);
   }else{c.rotate(angle);c.drawImage(image,-width/2,-height*.24,width,height);}
   c.restore();this.metrics.drawImages++;
  }
@@ -87,6 +88,7 @@ export class LakeScene{
   const base={x:portrait?w*.98:w+10,y:hud+(portrait?45:28)-this.pose*35};
   const transform=(x,y)=>({x:base.x+(x-axisX)*scale*Math.cos(angle)-(y-image.height)*scale*Math.sin(angle),y:base.y+(x-axisX)*scale*Math.sin(angle)+(y-image.height)*scale*Math.cos(angle)});
   const joint=transform(image.width*.81,cropY+8),tip={x:joint.x-w*.16+cast*w*.22,y:Math.max((this.inset.headerBottom??85)+16,joint.y-(portrait?100:55)-this.pose*40)};
+  const focusAnchor={...tip};if(g.phase==='held'&&g.loadout.method==='feeder')tip.x+=biteMotion(g,this.clock).feederFlex;
   const control={x:mix(joint.x,tip.x,.48)+(g.phase==='fight'?g.tension*25:0),y:mix(joint.y,tip.y,.5)};
   const sample=t=>point(joint,control,tip,t),guides=[];
   // Tapered flexible blank, textured with the photographed carbon foregrip.
@@ -101,7 +103,7 @@ export class LakeScene{
    c.beginPath();c.moveTo(tip.x,tip.y);c.quadraticCurveTo(mix(tip.x,end.x,.5),mix(tip.y,end.y,.5)+5,end.x,end.y);c.strokeStyle='rgba(225,236,225,.45)';c.lineWidth=.6;c.stroke();
   }
   c.save();c.translate(base.x,base.y);c.rotate(angle);c.drawImage(image,0,cropY,image.width,image.height-cropY,-axisX*scale,-(image.height-cropY)*scale,image.width*scale,(image.height-cropY)*scale);c.restore();
-  this.tip=tip;this.metrics.heldPhoto=true;this.metrics.drawImages+=29;return true;
+  if(g.loadout.method==='feeder'&&g.phase==='held')this.signals[this.drawIndex]={...tip,anchor:focusAnchor,kind:'feeder'};this.tip=tip;this.metrics.heldPhoto=true;this.metrics.drawImages+=29;return true;
  }
  drawFish(){const g=this.game;if(g.phase!=='fight'||g.distance>8)return;
   const c=this.ctx,p=this.target,s=clamp(8/g.distance,.9,2.2)*(g.fish?.length||50)/60;
@@ -111,14 +113,14 @@ export class LakeScene{
   this.ellipse(p.x,p.y,35+Math.sin(this.clock*4)*4,5,null,'rgba(223,236,222,.35)',1);
  }
  drawRig(){const c=this.ctx,g=this.game,w=this.width,h=this.height,method=g.loadout.method,floating=method==='float',fighting=g.phase==='fight',held=g.phase==='held',casting=g.phase==='casting',flying=g.phase==='flying';
-  const hand=floating||fighting||held||casting||flying;if(hand&&this.drawPhotoHeld())return;const layout=gearLayout(w,h,{...this.inset,index:this.drawIndex,count:this.drawCount,pose:this.pose,waterTop:this.waterTop});const {base,size}=layout;let tip={...layout.tip};
+  const hand=floating||fighting||held||casting||flying||g.time-g.lastStrikeAt<.55;if(hand&&this.drawPhotoHeld())return;const layout=gearLayout(w,h,{...this.inset,index:this.drawIndex,count:this.drawCount,pose:this.pose,waterTop:this.waterTop});const {base,size}=layout;let tip={...layout.tip};
   if(casting){tip.x+=w*g.castPower*.14;tip.y-=h*g.castPower*.15;}
   const bend=fighting?g.tension*48:method==='feeder'?7+(g.phase==='bite'?(8+Math.sin(g.elapsed*10)*6)*(g.biteStyle==='dropback'?-1:1):0):0;
   const control={x:mix(base.x,tip.x,.48)+bend*size,y:mix(base.y,tip.y,.45)-bend*.3*size};
   const rawTip={...tip},dx=tip.x-base.x,dy=tip.y-base.y,length=Math.hypot(dx,dy),normal={x:-dy/length,y:dx/length};
-  const signal=method==='feeder'&&g.phase==='bite'?(g.biteStyle==='dropback'?-1:1)*(16+Math.sin(g.elapsed*11)*10)*size:0;
+  const signal=method==='feeder'?biteMotion(g,this.clock).feederFlex*size:0;
   const sample=t=>{const p=point(base,control,rawTip,t),flex=Math.pow(Math.max(0,(t-.70)/.30),2)*signal;return {x:p.x+normal.x*flex,y:p.y+normal.y*flex};};
-  tip=sample(1);this.tip=tip;if(method==='feeder')this.signals[this.drawIndex]={...tip,kind:'feeder'};
+  tip=sample(1);this.tip=tip;if(method==='feeder')this.signals[this.drawIndex]={...tip,anchor:{...rawTip},kind:'feeder'};
   if(!floating&&!hand){
    const rest=sample(.66),foot={x:rest.x+12*size,y:h+35};
    // One slender bank stick, planted below the photograph's foreground edge.
@@ -139,8 +141,8 @@ export class LakeScene{
   }
   const linePoints=[{x:reel.x-10*size,y:reel.y+2*size}];
   if(method==='ledger'&&!hand&&['waiting','bite'].includes(g.phase)){
-   const lift=g.phase==='bite'?(g.biteStyle==='dropback'?1:-1)*(15+Math.sin(g.elapsed*9)*10):0,indicator={x:reel.x-28*size,y:clamp(Math.min(reel.y+28*size,layout.hudTop-36)+lift,layout.headerBottom+20,layout.hudTop-24)};
-   this.signals[this.drawIndex]={...indicator,kind:'ledger'};linePoints.push(indicator);const glow=c.createLinearGradient(indicator.x-4,0,indicator.x+4,0);glow.addColorStop(0,'#6a7454');glow.addColorStop(.45,'#edefc0');glow.addColorStop(1,'#9cac73');this.ellipse(indicator.x,indicator.y,6*size,12*size,glow,'#303e2e',.8);
+   const lift=biteMotion(g,this.clock).ledgerLift,indicator={x:reel.x-28*size,y:clamp(Math.min(reel.y+28*size,layout.hudTop-36)+lift,layout.headerBottom+20,layout.hudTop-24)};
+   this.signals[this.drawIndex]={...indicator,anchor:{x:indicator.x,y:clamp(Math.min(reel.y+28*size,layout.hudTop-36),layout.headerBottom+20,layout.hudTop-24)},kind:'ledger'};linePoints.push(indicator);const glow=c.createLinearGradient(indicator.x-4,0,indicator.x+4,0);glow.addColorStop(0,'#6a7454');glow.addColorStop(.45,'#edefc0');glow.addColorStop(1,'#9cac73');this.ellipse(indicator.x,indicator.y,6*size,12*size,glow,'#303e2e',.8);
    this.line([{x:indicator.x,y:indicator.y+11*size},{x:indicator.x+3*size,y:h+25}],'rgba(170,182,157,.6)',.7);
   }
   linePoints.push(...guides,tip);
@@ -154,20 +156,25 @@ export class LakeScene{
   if(RIGS[r].feeder){c.save();c.translate(p.x,p.y);c.rotate(this.clock*4);c.fillStyle='#8a7960';c.fillRect(-4*size,-7*size,8*size,14*size);for(let i=-3;i<=3;i+=2)this.line([{x:i*size,y:-7*size},{x:i*size,y:7*size}],'#bdc4a7',.6);for(const y of [-6,0,6])this.line([{x:-4*size,y:y*size},{x:4*size,y:y*size}],'#c6ceb0',.8);c.restore();}else this.ellipse(p.x,p.y,2*size,4*size,'#667363');
  }
  paintSignal(active){
-  const target=this.signals[active],canvas=this.signalCanvas;if(!target||!canvas)return;
-  const ctx=canvas.getContext('2d'),r=this.ratio,roi=target.kind==='float'?46:target.kind==='ledger'?95:115;
-  const sx=clamp(target.x-roi/2,0,Math.max(0,this.width-roi)),sy=clamp(target.y-roi*(target.kind==='float'?.45:.32),0,Math.max(0,this.height-roi*.65));
-  ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(this.canvas,sx*r,sy*r,roi*r,roi*.65*r,0,0,canvas.width,canvas.height);
+  const target=this.signals[active],canvas=this.signalCanvas;if(!target||!canvas||!this.signalVisible)return;
+  // Fixed optical axis: following the moving tip would hide the bite itself.
+  const anchor=target.anchor||target,roi=target.kind==='float'?54:target.kind==='ledger'?110:130;
+  const roiHeight=roi*canvas.height/canvas.width,sx=anchor.x-roi/2,sy=anchor.y-roiHeight/2-(target.kind==='float'?8:0);
+  const ctx=canvas.getContext('2d'),mainCtx=this.ctx,metrics={...this.metrics};
+  const saved={signals:this.signals,targets:this.targets,target:this.target,tip:this.tip,drawIndex:this.drawIndex,pose:this.pose};
+  ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,canvas.width,canvas.height);ctx.setTransform(canvas.width/roi,0,0,canvas.height/roiHeight,-sx*canvas.width/roi,-sy*canvas.height/roiHeight);
+  try{this.ctx=ctx;this.drawFrame(0);}finally{this.ctx=mainCtx;ctx.restore();Object.assign(this,saved);this.metrics={...metrics,opticalDetail:true};}
  }
- render(dt){if(!this.image)return;this.clock+=Math.max(0,dt);this.cachePhotograph();this.water();this.drawRipples();
+ render(dt){if(!this.image)return;this.clock+=Math.max(0,dt);this.cachePhotograph();this.drawFrame(dt);this.paintSignal(this.game.activeIndex||0);}
+ drawFrame(dt){this.water();this.drawRipples();
   const session=this.game,rods=session.enabledRods||[session],active=session.activeIndex||0;this.drawCount=rods.length;this.targets=[];this.signals=[];
   for(let i=0;i<rods.length;i++){
    const g=rods[i];this.game=g;this.drawIndex=i;
-   const targetPose=['held','fight'].includes(g.phase)?g.lifting?.9:.5:0;this.poseByRod[i]=mix(this.poseByRod[i],targetPose,1-Math.exp(-Math.max(0,dt)*8));this.pose=this.poseByRod[i];
+   const strikePulse=Math.max(0,1-(g.time-g.lastStrikeAt)/.55);const targetPose=Math.max(['held','fight'].includes(g.phase)?g.lifting?.9:.5:0,strikePulse*.85);this.poseByRod[i]=mix(this.poseByRod[i],targetPose,1-Math.exp(-Math.max(0,dt)*8));this.pose=this.poseByRod[i];
    this.target=waterPoint(this.width,this.height,this.waterTop,g.distance||30,(g.castAngle||0)-this.yaw+(rods.length>1?(i===0?-.05:.05):0));if(g.loadout.method==='float')this.target.x-=this.width*.12;this.targets.push({...this.target});
    this.drawFish();if(g.loadout.method==='float'&&['waiting','bite'].includes(g.phase))this.drawFloat(this.target,false);this.drawRig();
   }
-  this.game=session;this.target=this.targets[active];this.paintSignal(active);
+  this.game=session;this.target=this.targets[active];
  }
 
  dispose(){window.removeEventListener('resize',this.onResize);}
