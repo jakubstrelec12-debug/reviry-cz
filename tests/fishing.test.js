@@ -9,3 +9,10 @@ test('cannot land fish at distance or without exhausting it',()=>{const g=hooked
 test('maximum brake and continuous lifting can break the line',()=>{let n=0;const seq=[.1,0,.99];const g=hooked(()=>seq[n++%seq.length]);g.drag=.95;g.reeling=true;g.lifting=true;step(g,100);assert.equal(g.phase,'escaped');assert.match(g.result.reason,/praskl/);});
 test('arbitrary delta spikes do not skip an entire fight',()=>{const g=hooked();const before=g.stamina;g.tick(99999);assert.ok(g.stamina>before-.01);});
 test('casting only available outside an active catch',()=>{const g=hooked();assert.equal(g.startCast(),false);assert.equal(g.grab(),false);assert.equal(g.strike(),false);});
+
+test('lower frame rates advance real fishing time using bounded simulation substeps',()=>{
+ const slow=new Fishing(()=>.1),fast=new Fishing(()=>.1);for(const g of [slow,fast]){g.startCast();g.releaseCast();}
+ for(let i=0;i<20;i++)slow.advance(.2);for(let i=0;i<80;i++)fast.tick(.05);
+ assert.ok(Math.abs(slow.time-fast.time)<1e-8);assert.equal(slow.phase,fast.phase);assert.ok(Math.abs(slow.elapsed-fast.elapsed)<1e-8);
+ const before=slow.time;slow.advance(120);assert.ok(slow.time-before<=.250000001);slow.paused=true;const frozen=JSON.stringify(slow);slow.advance(.2);assert.equal(JSON.stringify(slow),frozen);
+});

@@ -43,6 +43,11 @@ export class Fishing {
     this.emit('landed',this.result);return true;}
   lose(reason){this.phase='escaped';this.reeling=false;this.lifting=false;this.result={reason};this.emit('escaped',{reason});}
   retrieve(){if(!['waiting','bite','held'].includes(this.phase))return;this.phase='ready';this.reeling=false;this.lifting=false;this.emit('retrieved');}
+  advance(elapsed){
+    if(!Number.isFinite(elapsed)||elapsed<=0)return;
+    let remaining=Math.min(.25,elapsed);
+    while(remaining>1e-8){const step=Math.min(.05,remaining);this.tick(step);remaining-=step;}
+  }
   tick(dt){if(this.paused)return;dt=Math.min(Math.max(dt,0),0.05);this.time+=dt;this.elapsed+=dt;
     if(this.phase==='casting')this.castPower=Math.min(1,this.castPower+dt/1.7);
     if(this.phase==='flying'&&this.elapsed>1.1){this.phase='waiting';if(RIGS[this.loadout.rig].feeder)this.depositFeed(20);this.biteIn=biteDelay(this.loadout,this.random(),this.feedBonus);this.elapsed=0;this.emit('splash');}
