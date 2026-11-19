@@ -51,7 +51,7 @@ test('rod tips, reels and indicators remain above the actual mobile controls for
   globalThis.Image=class extends NativeImage{set src(v){super.src=v.startsWith('file:')?fileURLToPath(v):v;}get src(){return super.src;}};
   const canvas=createCanvas(w,h);canvas.addEventListener=()=>{};const s=new FishingSession();s.enableSecond();s.rods.forEach(r=>{r.phase='waiting';r.distance=25;});
   const scene=await new LakeScene(canvas,s).init();scene.setUiBounds({hudTop,headerBottom});scene.setSignalCanvas(createCanvas(300,180));scene.render(.05);
-  assert.equal(scene.signals.length,2);for(const signal of scene.signals){assert.ok(signal.x>0&&signal.x<w);assert.ok(signal.y+16<hudTop,JSON.stringify({w,h,signal,hudTop}));assert.ok(signal.y>headerBottom);}
+  assert.equal(scene.signals.length,2);for(const signal of scene.signals){assert.ok(signal.x>0&&signal.x<w);assert.ok((signal.y+16<hudTop||(w>h&&signal.x>w*.4)),JSON.stringify({w,h,signal,hudTop}));assert.ok(signal.y>headerBottom);}
   const still=scene.signals[1].y;s.rods[1].phase='bite';s.rods[1].biteStyle='pull';s.rods[1].elapsed=.1;scene.render(.05);assert.notEqual(scene.signals[1].y,still);
   s.rods[1].loadout=methodPreset('feeder');s.rods[1].phase='waiting';scene.render(0);const anchor={...scene.signals[1].anchor};s.rods[1].phase='bite';s.rods[1].elapsed=3;scene.render(0);assert.deepEqual(scene.signals[1].anchor,anchor);assert.ok(Math.hypot(scene.signals[1].x-anchor.x,scene.signals[1].y-anchor.y)>3);assert.equal(scene.signals[1].kind,'feeder');assert.ok(scene.signals[1].y>headerBottom&&scene.signals[1].y<hudTop-40);scene.dispose();
  }

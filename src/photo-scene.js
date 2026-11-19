@@ -124,7 +124,7 @@ export class LakeScene{
   const guides=[[.096,.079],[.139,.117],[.178,.157],[.231,.214],[.305,.295],[.407,.413]].map(([u,v])=>{const p=at(u,v);return {x:p.x+shift(v),y:p.y};});
   const reel=at(.65,.762),points=[reel];
   if(!feeder&&['waiting','bite'].includes(g.phase)){
-   const origin=at(.43,.66),limit=(this.inset.hudTop??this.height*.82)-26;
+   const origin=at(.43,.80),limit=this.height>this.width?(this.inset.hudTop??this.height*.82)-26:Infinity;
    const anchor={x:origin.x,y:Math.min(origin.y,limit)},motion=biteMotion(g,this.clock).ledgerLift;
    const indicator={x:anchor.x,y:anchor.y+motion};
    this.signals[this.drawIndex]={...indicator,anchor,kind:'ledger'};
