@@ -2,7 +2,7 @@ import {Preparation} from './preparation.js?v=0.8.0';
 import {METHODS,BAITS,FEEDS,setupSummary,validateLoadout} from './tackle.js?v=0.8.0';
 import {showCatchPhoto,photoFor} from './fish-photos.js?v=0.8.0';
 import {FishingSession as Fishing} from './session.js?v=0.8.0';
-import {LakeScene} from './photo-scene.js?v=0.8.0';
+import {LakeScene} from './photo-scene.js?v=0.8.0a';
 const $=id=>document.getElementById(id);const game=new Fishing();let lake;let last=performance.now(),started=false,drawerOpen=false,audio=null,soundOn=false,toastTimer;
 const setHidden=(id,hidden)=>$(id).classList.toggle('hidden',hidden);
 function toast(message){$('toast').textContent=message;setHidden('toast',false);clearTimeout(toastTimer);toastTimer=setTimeout(()=>setHidden('toast',true),4000);}
