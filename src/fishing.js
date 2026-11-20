@@ -52,7 +52,7 @@ export class Fishing {
     this.emit('hooked',{strike:result});return true;}
   net(){if(this.paused||this.phase!=='fight'||this.distance>5||this.stamina>.35)return false;this.netDeployed=true;return true;}
   land(){if(this.phase!=='fight')return false;
-    this.phase='landed';this.steer=0;this.result={...this.fish,speciesId:this.fish.id,venueId:this.venueId,loadout:{...this.loadout},trip:{...this.trip},spotId:this.area.id,cast:this.castReport?{...this.castReport}:null,strike:this.lastStrike?{...this.lastStrike}:null,date:new Date().toISOString(),id:Date.now()};
+    this.phase='landed';this.steer=0;this.result={...this.fish,speciesId:this.fish.id,venueId:this.venueId,loadout:{...this.loadout},trip:{...this.trip},spotId:waterSpot(this.throwDistance||this.distance,this.castAngle).id,cast:this.castReport?{...this.castReport}:null,strike:this.lastStrike?{...this.lastStrike}:null,date:new Date().toISOString(),id:Date.now()};
     this.journal.unshift(this.result);this.journal=this.journal.slice(0,100);this.reeling=false;this.lifting=false;
     this.emit('landed',this.result);return true;}
   lose(reason,detail={}){this.phase='escaped';this.reeling=false;this.lifting=false;this.steer=0;this.netDeployed=false;this.netProgress=0;this.result={reason,...detail};this.emit('escaped',{reason,...detail});}

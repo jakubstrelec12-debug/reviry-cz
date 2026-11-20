@@ -33,3 +33,5 @@ test('a last bank surge can happen once, can force line out, and does not repeat
 test('aims persist independently and old expeditions migrate within the actual rod range',()=>{
  const s=new FishingSession();s.enableSecond();s.rods[0].setAim(18,-.2);s.rods[1].setAim(46,.3);const saved=s.exportSetup(),other=new FishingSession();assert.ok(other.restoreSetup(saved));assert.deepEqual(other.exportSetup().aims,saved.aims);assert.equal(other.restoreSetup({...saved,aims:[{distance:NaN,angle:0}]}),false);
 });
+
+test('the catch records the fishing area before retrieval, not the bank where it was netted',()=>{const g=atBank();g.throwDistance=47;g.castAngle=.28;g.land();assert.equal(g.result.spotId,'edge');});
