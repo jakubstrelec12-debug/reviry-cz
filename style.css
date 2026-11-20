@@ -108,6 +108,8 @@ body:is([data-phase=waiting],[data-phase=bite],[data-phase=held],[data-phase=fig
 .welcome #welcomeTrip{max-width:none;width:100%;padding:12px}.rod-monitor.empty canvas{display:none}.rod-monitor.empty .monitor-state{min-height:0}
 
 #intro .welcome{max-height:calc(100dvh - 32px);overflow-y:auto}
+/* Keep the visible sound and environment controls reachable on the welcome screen. */
+body:has(#intro:not(.hidden)) header{z-index:11}
 
 body.immersive:is([data-phase="waiting"],[data-phase="bite"],[data-phase="fight"]) .status-block{display:none}body.immersive .fight-stats>span:nth-child(2){display:none}body.immersive #crosshair,body.immersive #lookHint{display:none}body.immersive #signalState{font-weight:400}body.immersive .rod-monitor{background:#142e2bbf;backdrop-filter:blur(8px)}#guideMode{max-width:none;margin:10px 8px 10px 0}
 
