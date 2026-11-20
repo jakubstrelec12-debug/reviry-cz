@@ -341,10 +341,53 @@ export class LakeScene{
   }
   ctx.restore();
  }
+ paintFeederSignal(active,canvas){
+  const rod=this.game.enabledRods?.[active]||this.game;
+  const motion=biteMotion(rod,rod.time);
+  const ctx=canvas.getContext('2d');if(!ctx)return;
+  const w=canvas.width,h=canvas.height;
+  const flex=clamp(motion.feederFlex||0,-34,34);
+  // The support remains fixed: only the final flexible section moves.
+  // Magnify real flex to make subtle touches readable, but cap the deformation.
+  const bend=flex*1.75;
+  ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,w,h);
+  const bg=ctx.createLinearGradient(0,0,w,h);
+  bg.addColorStop(0,'#233f39');bg.addColorStop(1,'#0d2428');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+  // Faint neutral reference line shows the resting tip location.
+  const x0=w*.06,y0=h*.76,x1=w*.91,y1=h*.32;
+  ctx.lineCap='round';ctx.setLineDash([5,6]);ctx.strokeStyle='rgba(226,236,211,.28)';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(w*.50,h*.53);ctx.lineTo(x1,y1);ctx.stroke();ctx.setLineDash([]);
+  // Graphite blank with a brightly painted orange/yellow feeder quiver tip.
+  const midx=w*.54,midy=h*.52;
+  ctx.lineWidth=13;ctx.strokeStyle='#142120';
+  ctx.beginPath();ctx.moveTo(x0,y0);ctx.quadraticCurveTo(w*.28,h*.65,midx,midy);ctx.stroke();
+  const tipx=x1,tipy=y1+bend;
+  ctx.beginPath();ctx.moveTo(midx,midy);ctx.quadraticCurveTo(w*.75,h*.40+bend*.30,tipx,tipy);
+  ctx.lineWidth=9;ctx.strokeStyle='#f6a53e';ctx.stroke();
+  ctx.beginPath();ctx.moveTo(w*.76,h*.41+bend*.30);ctx.quadraticCurveTo(w*.86,h*.35+bend*.62,tipx,tipy);
+  ctx.lineWidth=6;ctx.strokeStyle='#f1ec92';ctx.stroke();
+  // Guide rings move with the flexible part, without moving the reel.
+  const guides=[[.60,.49,.10],[.77,.405,.30],[.91,.32,1]];
+  for(const [gx,gy,weight] of guides){
+    const px=w*gx,py=h*gy+bend*weight;
+    ctx.strokeStyle='#dbe4da';ctx.lineWidth=3;ctx.beginPath();
+    ctx.ellipse(px,py,8,12,-.6,0,Math.PI*2);ctx.stroke();
+  }
+  // Hanging line runs from the final ring toward the water below.
+  ctx.strokeStyle='rgba(224,235,229,.6)';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(tipx,tipy);ctx.lineTo(tipx-15,Math.min(h*.95,tipy+85));ctx.stroke();
+  if(motion.stage==='touch'||motion.stage==='run'){
+    ctx.fillStyle=motion.stage==='touch'?'#f1cf75':'#8de0b1';
+    ctx.beginPath();ctx.arc(w*.14,h*.17,8,0,Math.PI*2);ctx.fill();
+  }
+  ctx.restore();
+ }
  paintSignal(active,canvas=this.signalCanvas,force=false){
   if(!canvas||(!force&&!this.signalVisible))return;
   const activeRod=this.game.enabledRods?.[active]||this.game;
   if(activeRod.loadout.method==='ledger'){this.paintLedgerSignal(active,canvas);return;}
+  if(activeRod.loadout.method==='feeder'){this.paintFeederSignal(active,canvas);return;}
   const target=this.signals[active];if(!target)return;
   // Fixed optical axis: following the moving tip would hide the bite itself.
   const anchor=target.anchor||target,roi=target.kind==='float'?54:target.kind==='ledger'?110:130;
