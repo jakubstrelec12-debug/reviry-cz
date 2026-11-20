@@ -7,7 +7,7 @@ import {Preparation} from './preparation.js?v=0.22.0';
 import {METHODS,BAITS,FEEDS,setupSummary,validateLoadout} from './tackle.js?v=0.22.0';
 import {showCatchPhoto,photoFor} from './fish-photos.js?v=0.22.0';
 import {FishingSession as Fishing} from './session.js?v=0.22.0';
-import {LakeScene} from './photo-scene.js?v=0.22.3';
+import {LakeScene} from './photo-scene.js?v=0.22.4';
 const $=id=>document.getElementById(id);
 // Preserve a tappable water area on portrait phones; spots remain expandable on demand.
 if(window.matchMedia('(max-width:650px) and (orientation:portrait)').matches) $('targetPanel').open=false;const game=new Fishing();let lake;let last=performance.now(),started=false,drawerOpen=false,audio=null,soundOn=false,toastTimer,venueOpen=false,venueLoading=false;
