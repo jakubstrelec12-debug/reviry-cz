@@ -1,9 +1,9 @@
-import {RodPresentation,environmentAt,handResponse} from './immersion.js?v=0.20.0';
-import {runForce} from './encounter.js?v=0.20.0';
-import {tripConditions} from './trip.js?v=0.20.0';
-import {getVenue} from './venues.js?v=0.20.0';
-import {biteMotion} from './bite-motion.js?v=0.20.0';
-import {RODS,RIGS} from './tackle.js?v=0.20.0';
+import {RodPresentation,environmentAt,handResponse} from './immersion.js?v=0.21.0';
+import {runForce} from './encounter.js?v=0.21.0';
+import {tripConditions} from './trip.js?v=0.21.0';
+import {getVenue} from './venues.js?v=0.21.0';
+import {biteMotion} from './bite-motion.js?v=0.21.0';
+import {RODS,RIGS} from './tackle.js?v=0.21.0';
 
 export const PHOTO=getVenue('vajgar').photo;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -50,7 +50,7 @@ export class LakeScene{
   try{this.high=localStorage.getItem('reviry-quality')!=='low';const pref=localStorage.getItem('reviry-wide-view');this.widePreference=pref===null?null:pref==='on';this.wideView=this.widePreference??(this.venueId==='jarosov');}catch{this.high=true;this.widePreference=null;this.wideView=this.venueId==='jarosov';}
   this.photoLayer=document.createElement('canvas');this.photoCtx=this.photoLayer.getContext('2d');this.background=document.createElement('canvas');this.bctx=this.background.getContext('2d');this.lastView='';this.bindLook();this.onResize=()=>this.resize();window.addEventListener('resize',this.onResize);
  }
- async init(){const loaded=await this.loadVenuePhoto(this.photo);this.photo=loaded.photo;this.image=loaded.image;this.equipment={};await Promise.all([['rod','assets/equipment/rod-hand.webp'],['float','assets/equipment/waggler.webp'],['deck','assets/equipment/fishing-deck.webp'],['resting','assets/equipment/resting-feeder.webp'],['held','assets/equipment/held-feeder.webp'],['animatedHeld','assets/equipment/held-animated.webp'],['windingHand','assets/equipment/winding-hand.webp'],['emptyStand','assets/equipment/empty-tripod.webp'],['reeds','assets/equipment/shore-reeds.webp']].map(async([key,path])=>{try{this.equipment[key]=await loadImage(path);}catch{this.assetWarnings.push(path);}}));this.resize();this.render(0);return this;}
+ async init(){const loaded=await this.loadVenuePhoto(this.photo);this.photo=loaded.photo;this.image=loaded.image;this.equipment={};await Promise.all([['rod','assets/equipment/rod-hand.webp'],['float','assets/equipment/waggler.webp'],['deck','assets/equipment/fishing-deck.webp'],['resting','assets/equipment/resting-feeder.webp'],['held','assets/equipment/held-feeder.webp'],['animatedHeld','assets/equipment/held-animated.webp'],['windingHand','assets/equipment/winding-hand.webp'],['emptyStand','assets/equipment/empty-tripod.webp'],['reeds','assets/equipment/shore-reeds.webp'],['bobbin','assets/equipment/bobbin-photo.webp']].map(async([key,path])=>{try{this.equipment[key]=await loadImage(path);}catch{this.assetWarnings.push(path);}}));this.resize();this.render(0);return this;}
  async loadVenuePhoto(photo){try{return {photo,image:await loadImage(photo.src)};}catch(error){if(!photo.fallback)throw error;return {photo:{...photo.fallback,externalUnavailable:true},image:await loadImage(photo.fallback.src)};}}
  async setVenue(id){const loaded=await this.loadVenuePhoto(getVenue(id).photo);this.photo=loaded.photo;this.image=loaded.image;this.venueId=getVenue(id).id;if(this.widePreference===null)this.wideView=this.venueId==='jarosov';this.yaw=0;this.pitch=0;this.ripples=[];this.feedThrow=null;this.lastView='';this.render(0);}
  setWideView(value){this.wideView=Boolean(value);this.widePreference=this.wideView;try{localStorage.setItem('reviry-wide-view',this.wideView?'on':'off');}catch{}this.lastView='';this.render(0);}
@@ -125,6 +125,16 @@ export class LakeScene{
  drawEmptyStand(){const image=this.equipment?.emptyStand;if(!image)return;const {x,y,width,height,at}=restingLayout(this.width,this.height,{index:this.drawIndex,count:this.drawCount,shoreTop:this.shoreTop});
   for(const [u,v] of [[.225,.947],[.501,.909],[.783,.947]]){const p=at(u,v);this.ellipse(p.x,p.y+2,width*.044,height*.006,'rgba(9,17,16,.23)');}
   this.ctx.save();this.ctx.filter='saturate(.76) brightness(.88)';this.ctx.drawImage(image,x,y,width,height);this.ctx.restore();
+ }
+ drawHangingBobbin(indicator,tether,lift=0,size=1){
+  const c=this.ctx,image=this.equipment?.bobbin,height=25*size,width=image?height*image.width/image.height:7*size,tilt=Math.sin(this.clock*.9+this.drawIndex)*.015+clamp(lift,-30,30)*.0007;
+  // The fishing line contacts the steel balls, not the middle of the body.
+  const eye={x:indicator.x-Math.sin(tilt)*height*.94,y:indicator.y+Math.cos(tilt)*height*.94},sag=clamp(8+lift*.25,2,16)*size;
+  c.save();c.beginPath();c.moveTo(eye.x,eye.y);c.quadraticCurveTo((eye.x+tether.x)/2,(eye.y+tether.y)/2+sag,tether.x,tether.y);c.strokeStyle='rgba(17,28,24,.8)';c.lineWidth=1*size;c.stroke();c.strokeStyle='rgba(140,153,133,.55)';c.lineWidth=.35*size;c.stroke();
+  c.translate(indicator.x,indicator.y);c.rotate(tilt);
+  if(image){c.filter='saturate(.78) brightness(.94)';c.drawImage(image,-width/2,-height*.035,width,height);this.metrics.drawImages++;this.metrics.bobbinPhoto=true;}
+  else{c.fillStyle='#d2d1b7';c.strokeStyle='#5b6555';c.lineWidth=.6;c.beginPath();c.roundRect(-width/2,height*.32,width,height*.57,width*.35);c.fill();c.stroke();c.fillStyle='#29322c';c.fillRect(-width*.17,0,width*.34,height*.34);}
+  c.restore();
  }
  drawReel(image,x,y,scale,g,m){if(!this.equipment?.animatedHeld||!m)return;const c=this.ctx,ax=x+image.width*.681*scale,ay=y+image.height*.810*scale,ex=ax+Math.cos(m.crank)*48*scale,ey=ay+Math.sin(m.crank)*62*scale;
   this.line([{x:ax,y:ay},{x:ex,y:ey}],'#303a39',5*scale);this.line([{x:ax-.6,y:ay-.5},{x:ex-.6,y:ey-.5}],'#aeb5ae',2.4*scale);this.ellipse(ex,ey,9*scale,5*scale,'#202a29','#7e8780',.5);
@@ -217,11 +227,10 @@ export class LakeScene{
    const type=g.loadout.indicator||'bobbin',tether=at(.50,.91),arm=Math.hypot(anchor.x-tether.x,anchor.y-tether.y),angle=Math.atan2(anchor.y-tether.y,anchor.x-tether.x)+(motion/Math.max(30,arm));
    const indicator=type==='bobbin'?{x:anchor.x,y:anchor.y+motion}:{x:tether.x+Math.cos(angle)*arm,y:tether.y+Math.sin(angle)*arm};
    this.signals[this.drawIndex]={...indicator,anchor,kind:'ledger'};
-   points.push(indicator);const grad=c.createLinearGradient(indicator.x-3,0,indicator.x+3,0);grad.addColorStop(0,'#4e5941');grad.addColorStop(.45,'#c6cca0');grad.addColorStop(1,'#7f8d60');
+   points.push(indicator);
 
    if(type!=='bobbin')this.line([tether,indicator],'#8d9a94',2);
-   this.ellipse(indicator.x,indicator.y,3.5,7,type==='bobbin'?grad:'#72b8c6','#28332b',.6);
-   if(type==='bobbin')this.line([{x:indicator.x,y:indicator.y+7},tether],'rgba(100,115,94,.6)',.55);
+   if(type==='bobbin')this.drawHangingBobbin(indicator,tether,motion);else this.ellipse(indicator.x,indicator.y,3.5,7,'#72b8c6','#28332b',.6);
    if(type==='electronic'){
     const alarm=at(.43,.72),lit=Math.abs(biteMotion(g,this.clock).ledgerLift)>1&&Math.sin(this.clock*12)>0;
     c.fillStyle='#263035';c.strokeStyle='#8b9994';c.lineWidth=.7;c.beginPath();c.roundRect(alarm.x-5,alarm.y-8,10,17,3);c.fill();c.stroke();
@@ -276,8 +285,7 @@ export class LakeScene{
   const linePoints=[{x:reel.x-10*size,y:reel.y+2*size}];
   if(method==='ledger'&&!hand&&['waiting','bite'].includes(g.phase)){
    const lift=biteMotion(g,this.clock).ledgerLift,indicator={x:reel.x-28*size,y:clamp(Math.min(reel.y+28*size,layout.hudTop-36)+lift,layout.headerBottom+20,layout.hudTop-24)};
-   this.signals[this.drawIndex]={...indicator,anchor:{x:indicator.x,y:clamp(Math.min(reel.y+28*size,layout.hudTop-36),layout.headerBottom+20,layout.hudTop-24)},kind:'ledger'};linePoints.push(indicator);const glow=c.createLinearGradient(indicator.x-4,0,indicator.x+4,0);glow.addColorStop(0,'#6a7454');glow.addColorStop(.45,'#edefc0');glow.addColorStop(1,'#9cac73');this.ellipse(indicator.x,indicator.y,6*size,12*size,glow,'#303e2e',.8);
-   this.line([{x:indicator.x,y:indicator.y+11*size},{x:indicator.x+3*size,y:h+25}],'rgba(170,182,157,.6)',.7);
+   this.signals[this.drawIndex]={...indicator,anchor:{x:indicator.x,y:clamp(Math.min(reel.y+28*size,layout.hudTop-36),layout.headerBottom+20,layout.hudTop-24)},kind:'ledger'};linePoints.push(indicator);this.drawHangingBobbin(indicator,{x:indicator.x+12*size,y:layout.hudTop+20},lift,size);
   }
   linePoints.push(...guides,tip);
   let end=this.target;
