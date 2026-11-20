@@ -21,10 +21,11 @@ test('cast release follows through then settles, and wind is bounded and repeata
  for(let t=0;t<200;t++){const a=environmentAt(t*.3);assert.deepEqual(a,environmentAt(t*.3));assert.ok(a.gust>=.05&&a.gust<=1);assert.ok(Math.abs(a.sway)<=.81);}
 });
 class Param{constructor(){this.value=0;}setValueAtTime(v){this.value=v;}setTargetAtTime(v){this.value=v;}exponentialRampToValueAtTime(v){this.value=v;}}
-class Node{constructor(ctx,type){this.ctx=ctx;this.kind=type;this.gain=new Param();this.frequency=new Param();this.pan=new Param();this.Q=new Param();}connect(){return this;}start(){this.ctx.started.push(this.kind==='buffer'&&this.loop?'ambient':this.kind);}stop(){}}
-class FakeContext{constructor(){this.currentTime=0;this.sampleRate=2000;this.state='running';this.destination={};this.started=[];}createGain(){return new Node(this,'gain');}createBiquadFilter(){return new Node(this,'filter');}createBufferSource(){return new Node(this,'buffer');}createOscillator(){return new Node(this,'tone');}createStereoPanner(){return new Node(this,'pan');}createBuffer(ch,n){return {getChannelData:()=>new Float32Array(n)};}resume(){this.state='running';return Promise.resolve();}suspend(){this.state='suspended';return Promise.resolve();}}
+class Node{constructor(ctx,type){this.ctx=ctx;this.kind=type;this.gain=new Param();this.frequency=new Param();this.pan=new Param();this.Q=new Param();this.playbackRate=new Param();}connect(){return this;}start(){this.ctx.started.push(this.buffer?.name|| (this.kind==='buffer'&&this.loop?'ambient':this.kind));}stop(){this.stopped=true;}}
+class FakeContext{constructor(){this.currentTime=0;this.sampleRate=2000;this.state='running';this.destination={};this.started=[];}createGain(){return new Node(this,'gain');}createBiquadFilter(){return new Node(this,'filter');}createBufferSource(){return new Node(this,'buffer');}createOscillator(){return new Node(this,'tone');}createStereoPanner(){return new Node(this,'pan');}createBuffer(ch,n){const data=new Float32Array(n);return {duration:n/this.sampleRate,getChannelData:()=>data};}decodeAudioData(){return Promise.resolve({duration:3});}resume(){this.state='running';return Promise.resolve();}suspend(){this.state='suspended';return Promise.resolve();}}
+function sampleSound(){const sound=new LakeSound(FakeContext);sound.samples=Object.fromEntries(['reel','drag','splash'].map(name=>[name,{duration:name==='splash'?.68:3,name}]));return sound;}
 test('soundscape pauses foreground sound, follows control and line movement, and resumes without duplicate ambient loops',async()=>{
- const s=new LakeSound(FakeContext),g=new Fishing();assert.deepEqual(s.context.started,['ambient','ambient']);g.paused=true;s.update(g,.1);const quiet=s.context.started.length;s.alarm();s.event('cast',{},g);assert.equal(s.context.started.length,quiet);assert.equal(s.effects.gain.value,0);assert.ok(s.master.gain.value>0);s.confirm();assert.equal(s.context.started.at(-1),'tone');
+ const s=sampleSound(),g=new Fishing();assert.deepEqual(s.context.started,['ambient','ambient']);g.paused=true;s.update(g,.1);const quiet=s.context.started.length;s.alarm();s.event('cast',{},g);assert.equal(s.context.started.length,quiet);assert.equal(s.effects.gain.value,0);assert.ok(s.master.gain.value>0);s.confirm();assert.equal(s.context.started.at(-1),'tone');
  g.paused=false;s.update(g,.1);s.alarm();assert.equal(s.context.started.at(-1),'tone');const count=s.context.started.length;g.phase='fight';g.reeling=true;g.tension=.4;g.lineOutRate=0;s.update(g,.1);assert.ok(s.context.started.length>count);
  g.reeling=false;g.lineOutRate=1;const drag=s.context.started.length;s.update(g,.2);assert.ok(s.context.started.length>drag);
  await s.suspend();const stopped=s.context.started.length;s.update(g,10);assert.equal(s.context.started.length,stopped);await s.resume();s.update(g,.2);assert.equal(s.context.started.filter(x=>x==='ambient').length,2);
@@ -37,19 +38,24 @@ test('blank flex lags load, responds to head shakes and settles without advancin
  const slow=new RodPresentation(),fast=new RodPresentation();g.phase='fight';for(let i=0;i<30;i++)slow.update(g,1/30);for(let i=0;i<120;i++)fast.update(g,1/120);assert.ok(Math.abs(slow.bend-fast.bend)<.001);
 });
 test('master volume clamps to a safe range and persists when effects pause',()=>{
- const s=new LakeSound(FakeContext);s.setVolume(.4);assert.ok(Math.abs(s.master.gain.value-.26)<1e-9);s.setPaused(true);assert.ok(Math.abs(s.master.gain.value-.26)<1e-9);s.setVolume(-1);assert.equal(s.master.gain.value,0);s.setVolume(2);assert.equal(s.master.gain.value,.65);
+ const s=sampleSound();s.setVolume(.4);assert.ok(Math.abs(s.master.gain.value-.26)<1e-9);s.setPaused(true);assert.ok(Math.abs(s.master.gain.value-.26)<1e-9);s.setVolume(-1);assert.equal(s.master.gain.value,0);s.setVolume(2);assert.equal(s.master.gain.value,.65);
 });
 test('audition plays all three effects through menu pause, while ordinary game effects stay muted',()=>{
- const s=new LakeSound(FakeContext);s.setPaused(true);
+ const s=sampleSound();s.setPaused(true);
  for(const name of ['reel','drag','splash']){const before=s.context.started.length;s.preview(name);assert.ok(s.context.started.length>before,name);}
- const before=s.context.started.length;s.reelClick();s.dragClick();s.splash();assert.equal(s.context.started.length,before);
+ const before=s.context.started.length;s.playSample('reel');s.playSample('drag');s.splash();assert.equal(s.context.started.length,before);
 });
-test('reel and drag cues follow controls and actual payout independently on both rods',()=>{
- const s=new LakeSound(FakeContext),a=new Fishing(),b=new Fishing(),reel=[],drag=[],splash=[];
- s.reelClick=pan=>reel.push(pan);s.dragClick=pan=>drag.push(pan);s.splash=(distance,pan)=>splash.push({distance,pan});
- a.phase=b.phase='fight';a.reeling=true;a.lineOutRate=0;b.reeling=false;b.lineOutRate=1;b.distance=20;
- s.update({paused:false,enabledRods:[a,b],trip:a.trip},.1);assert.equal(reel.length,1);assert.equal(drag.length,1);assert.ok(reel[0]<0);assert.ok(drag[0]>0);
- a.reeling=false;b.lineOutRate=0;s.update({paused:false,enabledRods:[a,b],trip:a.trip},.2);assert.equal(reel.length,1);assert.equal(drag.length,1);
- s.event('splash',{rodIndex:1},b);assert.equal(splash.length,1);assert.equal(splash[0].distance,20);assert.ok(splash[0].pan>0);
- const before=reel.length;s.event('retrieved',{rodIndex:0},a);assert.equal(reel.length,before+7);
+test('recorded reel and drag loop independently on two rods, stop on release and do not restart each frame',()=>{
+ const s=sampleSound(),a=new Fishing(),b=new Fishing();a.phase=b.phase='fight';a.reeling=true;a.lineOutRate=0;b.reeling=false;b.lineOutRate=1;b.distance=20;
+ const session={paused:false,enabledRods:[a,b],trip:a.trip};s.update(session,.1);
+ const reel=s.tracks.get(0).voices.reel,drag=s.tracks.get(1).voices.drag;assert.ok(reel);assert.ok(drag);assert.equal(reel.source.buffer.name,'reel');assert.equal(drag.source.buffer.name,'drag');
+ const before=s.context.started.length;s.update(session,.1);assert.equal(s.context.started.length,before);
+ a.reeling=false;b.lineOutRate=0;s.update(session,.1);assert.equal(reel.source.stopped,true);assert.equal(drag.source.stopped,true);assert.equal(s.tracks.get(0).voices.reel,undefined);
+ s.event('splash',{rodIndex:1},b);assert.equal(s.context.started.at(-1),'splash');s.event('retrieved',{rodIndex:0},a);assert.equal(s.context.started.at(-1),'reel');
+ a.reeling=true;s.update(session,.1);const playing=s.tracks.get(0).voices.reel;session.paused=true;s.update(session,.1);assert.equal(playing.source.stopped,true);
+});
+test('samples decode once, report download failures and allow retry without synthesizing substitute effects',async()=>{
+ const s=new LakeSound(FakeContext);let calls=0;const fetcher=async()=>{calls++;return {ok:true,arrayBuffer:async()=>new ArrayBuffer(8)}};
+ assert.deepEqual(await s.loadSamples(fetcher),[]);assert.equal(calls,3);await s.loadSamples(fetcher);assert.equal(calls,3);assert.ok(s.samples.reel);
+ const failed=new LakeSound(FakeContext);assert.equal(failed.playSample('reel'),null);assert.equal((await failed.loadSamples(async()=>({ok:false,status:404}))).length,3);assert.deepEqual(await failed.loadSamples(fetcher),[]);
 });
