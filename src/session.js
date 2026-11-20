@@ -1,26 +1,27 @@
-import {DEFAULT_TRIP,validTrip} from './trip.js?v=0.19.0';
-import {VENUES} from './venues.js?v=0.19.0';
-import {Fishing} from './fishing.js?v=0.19.0';
-import {cleanLoadout,validateLoadout,createFeedStocks} from './tackle.js?v=0.19.0';
+import {normalizeAim} from './watercraft.js?v=0.20.0';
+import {DEFAULT_TRIP,validTrip} from './trip.js?v=0.20.0';
+import {VENUES} from './venues.js?v=0.20.0';
+import {Fishing} from './fishing.js?v=0.20.0';
+import {cleanLoadout,validateLoadout,createFeedStocks} from './tackle.js?v=0.20.0';
 const LOCKED=['casting','flying','held','fight','landed'];
 export class FishingSession{
  constructor(random=Math.random){
   this.rods=[new Fishing(random),new Fishing(random)];this.activeIndex=0;this.secondEnabled=false;this.onChange=()=>{};this.onEvent=()=>{};this._paused=false;this._journal=[];
-  const stocks=createFeedStocks();
-  this.rods.forEach((rod,index)=>{rod.feedStocks=stocks;rod.journal=this._journal;rod.onEvent=(event,data)=>{
+  const stocks=createFeedStocks(),spots=[];
+  this.rods.forEach((rod,index)=>{rod.feedStocks=stocks;rod.feedSpots=spots;rod.journal=this._journal;rod.onEvent=(event,data)=>{
    if(event==='landed'){data.rodNumber=index+1;this.journal=rod.journal;}
    this.onEvent(event,{...data,rodIndex:index});this.onChange(this);
   };});
  }
  get trip(){return this.rods[0].trip;}
- setTrip(value){if(!validTrip(value)||this.enabledRods.some(r=>!['ready','escaped'].includes(r.phase)))return false;this.rods.forEach(r=>{r.trip={date:value.date,time:value.time};r.feedSpot=null;});this.onEvent('trip-selected',{trip:{...this.trip}});return true;}
+ setTrip(value){if(!validTrip(value)||this.enabledRods.some(r=>!['ready','escaped'].includes(r.phase)))return false;this.rods.forEach(r=>{r.trip={date:value.date,time:value.time};r.feedSpot=null;r.feedSpots.length=0;});this.onEvent('trip-selected',{trip:{...this.trip}});return true;}
  get venueId(){return this.rods[0].venueId;}
- setVenue(id){if(!Object.hasOwn(VENUES,id)||this.enabledRods.some(r=>!['ready','escaped'].includes(r.phase)))return false;this.rods.forEach(r=>{r.venueId=id;r.feedSpot=null;r.fish=null;r.result=null;r.distance=0;r.phase='ready';});this.onEvent('venue-selected',{venueId:id});return true;}
+ setVenue(id){if(!Object.hasOwn(VENUES,id)||this.enabledRods.some(r=>!['ready','escaped'].includes(r.phase)))return false;this.rods.forEach(r=>{r.venueId=id;r.feedSpot=null;r.feedSpots.length=0;r.fish=null;r.result=null;r.distance=0;r.castReport=null;r.netDeployed=false;r.netProgress=0;r.steer=0;r.phase='ready';});this.onEvent('venue-selected',{venueId:id});return true;}
  get active(){return this.rods[this.activeIndex];}
  get enabledRods(){return this.rods.slice(0,this.secondEnabled?2:1);}
  get paused(){return this._paused;}set paused(value){this._paused=value;this.rods.forEach(r=>r.paused=value);}
  get journal(){return this._journal;}set journal(value){this._journal=value;this.rods.forEach(r=>r.journal=value);}
- select(index){if(index===this.activeIndex)return true;if(!Number.isInteger(index)||index<0||index>=this.enabledRods.length||LOCKED.includes(this.phase))return false;this.reeling=false;this.lifting=false;this.activeIndex=index;this.onEvent('rod-selected',{rodIndex:index});return true;}
+ select(index){if(index===this.activeIndex)return true;if(!Number.isInteger(index)||index<0||index>=this.enabledRods.length||LOCKED.includes(this.phase))return false;this.reeling=false;this.lifting=false;this.steer=0;this.activeIndex=index;this.onEvent('rod-selected',{rodIndex:index});return true;}
  enableSecond(){if(this.secondEnabled)return true;if(this.loadout.method==='float'||LOCKED.includes(this.phase))return false;this.rods[1].loadout={...this.loadout};this.secondEnabled=true;this.select(1);this.onEvent('rod-added',{rodIndex:1});return true;}
  foldSecond(){if(!this.secondEnabled)return true;if(LOCKED.includes(this.rods[1].phase)||LOCKED.includes(this.active.phase))return false;this.rods[1].retrieve();this.rods[1].phase='ready';this.activeIndex=0;this.secondEnabled=false;this.onEvent('rod-folded',{rodIndex:1});return true;}
  applyLoadouts(changes,{addSecond=false}={}){
@@ -35,8 +36,8 @@ export class FishingSession{
  setLoadout(value){if(this.secondEnabled&&value.method==='float')return false;return this.active.setLoadout(value);}
  advance(elapsed){for(const rod of this.enabledRods)rod.advance(elapsed);}
  tick(dt){for(const rod of this.enabledRods)rod.tick(dt);}
- exportSetup(){return {trip:{...this.trip},venueId:this.venueId,secondEnabled:this.secondEnabled,activeIndex:this.activeIndex,loadouts:this.enabledRods.map(r=>({...r.loadout}))};}
- restoreSetup(value){if(!value||!Array.isArray(value.loadouts))return false;if(value.trip!==undefined&&!validTrip(value.trip))return false;const list=value.loadouts;if(!list.length||list.length>2||list.some(v=>validateLoadout(v).length)||list.length===2&&list.some(v=>v.method==='float'))return false;list.forEach((v,i)=>this.rods[i].loadout=cleanLoadout(v));this.rods.forEach(r=>r.trip={...(value.trip||DEFAULT_TRIP)});this.rods.forEach(r=>r.venueId=Object.hasOwn(VENUES,value.venueId)?value.venueId:'vajgar');this.secondEnabled=list.length===2;this.activeIndex=value.activeIndex===1&&this.secondEnabled?1:0;return true;}
+ exportSetup(){return {aims:this.enabledRods.map(r=>({distance:r.aimDistance,angle:r.aimAngle})),trip:{...this.trip},venueId:this.venueId,secondEnabled:this.secondEnabled,activeIndex:this.activeIndex,loadouts:this.enabledRods.map(r=>({...r.loadout}))};}
+ restoreSetup(value){if(!value||!Array.isArray(value.loadouts))return false;if(value.trip!==undefined&&!validTrip(value.trip))return false;const list=value.loadouts;if(value.aims!==undefined&&(!Array.isArray(value.aims)||value.aims.length!==list.length||value.aims.some(a=>!a||!Number.isFinite(a.distance)||!Number.isFinite(a.angle))))return false;if(!list.length||list.length>2||list.some(v=>validateLoadout(v).length)||list.length===2&&list.some(v=>v.method==='float'))return false;list.forEach((v,i)=>{this.rods[i].loadout=cleanLoadout(v);const aim=normalizeAim(v,value.aims?.[i]?.distance??31,value.aims?.[i]?.angle??0);this.rods[i].aimDistance=aim.distance;this.rods[i].aimAngle=aim.angle;});this.rods.forEach(r=>r.trip={...(value.trip||DEFAULT_TRIP)});this.rods.forEach(r=>r.venueId=Object.hasOwn(VENUES,value.venueId)?value.venueId:'vajgar');this.secondEnabled=list.length===2;this.activeIndex=value.activeIndex===1&&this.secondEnabled?1:0;return true;}
 }
-for(const key of ['lineOutRate','lineInRate','phase','time','elapsed','castPower','distance','throwDistance','castAngle','loadout','feedStocks','feedSpot','feedBonus','drag','tension','stamina','reeling','lifting','biteStyle','biteProfile','probe','run','fishBearing','biteWindow','slackToTake','hookQuality','lastStrikeAt','lastStrike','biteIn','biteElapsed','fish','result'])Object.defineProperty(FishingSession.prototype,key,{get(){return this.active[key];},set(value){this.active[key]=value;}});
-for(const name of ['startCast','releaseCast','grab','strike','net','lose','retrieve','feed','emit'])FishingSession.prototype[name]=function(...args){return this.active[name](...args);};
+for(const key of ['recommendedPower','aimDistance','aimAngle','castReport','area','encounterWeights','feedSpots','netDeployed','netAngle','netProgress','steer','fightAim','bankSurge','lineOutRate','lineInRate','phase','time','elapsed','castPower','distance','throwDistance','castAngle','loadout','feedStocks','feedSpot','feedBonus','drag','tension','stamina','reeling','lifting','biteStyle','biteProfile','probe','run','fishBearing','biteWindow','slackToTake','hookQuality','lastStrikeAt','lastStrike','biteIn','biteElapsed','fish','result'])Object.defineProperty(FishingSession.prototype,key,{get(){return this.active[key];},set(value){this.active[key]=value;}});
+for(const name of ['setAim','startCast','releaseCast','grab','strike','net','lose','retrieve','feed','emit'])FishingSession.prototype[name]=function(...args){return this.active[name](...args);};

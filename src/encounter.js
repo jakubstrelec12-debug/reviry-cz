@@ -4,7 +4,7 @@ export function probeLift(game){
  const p=game.probe;if(!p||game.phase!=='waiting')return 0;const t=game.time-p.at;
  if(t<0||t>p.duration)return 0;
  const pulse=(center,width)=>Math.exp(-Math.pow((t-center)/width,2));
- return -p.power*(pulse(.27,.11)+.65*pulse(.78+p.seed*.3,.15)+.35*pulse(1.45+p.seed*.25,.13));
+ return -p.power*(pulse(.27,.11)+((p.taps??3)>1?.65*pulse(.78+p.seed*.3,.15):0)+((p.taps??3)>2?.35*pulse(1.45+p.seed*.25,.13):0));
 }
 export function alarmStep(game,state={offset:0,travel:0,last:-Infinity},offset=0){
  const inWater=['waiting','bite'].includes(game.phase),active=game.loadout.method==='ledger'&&game.loadout.indicator==='electronic'&&inWater;

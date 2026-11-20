@@ -25,7 +25,7 @@ test('app flow: prepare float tackle, cast, strike, land, show real photo, store
  $('waters').click();assert.equal($('venuesOverlay').classList.contains('hidden'),false);document.querySelector('[data-venue="jarosov"]').click();tick();
  assert.equal(state().venueId,'jarosov');assert.equal($('venuePhotoNotice').classList.contains('hidden'),true);assert.match($('venueEvidence').textContent,/2022/);
  $('start').click();$('setupTrip').click();assert.equal($('tripOverlay').classList.contains('hidden'),false);$('tripTime').value='12:00';$('tripTime').dispatchEvent(new dom.window.Event('input'));$('tripApply').click();assert.equal(state().trip.time,'12:00');assert.equal(state().paused,true);assert.equal(JSON.parse(dom.window.localStorage.getItem('reviry-session-setup')).trip.time,'12:00');document.querySelector('[data-method="float"]').click();$('setupApply').click();tick();
- assert.equal(state().loadout.method,'float');assert.equal(state().paused,false);
+ assert.equal(state().loadout.method,'float');assert.equal(state().paused,false);document.querySelector('[data-distance="17"]').click();tick();assert.match($('aimLabel').textContent,/17.0 m/);assert.match($('targetSummary').textContent,/17 m/);
  $('action').dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:' ',bubbles:true}));for(let i=0;i<10;i++)tick();$('action').dispatchEvent(new dom.window.KeyboardEvent('keyup',{key:' ',bubbles:true}));
  for(let i=0;i<1000&&state().phase!=='bite';i++)tick();assert.equal(state().phase,'bite');assert.match($('action').textContent,/ZASEKNOUT/);assert.equal($('signalFocus').classList.contains('hidden'),false);assert.match($('signalTitle').textContent,/Splávek/);
  for(let i=0;i<50;i++)tick();
@@ -34,6 +34,8 @@ test('app flow: prepare float tackle, cast, strike, land, show real photo, store
  for(let i=0;i<25;i++)$('dragDown').click();assert.equal($('drag').value,'8');assert.equal($('dragDown').disabled,true);for(let i=0;i<25;i++)$('dragUp').click();assert.equal($('drag').value,'95');assert.equal($('dragUp').disabled,true);
  $('volume').value='35';$('volume').dispatchEvent(new dom.window.Event('input'));assert.equal(dom.window.localStorage.getItem('reviry-volume'),'0.35');assert.equal($('volumeValue').textContent,'35 %');
  for(let i=0;i<6000&&state().phase==='fight';i++){
+  for(const id of ['steerLeft','steerRight'])$(id).dispatchEvent(new dom.window.KeyboardEvent('keyup',{key:' ',bubbles:true}));
+  const correction=-state().fishBearing;if(Math.abs(correction)>.02)$(correction>0?'steerRight':'steerLeft').dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:' ',bubbles:true}));
   $('drag').value=state().tension>.8?'20':'50';$('drag').dispatchEvent(new dom.window.Event('input',{bubbles:true}));
   $('action').dispatchEvent(new dom.window.KeyboardEvent(state().tension<.78?'keydown':'keyup',{key:' ',bubbles:true}));tick();if(!$('net').disabled)$('net').click();
  }
@@ -81,6 +83,8 @@ test('two-rod UI keeps both live indicators and lets an inactive bite be picked 
  for(let i=0;i<25;i++)$('dragDown').click();assert.equal($('drag').value,'8');assert.equal($('dragDown').disabled,true);for(let i=0;i<25;i++)$('dragUp').click();assert.equal($('drag').value,'95');assert.equal($('dragUp').disabled,true);
  $('volume').value='35';$('volume').dispatchEvent(new dom.window.Event('input'));assert.equal(dom.window.localStorage.getItem('reviry-volume'),'0.35');assert.equal($('volumeValue').textContent,'35 %');
  for(let i=0;i<6000&&state().phase==='fight';i++){
+  for(const id of ['steerLeft','steerRight'])$(id).dispatchEvent(new dom.window.KeyboardEvent('keyup',{key:' ',bubbles:true}));
+  const correction=-state().fishBearing;if(Math.abs(correction)>.02)$(correction>0?'steerRight':'steerLeft').dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:' ',bubbles:true}));
   $('drag').value=state().tension>.8?'20':'50';$('drag').dispatchEvent(new dom.window.Event('input',{bubbles:true}));press('action',state().tension<.78?'keydown':'keyup');tick();if(!$('net').disabled)$('net').click();
  }
  assert.equal(state().phase,'landed');assert.equal(state().catches,1);$('release').click();tick();

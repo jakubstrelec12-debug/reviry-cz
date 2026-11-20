@@ -19,7 +19,7 @@ test('float cannot add a second rod, nor replace a rod in a two-rod session',()=
 });
 test('shared journal retains catches from either rod and active setup restores safely',()=>{
  const s=new FishingSession(()=>.1);s.enableSecond();s.setLoadout(methodPreset('feeder'));
- for(const i of [1,0]){s.select(i);const r=s.active;r.phase='fight';r.fish={id:'carp',name:'Kapr obecný',weight:3,length:50};r.distance=3;r.stamina=.1;s.net();assert.equal(s.journal[0].rodNumber,i+1);r.phase='ready';}
+ for(const i of [1,0]){s.select(i);const r=s.active;r.phase='fight';r.fish={id:'carp',name:'Kapr obecný',weight:3,length:50};r.distance=3;r.stamina=.1;r.land();assert.equal(s.journal[0].rodNumber,i+1);r.phase='ready';}
  assert.equal(s.journal.length,2);assert.equal(s.rods[0].journal,s.rods[1].journal);
  const saved=s.exportSetup(),restored=new FishingSession();assert.ok(restored.restoreSetup(saved));assert.equal(restored.enabledRods.length,2);assert.equal(restored.rods[1].loadout.method,'feeder');assert.equal(restored.rods[0].phase,'ready');
  assert.equal(restored.restoreSetup({loadouts:[DEFAULT_LOADOUT,methodPreset('float')]}),false);

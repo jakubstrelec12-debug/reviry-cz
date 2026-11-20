@@ -1,9 +1,9 @@
-import {RodPresentation,environmentAt,handResponse} from './immersion.js?v=0.19.0';
-import {runForce} from './encounter.js?v=0.19.0';
-import {tripConditions} from './trip.js?v=0.19.0';
-import {getVenue} from './venues.js?v=0.19.0';
-import {biteMotion} from './bite-motion.js?v=0.19.0';
-import {RODS,RIGS} from './tackle.js?v=0.19.0';
+import {RodPresentation,environmentAt,handResponse} from './immersion.js?v=0.20.0';
+import {runForce} from './encounter.js?v=0.20.0';
+import {tripConditions} from './trip.js?v=0.20.0';
+import {getVenue} from './venues.js?v=0.20.0';
+import {biteMotion} from './bite-motion.js?v=0.20.0';
+import {RODS,RIGS} from './tackle.js?v=0.20.0';
 
 export const PHOTO=getVenue('vajgar').photo;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -14,6 +14,11 @@ export function photoCrop(iw,ih,w,h,yaw=0,pitch=0){
 export function waterPoint(w,h,waterTop,distance,angle=0,waterBottom=null){
  const near=waterBottom===null?h*.84:waterBottom-14,far=waterBottom===null?Math.max(waterTop+18,h*.60):Math.min(near-12,waterTop+18),depth=clamp(Math.log1p(distance)/Math.log(65),0,1);
  return {x:w*(.50+Math.sin(angle)*.65),y:near+(far-near)*depth};
+}
+export function aimAtPoint(w,h,waterTop,shoreTop,x,y,yaw=0){
+ const near=shoreTop-14,far=Math.min(near-12,waterTop+18);if(y<far||y>near||x<0||x>w)return null;
+ const depth=clamp((y-near)/(far-near),0,1),angle=Math.asin(clamp((x/w-.5)/.65,-1,1))+yaw;
+ return {distance:Math.expm1(depth*Math.log(65)),angle};
 }
 export function gearLayout(w,h,{hudTop=h*.82,headerBottom=90,index=0,count=1,pose=0,waterTop=h*.56}={}){
  const top=Math.min(headerBottom+12,h*.35),bottom=Math.max(top+55,Math.min(hudTop,h-30));
@@ -51,10 +56,11 @@ export class LakeScene{
  setWideView(value){this.wideView=Boolean(value);this.widePreference=this.wideView;try{localStorage.setItem('reviry-wide-view',this.wideView?'on':'off');}catch{}this.lastView='';this.render(0);}
  resize(){this.width=innerWidth;this.height=innerHeight;this.ratio=Math.min(devicePixelRatio||1,this.high?1.75:1);for(const c of [this.canvas,this.background,this.photoLayer]){c.width=Math.round(this.width*this.ratio);c.height=Math.round(this.height*this.ratio);}this.ctx.setTransform(this.ratio,0,0,this.ratio,0,0);this.bctx.setTransform(this.ratio,0,0,this.ratio,0,0);this.photoCtx.setTransform(this.ratio,0,0,this.ratio,0,0);this.lastView='';}
  setQuality(high){this.high=high;try{localStorage.setItem('reviry-quality',high?'high':'low');}catch{}this.resize();}
- bindLook(){let pointer=null,lastX=0,lastY=0;
-  this.canvas.addEventListener('pointerdown',e=>{pointer=e.pointerId;lastX=e.clientX;lastY=e.clientY;this.canvas.setPointerCapture(e.pointerId);});
-  this.canvas.addEventListener('pointermove',e=>{if(pointer!==e.pointerId)return;this.yaw=clamp(this.yaw-(e.clientX-lastX)*.0005,-.12,.12);this.pitch=clamp(this.pitch-(e.clientY-lastY)*.0004,-.055,.055);lastX=e.clientX;lastY=e.clientY;});
-  for(const type of ['pointerup','pointercancel','lostpointercapture'])this.canvas.addEventListener(type,()=>pointer=null);
+ bindLook(){let pointer=null,lastX=0,lastY=0,startX=0,startY=0,moved=false;
+  this.canvas.addEventListener('pointerdown',e=>{pointer=e.pointerId;startX=lastX=e.clientX;startY=lastY=e.clientY;moved=false;this.canvas.setPointerCapture(e.pointerId);});
+  this.canvas.addEventListener('pointermove',e=>{if(pointer!==e.pointerId)return;if(Math.hypot(e.clientX-startX,e.clientY-startY)>6)moved=true;if(moved){this.yaw=clamp(this.yaw-(e.clientX-lastX)*.0005,-.12,.12);this.pitch=clamp(this.pitch-(e.clientY-lastY)*.0004,-.055,.055);}lastX=e.clientX;lastY=e.clientY;});
+  this.canvas.addEventListener('pointerup',e=>{if(pointer!==e.pointerId)return;if(!moved){const aim=aimAtPoint(this.width,this.height,this.waterTop,this.shoreTop,e.clientX,e.clientY,this.yaw);if(aim)this.onAim?.(aim);}pointer=null;});
+  for(const type of ['pointercancel','lostpointercapture'])this.canvas.addEventListener(type,()=>pointer=null);
  }
  setUiBounds(bounds){this.inset=bounds;}
  setSignalCanvas(canvas){this.signalCanvas=canvas;}
@@ -62,7 +68,7 @@ export class LakeScene{
  setSignalVisible(visible){this.signalVisible=visible;}
  setCastDirection(){this.castYaw=this.yaw;}
  splash(index){const target=this.targets?.[index]||this.target;if(target)this.ripples.push({...target,time:this.clock,distance:this.game.rods?.[index]?.distance||this.game.distance||20});this.ripples=this.ripples.slice(-6);}
- scatterFeed(index){const target=this.targets?.[index]||this.target;if(target)this.feedThrow={time:this.clock,start:{x:this.width*.25,y:this.height},end:{...target}};}
+ scatterFeed(index,landing=null){const target=landing?waterPoint(this.width,this.height,this.waterTop,landing.distance,landing.angle-this.yaw,this.shoreTop):this.targets?.[index]||this.target;if(target)this.feedThrow={time:this.clock,start:{x:this.width*.25,y:this.height},end:{...target},distance:landing?.distance||this.game.rods?.[index]?.distance||this.game.distance||20};}
  cachePhotograph(){
   const key=[this.yaw.toFixed(3),this.pitch.toFixed(3),this.width,this.height,this.photo.src,this.wideView].join('/');if(key===this.lastView)return;
   if(this.equipment.deck){const d=this.equipment.deck;this.deckCrop=photoCrop(d.width,d.height,this.width,this.height,this.yaw*.25,this.pitch*.25);this.shoreTop=clamp((d.height*.739-this.deckCrop.sy)*this.deckCrop.scale,0,this.height);}else this.shoreTop=this.height;
@@ -99,6 +105,18 @@ export class LakeScene{
   for(let i=0;i<(this.high?32:18);i++){const x=((Math.sin(i*91.73)*43758.54)%1+1)%1*w,y=this.waterTop+h*(.15+((i*37%97)/97)*.85),phase=Math.sin(this.clock*(.65+i%3*.11)+i*2.13),alpha=Math.pow(Math.max(0,phase),8)*(.045+env.gust*.055);
    if(alpha<.008)continue;this.line([{x:x-3-i%4,y},{x:x+3+i%4,y:y+.2}],`rgba(237,239,215,${alpha})`,.6);
   }c.restore();
+ }
+ drawLife(){const c=this.ctx,w=this.width,top=this.waterTop,bottom=this.shoreTop,light=tripConditions(this.game.trip).light;if(bottom<=top)return;c.save();c.beginPath();c.rect(0,top,w,bottom-top);c.clip();
+  const age=(this.clock+7)%31,cycle=Math.floor((this.clock+7)/31);if(age<3.8){const x=w*(.18+((cycle*37%67)/100)),y=top+(bottom-top)*(.28+(cycle*13%38)/100);for(let i=0;i<2;i++){const t=age-i*.3;if(t>=0)this.ellipse(x,y,3+t*8,(3+t*8)*.18,null,`rgba(219,234,217,${Math.max(0,.22-t*.055)})`,.7);}}
+  if(light>.3&&(this.clock%13)<5)for(let i=0;i<3;i++){const t=this.clock+i*3,x=w*(.22+i*.23)+Math.sin(t*2.7)*8,y=bottom-14-i*4+Math.cos(t*3.4)*4;this.ellipse(x,y,.65,.5,'rgba(226,221,186,.38)');}c.restore();
+ }
+ drawAimAndFeed(){const g=this.game,active=g.active||g;if(!active)return;const point=p=>waterPoint(this.width,this.height,this.waterTop,p.distance,p.angle-this.yaw,this.shoreTop);
+  if(['ready','escaped','casting','waiting'].includes(active.phase)){const p=point({distance:active.aimDistance,angle:active.aimAngle});this.ellipse(p.x,p.y,10,3,null,'rgba(231,217,165,.7)',.9);this.line([{x:p.x-4,y:p.y},{x:p.x+4,y:p.y}],'rgba(231,217,165,.65)',.7);}
+  const spots=active.feedSpots||[];for(const spot of spots){const age=active.time-spot.time;if(age>300)continue;const p=point(spot);this.ellipse(p.x,p.y,14,4,null,`rgba(210,189,123,${Math.max(0,.35*(1-age/300))})`,.7);}
+ }
+ drawNet(){const g=this.game;if(g.phase!=='fight'||!g.netDeployed)return;const p=waterPoint(this.width,this.height,this.waterTop,clamp(g.distance,2.2,3.3),g.netAngle-this.yaw,this.shoreTop),r=clamp(this.width*.065,22,65),c=this.ctx;
+  this.line([{x:p.x+r*.65,y:p.y+3},{x:this.width*.94,y:this.height+20}],'#303a35',4);this.ellipse(p.x,p.y,r,r*.22,'rgba(24,41,35,.12)',g.netProgress>0?'rgba(217,206,158,.85)':'rgba(159,174,153,.8)',1.7);
+  c.save();c.beginPath();c.ellipse(p.x,p.y,r,r*.22,0,0,Math.PI*2);c.clip();for(let x=-r;x<=r;x+=8)this.line([{x:p.x+x,y:p.y-r*.22},{x:p.x+x+r*.35,y:p.y+r*.22}],'rgba(108,131,114,.32)',.6);c.restore();
  }
  drawReeds(){const image=this.equipment?.reeds;if(!image)return;const c=this.ctx,h=this.height*(this.height>this.width?.30:.40),w=h*image.width/image.height,env=environmentAt(this.clock),x=-w*.1,y=this.height-h+8;
   c.save();c.globalAlpha=.92;c.filter='saturate(.72) brightness(.84)';const step=this.high?8:16;
@@ -140,7 +158,7 @@ export class LakeScene{
  drawRipples(){const c=this.ctx,t=this.clock;
   this.ripples=this.ripples.filter(p=>t-p.time<5);
   for(const p of this.ripples){const age=t-p.time;for(let i=0;i<3;i++){const f=age-i*.24;if(f<0)continue;const scale=clamp(18/Math.max(8,p.distance||20),.45,1.4),radius=(3+f*14)*scale;this.ellipse(p.x,p.y,radius,radius*.17,null,`rgba(231,242,228,${Math.max(0,.45-f*.09)})`,1);}}
-  if(this.feedThrow){const p=this.feedThrow,f=clamp((t-p.time)/.95,0,1);for(let i=0;i<20;i++){const x=mix(p.start.x,p.end.x+Math.sin(i*2.4)*18,f),y=mix(p.start.y,p.end.y+Math.cos(i*2.4)*4,f)-Math.sin(Math.PI*f)*(this.height*.22+i%3*5);this.ellipse(x,y,1.4,1.2,'#cfb77d');}if(f>=1){this.feedThrow=null;this.splash();}}
+  if(this.feedThrow){const p=this.feedThrow,f=clamp((t-p.time)/.95,0,1);for(let i=0;i<20;i++){const x=mix(p.start.x,p.end.x+Math.sin(i*2.4)*18,f),y=mix(p.start.y,p.end.y+Math.cos(i*2.4)*4,f)-Math.sin(Math.PI*f)*(this.height*.22+i%3*5);this.ellipse(x,y,1.4,1.2,'#cfb77d');}if(f>=1){this.feedThrow=null;this.ripples.push({...p.end,time:t,distance:p.distance});this.ripples=this.ripples.slice(-6);}}
  }
  drawFloat(target,flying){
   const c=this.ctx,g=this.game,image=this.equipment?.float;if(!image)return;
@@ -148,6 +166,7 @@ export class LakeScene{
   const motion=biteMotion(g,this.clock),sink=motion.floatSink*height;
   const angle=flying?.65:motion.floatTilt;
   this.signals[this.drawIndex]={x:target.x,y:target.y,anchor:{...target},kind:'float'};
+  if(!flying&&Math.abs(motion.floatSink)>.03){const r=3+((this.clock%1.4)/1.4)*height*.3;this.ellipse(target.x,target.y,r,r*.17,null,'rgba(215,231,217,.18)',.6);}
   c.save();c.translate(target.x,target.y);
   if(!flying){
    c.save();c.beginPath();c.rect(-width,-height,width*2,height);c.clip();c.translate(0,sink);c.rotate(angle);c.drawImage(image,-width/2,-height*.24,width,height);c.restore();
@@ -281,7 +300,7 @@ export class LakeScene{
   try{this.ctx=ctx;this.drawFrame(0);}finally{this.ctx=mainCtx;ctx.restore();Object.assign(this,saved);this.metrics={...metrics,opticalDetail:true};}
  }
  render(dt,{paused=false}={}){if(!this.image)return;dt=Math.max(0,dt);this.clock+=dt;const motionDt=paused?0:dt;const rods=this.game.enabledRods||[this.game];for(let i=0;i<rods.length;i++){const g=rods[i],m=this.motionByRod[i]??=new RodPresentation();m.update(g,motionDt);const strikePulse=Math.max(0,1-(g.time-g.lastStrikeAt)/.55),targetPose=Math.max(['held','fight'].includes(g.phase)?.5+m.pump*.4:0,strikePulse*.85);this.poseByRod[i]=mix(this.poseByRod[i],targetPose,1-Math.exp(-motionDt*8));}this.cachePhotograph();this.drawFrame(dt);if(this.signalViews?.length){for(const v of this.signalViews)this.paintSignal(v.index,v.canvas,true);}else this.paintSignal(this.game.activeIndex||0);}
- drawFrame(dt){this.water();this.drawSurface();this.ctx.save();this.ctx.beginPath();this.ctx.rect(0,this.waterTop,this.width,Math.max(0,this.shoreTop-this.waterTop));this.ctx.clip();this.drawRipples();this.ctx.restore();
+ drawFrame(dt){this.water();this.drawSurface();this.drawLife();this.drawAimAndFeed();this.ctx.save();this.ctx.beginPath();this.ctx.rect(0,this.waterTop,this.width,Math.max(0,this.shoreTop-this.waterTop));this.ctx.clip();this.drawRipples();this.ctx.restore();
   if(this.equipment.deck){const d=this.equipment.deck,p=this.deckCrop;this.ctx.drawImage(d,p.sx,p.sy,p.sw,p.sh,0,0,this.width,this.height);this.metrics.drawImages++;}
 
   this.drawReeds();
@@ -289,8 +308,8 @@ export class LakeScene{
   for(let i=0;i<rods.length;i++){
    const g=rods[i];this.game=g;this.drawIndex=i;
    this.presentation=this.motionByRod[i];this.pose=this.poseByRod[i];
-   this.target=waterPoint(this.width,this.height,this.waterTop,g.distance||30,(g.phase==='fight'?(g.fishBearing??g.castAngle):g.castAngle||0)-this.yaw+(rods.length>1?(i===0?-.05:.05):0),this.equipment.deck?this.shoreTop:null);if(g.loadout.method==='float')this.target.x-=this.width*.12;this.targets.push({...this.target});
-   this.drawFish();this.drawWaterResponse();if(g.loadout.method==='float'&&['waiting','bite'].includes(g.phase))this.drawFloat(this.target,false);this.drawRig();
+   this.target=waterPoint(this.width,this.height,this.waterTop,g.distance||30,(g.phase==='fight'?(g.fishBearing??g.castAngle):g.castAngle||0)-this.yaw,this.equipment.deck?this.shoreTop:null);this.targets.push({...this.target});
+   this.drawFish();this.drawWaterResponse();this.drawNet();if(g.loadout.method==='float'&&['waiting','bite'].includes(g.phase))this.drawFloat(this.target,false);this.drawRig();
   }
   this.game=session;this.target=this.targets[active];this.drawLighting();
  }

@@ -1,5 +1,5 @@
-import {directCorn} from './bite-profile.js?v=0.19.0';
-import {BAITS} from './tackle.js?v=0.19.0';
+import {directCorn} from './bite-profile.js?v=0.20.0';
+import {BAITS} from './tackle.js?v=0.20.0';
 // Gameplay model: deliberately readable timing, not measured biological data.
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 export function strikeWindow(loadout,fish={},profile=null){
@@ -7,7 +7,7 @@ export function strikeWindow(loadout,fish={},profile=null){
  const cautious=fish?.id==='tench'?.30:fish?.id==='bream'?-.12:0;
  const direct=directCorn(loadout)||profile?.kind==='direct',tempo=profile?.tempo||1;
  const touchEnd=direct?0:(profile?.kind==='cautious'?1.3:1)*((method==='float'?.70:method==='feeder'?.90:1.15)+cautious+(largeBait?.22:0))/tempo;
- const openAt=direct?0:touchEnd+.5+(hair?.15:0),closeAt=openAt+((method==='float'?3:method==='feeder'?3.8:4.8)+(hair?.5:0))*(profile?.windowScale||1);
+ const openAt=direct?0:touchEnd+.5+(hair?.15:0),closeAt=openAt+((method==='float'?3:method==='feeder'?3.8:4.8)+(hair?.5:0))*(profile?.windowScale||1)+(profile?.pauseFor||0);
  return {touchEnd,openAt,closeAt,leaveAt:closeAt+.85};
 }
 export function biteAge(game){return game.phase==='held'?game.biteElapsed||0:game.elapsed||0;}

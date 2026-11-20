@@ -35,7 +35,7 @@ test('travel is shared by both rods, blocked while either is fishing, and retain
  s.active.feedSpot={type:'grain',grams:100,time:0,distance:5,angle:0};assert.ok(s.setVenue('vlkov'));assert.equal(s.active.feedSpot,null);assert.equal(s.feedStocks.grain,655);
  const saved=s.exportSetup(),restored=new FishingSession();assert.ok(restored.restoreSetup(saved));assert.equal(restored.venueId,'vlkov');assert.ok(restored.rods.every(r=>r.venueId==='vlkov'));
  assert.ok(restored.restoreSetup({...saved,venueId:'unknown'}));assert.equal(restored.venueId,'vajgar');assert.equal(s.setVenue('unknown'),false);
- s.active.phase='fight';s.active.fish={id:'amur',name:'Amur bílý',weight:3,length:60};s.active.distance=3;s.active.stamina=.1;s.net();assert.equal(s.journal[0].venueId,'vlkov');
+ s.active.phase='fight';s.active.fish={id:'amur',name:'Amur bílý',weight:3,length:60};s.active.distance=3;s.active.stamina=.1;s.active.land();assert.equal(s.journal[0].venueId,'vlkov');
 });
 test('local scenery switches atomically, uses its own waterline and stays within source crop',async()=>{
  globalThis.innerWidth=844;globalThis.innerHeight=390;globalThis.devicePixelRatio=1;globalThis.window={addEventListener(){},removeEventListener(){}};globalThis.localStorage={getItem:()=>null,setItem(){}};globalThis.document={createElement:()=>createCanvas(844,390)};

@@ -27,14 +27,14 @@ test('float has a direct strike and each technique completes the full catch cycl
  }
 });
 test('active fish cannot be replaced by changing the setup; catch stores a snapshot',()=>{
- const g=bite();hook(g);assert.equal(g.setLoadout(methodPreset('float')),false);g.distance=3;g.stamina=.1;g.net();const old=g.result.loadout.bait;g.loadout.bait='worm';assert.equal(g.result.loadout.bait,old);
+ const g=bite();hook(g);assert.equal(g.setLoadout(methodPreset('float')),false);g.distance=3;g.stamina=.1;g.land();const old=g.result.loadout.bait;g.loadout.bait='worm';assert.equal(g.result.loadout.bait,old);
 });
 test('the selected bait changes species selection rather than merely a label',()=>{
  const corn=speciesWeights(DEFAULT_LOADOUT),worm=speciesWeights({...DEFAULT_LOADOUT,bait:'worm'}),boilie=speciesWeights({...DEFAULT_LOADOUT,rig:'hair',bait:'boilie'});
  assert.ok(worm[1]/worm[0]>corn[1]/corn[0]);assert.ok(boilie[0]/boilie[2]>corn[0]/corn[2]);
 });
 test('feed consumes inventory, strengthens the actual spot and decays by time, distance and direction',()=>{
- const g=new Fishing(()=>.5);g.setLoadout({...DEFAULT_LOADOUT,feed:'grain'});assert.equal(g.feed(),false);g.startCast();g.releaseCast();step(g,2);const wait=g.biteIn;
+ const g=new Fishing(()=>.5);g.setLoadout({...DEFAULT_LOADOUT,feed:'grain'});assert.equal(g.feed(),false);g.startCast();g.releaseCast();step(g,2);const wait=g.biteIn;g.setAim(g.distance,g.castAngle);
  assert.ok(g.feed());assert.equal(g.feedStocks.grain,850);assert.ok(g.feedBonus>0);assert.ok(g.biteIn<wait);const spot=g.feedSpot,here=g.feedBonus;
  assert.ok(feedInfluence(g.loadout,spot,g.time,g.distance+20,0)<here*.01);
  assert.ok(feedInfluence(g.loadout,spot,g.time,g.distance,1)<here*.01);

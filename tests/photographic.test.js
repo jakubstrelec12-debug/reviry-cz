@@ -122,3 +122,8 @@ test('animated hands, empty stand and reeds use transparent local layers and opt
  const still=JSON.stringify(scene.motionByRod),gameBefore=JSON.stringify(g),ambient=scene.clock;scene.render(.2,{paused:true});assert.ok(scene.clock>ambient);assert.equal(JSON.stringify(scene.motionByRod),still);assert.equal(JSON.stringify(g),gameBefore);
  const motion=JSON.stringify(scene.motionByRod),game=JSON.stringify(g),clock=scene.clock;scene.setSignalCanvas(createCanvas(320,320));scene.paintSignal(0);scene.paintSignal(0);assert.equal(JSON.stringify(scene.motionByRod),motion);assert.equal(JSON.stringify(g),game);assert.equal(scene.clock,clock);scene.dispose();
 });
+test('feeding animation and impact ripple use the chosen feeding target rather than the hook position',async()=>{
+ globalThis.innerWidth=844;globalThis.innerHeight=390;globalThis.devicePixelRatio=1;globalThis.window={addEventListener(){},removeEventListener(){}};globalThis.localStorage={getItem:()=>null,setItem(){}};globalThis.document={createElement:()=>createCanvas(844,390)};
+ globalThis.Image=class extends NativeImage{set src(v){super.src=v.startsWith('file:')?fileURLToPath(v):v;}};
+ const canvas=createCanvas(844,390);canvas.addEventListener=()=>{};const g=new Fishing(()=>.5);g.phase='waiting';g.distance=16;const scene=await new LakeScene(canvas,g).init();scene.render(0);scene.scatterFeed(0,{distance:46,angle:.3});const landing={...scene.feedThrow.end};assert.ok(Math.hypot(landing.x-scene.target.x,landing.y-scene.target.y)>30);scene.render(1,{paused:true});assert.equal(scene.feedThrow,null);assert.equal(scene.ripples.at(-1).x,landing.x);assert.equal(scene.ripples.at(-1).y,landing.y);scene.dispose();
+});
