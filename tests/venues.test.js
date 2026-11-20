@@ -11,7 +11,7 @@ import {LakeScene} from '../src/photo-scene.js';
 
 test('venue evidence preserves source dates, group scope and photo uncertainty',()=>{
  assert.equal(VENUES.jarosov.playable.length,6);assert.equal(VENUES.vlkov.playable.length,5);
- assert.equal(VENUES.jarosov.photo.verified,true);assert.equal(VENUES.jarosov.photo.external,true);assert.match(VENUES.jarosov.photo.fallback.note,/Není to fotografie/);
+ assert.equal(VENUES.jarosov.photo.verified,true);assert.equal(VENUES.jarosov.photo.external,true);assert.match(VENUES.jarosov.photo.fallback.note,/Nejde o fotografii/);
  assert.match(STOCK_SOURCES.vlkov2019.scope,/celý revír/);assert.equal(STOCK_SOURCES.vlkov2019.date,'2019');
  for(const v of Object.values(VENUES))for(const id of v.playable)assert.ok(FISH_PHOTOS[id]);
  for(const v of [VENUES.jarosov,VENUES.vlkov]){assert.ok(v.sources.length>=2);for(const id of v.sources)assert.match(STOCK_SOURCES[id].url,/^https:\/\//);}

@@ -1,10 +1,16 @@
-# REVÍRY CZ — Jižní Čechy 0.22.0
+# REVÍRY CZ — Jižní Čechy 0.24.0
 
 Rybářská hra pro Safari na iPhonu. Výhled nově tvoří **skutečná fotografie Vajgaru** s animovanou hladinou, prutem, čihátkem, náhozem, splávkem a krmením. Zjednodušená 3D zástavba se v hlavní hře nepoužívá. Vykreslování běží přes Canvas 2D a nepotřebuje WebGL.
 
-**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.22.0
+**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.24.0
 
 Nejlépe na šířku. Všechny herní fotografie jsou přiložené lokálně. HD / ECO mění rozlišení a jemnost animace vody. Fotografie není 360° panorama: tažením jde pouze mírně posouvat výhled a směr náhozu. Nejde o volně průchozí 3D svět.
+
+## Prostředí a břehy — 0.24.0
+
+Každý z 15 revírů má samostatný podklad. Devět novějších vod nyní používá fotografie skutečné lokality (Lipno, Orlík, Hněvkovice, Jordán, Nežárka u Lásenice, Lužnice u Pilaře, pískovna Cep, Stupský a Zadní Kouty). Fotografie původních revírů se za jiné vody nevydávají. Vlkovská malá má vlastní výslovně označenou AI ilustraci; ověřenou fotografii nemáme. Jarošov při nedostupnosti externího originálu použije vlastní označenou ilustraci, nikoli Matějovec.
+
+Společné molo nahradilo pět průhledných přírodních břehů. Krátká tráva u městských a lučních nádrží, písek na pískovnách, štěrk na Lipně a Hněvkovicích, kameny na Orlíku a hlinitý břeh u zarostlých vod. Jsou to výtvarné vrstvy, nikoli dokumentace konkrétního povoleného lovného místa. Stojany drží stejné souřadnice při změnách ovládacích panelů. Podklady a licence: [assets/CREDITS.md](assets/CREDITS.md), konfigurace: `src/stations.js` a `src/venue-photos.js`.
 
 ## Revíry a úkoly — 0.22.0
 

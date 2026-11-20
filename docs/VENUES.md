@@ -30,3 +30,10 @@ Původní tři herní druhy zachovány. Ve výběru vody jsou poctivě označen�
 ## Chování aplikace
 
 Revír je společný oběma prutům a ukládá se do nastavení. Změna je povolená jen s oběma pruty ve stavu připraven / unikla; zásoby a deník se zachovají, krmné místo zanikne. Nový obrázek se načte před přepnutím stavu. Úlovek nese původní identifikátor revíru i po další změně vody. U nástrah se počítají a zobrazují jen druhy vybraného revíru; 20mm boilies zachovávají původní herní filtr velkých kaprů. Nové parametry amura, karase a plotice jsou herní model, ne měření těchto vod.
+
+
+## Oprava prostředí 0.24.0
+
+Aktuální konfigurace fotografií a zdrojů je v `src/venue-photos.js`. U všech 15 vod je podklad samostatný. Lužnice 10 C je **rybník Stupský**, ne další úsek řeky; vymezení potvrzuje [MO Třeboň](https://www.crstrebon.cz/reviry-crs-ve-sprave-mistni-organizace-trebon/). Lužnice 10 B používá fotografii pískovny Cep, která do revíru patří. Fotografie Nežárky pochází z Lásenice. Vlkovská malá je označená syntetická ilustrace; nepotvrzuje skutečný tvar jejího břehu. Jarošov má syntetickou zálohu při nedostupnosti vydavatele. Žádná fotografie jiné vody se jako záloha nepoužívá.
+
+Přírodní stanoviště se volí přes `src/stations.js`. Jde o syntetické kompozity s průhledností, bez tvrzení o přesné poloze nebo povoleném přístupu. Krajina zůstává fotografická; její roční období se s volbou herního data nemění.
