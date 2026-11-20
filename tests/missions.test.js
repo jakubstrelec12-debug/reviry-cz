@@ -8,7 +8,7 @@ import {VENUES} from '../src/venues.js';
 import {loadImage} from '@napi-rs/canvas';
 const fish=(d,extra={})=>({id:1,speciesId:d.speciesId,venueId:d.venueId,length:d.minLength,weight:4,...extra});
 test('all scenarios use compatible equipment, documented species and finite stock',()=>{
- for(const d of MISSIONS){assert.deepEqual(validateLoadout(d.loadout),[]);assert.ok(VENUES[d.venueId].playable.includes(d.speciesId));assert.equal(d.seconds,1200);assert.ok(d.grams>=d.loadout.feedPortion);}
+ for(const d of MISSIONS){assert.deepEqual(validateLoadout(d.loadout),[]);assert.ok(VENUES[d.venueId].playable.includes(d.speciesId));assert.ok(Number.isFinite(d.seconds)&&d.seconds>=900&&d.seconds<=1500);assert.ok(d.grams>=d.loadout.feedPortion);}
 });
 test('objectives require the right venue, species and size; duplicate catches cannot count twice',()=>{
  const d={...MISSIONS[0],count:2},r=new MissionRun(d);

@@ -81,3 +81,25 @@ Nové ilustrační AI vrstvy `equipment/held-animated.webp`, `winding-hand.webp`
 - `venues/hejtman.webp`: ŠJů, [Chlum u Třeboně, přes rybník Hejtman (01)](https://commons.wikimedia.org/wiki/File:Chlum_u_T%C5%99ebon%C4%9B,_p%C5%99es_rybn%C3%ADk_Hejtman_(01).jpg), 1 May 2009, [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/). Resized and converted to WebP; adapted image remains CC BY-SA 3.0.
 - `venues/stankov.webp`: Harold, [Staňkov, Staňkovský rybník (2020-07-06; 01)](https://commons.wikimedia.org/wiki/File:Sta%C5%88kov,_Sta%C5%88kovsk%C3%BD_rybn%C3%ADk_(2020-07-06;_01).jpg), 6 July 2020, [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Resized and converted to WebP; adapted image remains CC BY-SA 4.0.
 Both photographs depict the named venue. In-game view adds crop, extended/animated water and shared synthetic equipment/foreground. Stock evidence is linked in the venue picker; probabilities and lengths are game balance.
+
+## Individuální prostředí a stanoviště — 0.24.0
+
+Nové fotografické podklady jsou přiřazené pouze ke své lokalitě. Zmenšení, WebP, herní ořez, animace a případné rozšíření pouze vodní části. Upravené fotografie zůstávají pod uvedenou licencí.
+
+| Soubor | Autor | Zdroj | Licence |
+| --- | --- | --- | --- |
+| assets/venues/jordan.webp | ŠJů (cs:ŠJů) | [Tábor, centrum přes Jordán.jpg](https://commons.wikimedia.org/wiki/File:T%C3%A1bor,_centrum_p%C5%99es_Jord%C3%A1n.jpg) | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0) |
+| assets/venues/hnevkovice.webp | Jitka Erbenová (cheva) | [Purkarec Hněvkovická přehrada.jpg](https://commons.wikimedia.org/wiki/File:Purkarec_Hn%C4%9Bvkovick%C3%A1_p%C5%99ehrada.jpg) | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0) |
+| assets/venues/zadnikouty.webp | Michal Klajban | [Zadní kouty, Třeboňsko.JPG](https://commons.wikimedia.org/wiki/File:Zadn%C3%AD_kouty,_T%C5%99ebo%C5%88sko.JPG) | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0) |
+| assets/venues/nezarka3.webp | Jan Muller | [Lásenice, Czech Republic - panoramio (8).jpg](https://commons.wikimedia.org/wiki/File:L%C3%A1senice,_Czech_Republic_-_panoramio_(8).jpg) | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0) |
+| assets/venues/lipno.webp | MOs810 | [Lipno Lake in the Czech Rep (2).jpg](https://commons.wikimedia.org/wiki/File:Lipno_Lake_in_the_Czech_Rep_(2).jpg) | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| assets/venues/luznice10c.webp | Jana Sekyrová | [Stupský rybník, Třeboň (04).jpg](https://commons.wikimedia.org/wiki/File:Stupsk%C3%BD_rybn%C3%ADk,_T%C5%99ebo%C5%88_(04).jpg) | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| assets/venues/luznice10b.webp | IRISMA | [Pískovna Cep, Suchdol nad Lužnicí, Česko.jpg](https://commons.wikimedia.org/wiki/File:P%C3%ADskovna_Cep,_Suchdol_nad_Lu%C5%BEnic%C3%AD,_%C4%8Cesko.jpg) | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| assets/venues/orlik.webp | Michal Ritter | [Zámek Orlík , pohled z vyhlídky.jpg](https://commons.wikimedia.org/wiki/File:Z%C3%A1mek_Orl%C3%ADk_,_pohled_z_vyhl%C3%ADdky.jpg) | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0) |
+| assets/venues/luznice10a.webp | Kalinmir | [Jez 'Pilař', Lužnice.jpg](https://commons.wikimedia.org/wiki/File:Jez_%27Pila%C5%99%27,_Lu%C5%BEnice.jpg) | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| assets/venues/vlkovmala.webp | REVÍRY CZ · AI ilustrace | [AI ilustrace malé jihočeské pískovny. Nejde o fotografii ani přesnou rekonstrukci Vlkovské malé.](https://github.com/jakubstrelec12-debug/reviry-cz/blob/main/assets/CREDITS.md) | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+| assets/venues/jarosov-fallback.webp | REVÍRY CZ · AI ilustrace | [AI ilustrace malé venkovské nádrže při nedostupnosti fotografie Jarošova. Nejde o fotografii konkrétního revíru.](https://github.com/jakubstrelec12-debug/reviry-cz/blob/main/assets/CREDITS.md) | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+
+`stations/{grass,sand,gravel,rock,earth}.webp`: samostatné syntetické průhledné vrstvy vytvořené image_gen během předchozí práce 20. 11. 2026, nyní zapojené do hry. Sdílíme pod CC BY-SA 4.0. Zadání: nízký přírodní břeh z pohledu sedícího rybáře, krátká tráva / písek / štěrk / kamení / hlína, měkké denní světlo, průhledná horní část, bez náčiní. Jde o výtvarné stanoviště, nikoli zaměřené nebo ověřené lovné místo.
+
+Vlkovská malá používá vlastní označenou AI ilustraci; ověřenou fotografii této konkrétní pískovny nemáme. Jarošov nadále načítá originál Nachytáno.cz, při nedostupnosti přechází na vlastní označenou AI ilustraci venkovské nádrže. Matějovec ani fotografie jiných revírů se jako náhrady nenačítají. Ilustrace byly vytvořené vestavěným image_gen: malá jihočeská pískovna s borovicemi a břízami, respektive venkovská nádrž s travnatým břehem, vrbami a olšemi; bez lidí, náčiní a mola, oblačný letní den, voda ve spodní polovině. Nejde o dokumentární zobrazení těchto míst.

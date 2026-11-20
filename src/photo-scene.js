@@ -1,9 +1,10 @@
-import {RodPresentation,environmentAt,handResponse} from './immersion.js?v=0.22.0';
-import {runForce} from './encounter.js?v=0.22.0';
-import {tripConditions} from './trip.js?v=0.22.0';
-import {getVenue} from './venues.js?v=0.23.0';
-import {biteMotion} from './bite-motion.js?v=0.22.0';
-import {RODS,RIGS} from './tackle.js?v=0.22.0';
+import {STATIONS,stationFor,stationLayout} from './stations.js?v=0.24.0';
+import {RodPresentation,environmentAt,handResponse} from './immersion.js?v=0.24.0';
+import {runForce} from './encounter.js?v=0.24.0';
+import {tripConditions} from './trip.js?v=0.24.0';
+import {getVenue} from './venues.js?v=0.24.0';
+import {biteMotion} from './bite-motion.js?v=0.24.0';
+import {RODS,RIGS} from './tackle.js?v=0.24.0';
 
 export const PHOTO=getVenue('vajgar').photo;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -32,7 +33,7 @@ export function gearLayout(w,h,{hudTop=h*.82,headerBottom=90,index=0,count=1,pos
 }
 export function heldLayout(w,h,pose=0,cast=0){return {scale:Math.min(w*1.2,h*.70)/1536,angle:pose*.24-cast*.55,base:{x:w*.94,y:h*(h>w?.88:.97)-pose*20}};}
 // A single photographed-style assembly keeps the reel, blank and support in one perspective.
-// Feet stay on the pier, independent of changes in the controls above them.
+// Feet stay on the bank, independent of changes in the controls above them.
 export function restingLayout(w,h,{index=0,count=1,shoreTop=h*.75}={}){
  const portrait=h>w,dual=count>1,height=Math.min(h*(portrait?.70:.64),w*(dual?.92:1.2)),width=height*2/3;
  const footY=Math.max(shoreTop+18,h*.94),y=footY-height*.96;
@@ -50,7 +51,7 @@ export class LakeScene{
   try{this.high=localStorage.getItem('reviry-quality')!=='low';const pref=localStorage.getItem('reviry-wide-view');this.widePreference=pref===null?null:pref==='on';this.wideView=this.widePreference??(this.venueId==='jarosov');}catch{this.high=true;this.widePreference=null;this.wideView=this.venueId==='jarosov';}
   this.photoLayer=document.createElement('canvas');this.photoCtx=this.photoLayer.getContext('2d');this.background=document.createElement('canvas');this.bctx=this.background.getContext('2d');this.lastView='';this.bindLook();this.onResize=()=>this.resize();window.addEventListener('resize',this.onResize);
  }
- async init(){const loaded=await this.loadVenuePhoto(this.photo);this.photo=loaded.photo;this.image=loaded.image;this.equipment={};await Promise.all([['rod','assets/equipment/rod-hand.webp'],['float','assets/equipment/waggler.webp'],['deck','assets/equipment/fishing-deck.webp'],['resting','assets/equipment/resting-feeder.webp'],['held','assets/equipment/held-feeder.webp'],['animatedHeld','assets/equipment/held-animated.webp'],['windingHand','assets/equipment/winding-hand.webp'],['emptyStand','assets/equipment/empty-tripod.webp'],['reeds','assets/equipment/shore-reeds.webp'],['bobbin','assets/equipment/bobbin-photo.webp']].map(async([key,path])=>{try{this.equipment[key]=await loadImage(path);}catch{this.assetWarnings.push(path);}}));this.resize();this.render(0);return this;}
+ async init(){const loaded=await this.loadVenuePhoto(this.photo);this.photo=loaded.photo;this.image=loaded.image;this.equipment={};this.stationImages={};await Promise.all(Object.entries(STATIONS).map(async([key,station])=>{this.stationImages[key]=await loadImage(station.src);}));await Promise.all([['rod','assets/equipment/rod-hand.webp'],['float','assets/equipment/waggler.webp'],['resting','assets/equipment/resting-feeder.webp'],['held','assets/equipment/held-feeder.webp'],['animatedHeld','assets/equipment/held-animated.webp'],['windingHand','assets/equipment/winding-hand.webp'],['emptyStand','assets/equipment/empty-tripod.webp'],['reeds','assets/equipment/shore-reeds.webp'],['bobbin','assets/equipment/bobbin-photo.webp']].map(async([key,path])=>{try{this.equipment[key]=await loadImage(path);}catch{this.assetWarnings.push(path);}}));this.resize();this.render(0);return this;}
  async loadVenuePhoto(photo){try{return {photo,image:await loadImage(photo.src)};}catch(error){if(!photo.fallback)throw error;return {photo:{...photo.fallback,externalUnavailable:true},image:await loadImage(photo.fallback.src)};}}
  async setVenue(id){const loaded=await this.loadVenuePhoto(getVenue(id).photo);this.photo=loaded.photo;this.image=loaded.image;this.venueId=getVenue(id).id;if(this.widePreference===null)this.wideView=this.venueId==='jarosov';this.yaw=0;this.pitch=0;this.heldAngleByRod=[0,0];this.ripples=[];this.feedThrow=null;this.lastView='';this.render(0);}
  setWideView(value){this.wideView=Boolean(value);this.widePreference=this.wideView;try{localStorage.setItem('reviry-wide-view',this.wideView?'on':'off');}catch{}this.lastView='';this.render(0);}
@@ -71,10 +72,10 @@ export class LakeScene{
  scatterFeed(index,landing=null){const target=landing?waterPoint(this.width,this.height,this.waterTop,landing.distance,landing.angle-this.yaw,this.shoreTop):this.targets?.[index]||this.target;if(target)this.feedThrow={time:this.clock,start:{x:this.width*.25,y:this.height},end:{...target},distance:landing?.distance||this.game.rods?.[index]?.distance||this.game.distance||20};}
  cachePhotograph(){
   const key=[this.yaw.toFixed(3),this.pitch.toFixed(3),this.width,this.height,this.photo.src,this.wideView].join('/');if(key===this.lastView)return;
-  if(this.equipment.deck){const d=this.equipment.deck;this.deckCrop=photoCrop(d.width,d.height,this.width,this.height,this.yaw*.25,this.pitch*.25);this.shoreTop=clamp((d.height*.739-this.deckCrop.sy)*this.deckCrop.scale,0,this.height);}else this.shoreTop=this.height;
+  this.station=stationFor(this.venueId);this.stationImage=this.stationImages[Object.keys(STATIONS).find(key=>STATIONS[key]===this.station)];this.bankLayout=stationLayout(this.width,this.height,this.stationImage,this.station);this.shoreTop=this.bankLayout.shoreTop;
   const [rx,ry,rw,rh]=this.photo.crop||[0,0,1,1],iw=this.image.width,ih=this.image.height;
-  const wide=this.wideView&&this.height>this.width&&this.equipment.deck;
-  let viewHeight=this.equipment.deck?this.height*.82:this.height,photoY=this.equipment.deck?this.shoreTop+8-viewHeight:0;
+  const wide=this.wideView&&this.height>this.width;
+  let viewHeight=this.height*.82,photoY=this.shoreTop+8-viewHeight;
   if(wide){viewHeight=Math.min(this.height*.65,this.width*(ih*rh)/(iw*rw));const scale=viewHeight/(ih*rh);photoY=this.height*.36-(ih*this.photo.waterStart-ih*ry)*scale+this.pitch*this.height*.3;}
   this.crop=photoCrop(iw*rw,ih*rh,this.width,viewHeight,this.yaw,this.pitch);const p=this.crop;p.sx+=iw*rx;p.sy+=ih*ry;
   this.bctx.fillStyle='#1c2927';this.bctx.fillRect(0,0,this.width,this.height);
@@ -87,7 +88,12 @@ export class LakeScene{
    // Mask the edges on a separate transparent layer; draw the actual photograph once.
    const layer=this.photoCtx;layer.clearRect(0,0,this.width,this.height);layer.drawImage(this.image,p.sx,p.sy,p.sw,p.sh,0,photoY,this.width,viewHeight);
    const mask=layer.createLinearGradient(0,photoY,0,end);mask.addColorStop(0,'rgba(0,0,0,0)');mask.addColorStop(Math.min(.2,16/viewHeight),'#000');mask.addColorStop(Math.max(.8,1-24/viewHeight),'#000');mask.addColorStop(1,'rgba(0,0,0,0)');layer.globalCompositeOperation='destination-in';layer.fillStyle=mask;layer.fillRect(0,0,this.width,this.height);layer.globalCompositeOperation='source-over';this.bctx.drawImage(this.photoLayer,0,0,this.width,this.height);
-  }else this.bctx.drawImage(this.image,p.sx,p.sy,p.sw,p.sh,0,photoY,this.width,viewHeight);
+  }else {
+   // Keep water underneath the irregular transparent bank edge, including its central dip.
+   const band=this.photo.waterBand||[.1,.7,.7,.15];
+   this.bctx.drawImage(this.image,iw*band[0],ih*band[1],iw*band[2],ih*band[3],0,this.shoreTop-20,this.width,this.height-this.shoreTop+20);
+   this.bctx.drawImage(this.image,p.sx,p.sy,p.sw,p.sh,0,photoY,this.width,viewHeight);
+  }
   this.waterTop=clamp((ih*this.photo.waterStart-p.sy)*p.scale+photoY,0,this.height);this.lastView=key;
  }
  ellipse(x,y,rx,ry,fill,stroke=null,width=1){const c=this.ctx;c.beginPath();c.ellipse(x,y,Math.max(.1,rx),Math.max(.1,ry),0,0,Math.PI*2);if(fill){c.fillStyle=fill;c.fill();}if(stroke){c.strokeStyle=stroke;c.lineWidth=width;c.stroke();}}
@@ -118,8 +124,8 @@ export class LakeScene{
   this.line([{x:p.x+r*.65,y:p.y+3},{x:this.width*.94,y:this.height+20}],'#303a35',4);this.ellipse(p.x,p.y,r,r*.22,'rgba(24,41,35,.12)',g.netProgress>0?'rgba(217,206,158,.85)':'rgba(159,174,153,.8)',1.7);
   c.save();c.beginPath();c.ellipse(p.x,p.y,r,r*.22,0,0,Math.PI*2);c.clip();for(let x=-r;x<=r;x+=8)this.line([{x:p.x+x,y:p.y-r*.22},{x:p.x+x+r*.35,y:p.y+r*.22}],'rgba(108,131,114,.32)',.6);c.restore();
  }
- drawReeds(){const image=this.equipment?.reeds;if(!image)return;const c=this.ctx,h=this.height*(this.height>this.width?.30:.40),w=h*image.width/image.height,env=environmentAt(this.clock),x=-w*.1,y=this.height-h+8;
-  c.save();c.globalAlpha=.92;c.filter='saturate(.72) brightness(.84)';const step=this.high?8:16;
+ drawReeds(){const image=this.equipment?.reeds;if(!image||!this.station.reeds)return;const c=this.ctx,h=this.height*(this.height>this.width?.30:.40),w=h*image.width/image.height,env=environmentAt(this.clock),x=-w*.1,y=this.height-h+8;
+  c.save();c.globalAlpha=this.station.reeds;c.filter='saturate(.72) brightness(.84)';const step=this.high?8:16;
   for(let sy=0;sy<image.height;sy+=step){const sh=Math.min(step,image.height-sy),v=sy/image.height,shift=env.sway*(1.2+env.gust*3)*Math.pow(1-v,2);c.drawImage(image,0,sy,image.width,sh,x+shift,y+v*h,w,sh/image.height*h+.15);}c.restore();
  }
  drawEmptyStand(){const image=this.equipment?.emptyStand;if(!image)return;const {x,y,width,height,at}=restingLayout(this.width,this.height,{index:this.drawIndex,count:this.drawCount,shoreTop:this.shoreTop});
@@ -399,14 +405,14 @@ export class LakeScene{
  }
  render(dt,{paused=false}={}){if(!this.image)return;dt=Math.max(0,dt);this.motionFrameDt=Math.min(dt,1/30);this.clock+=dt;const motionDt=paused?0:dt;const rods=this.game.enabledRods||[this.game];for(let i=0;i<rods.length;i++){const g=rods[i],m=this.motionByRod[i]??=new RodPresentation();m.update(g,motionDt);const strikePulse=Math.max(0,1-(g.time-g.lastStrikeAt)/.55),targetPose=Math.max(['held','fight'].includes(g.phase)?.5+m.pump*.4:0,strikePulse*.85);this.poseByRod[i]=mix(this.poseByRod[i],targetPose,1-Math.exp(-motionDt*8));}this.cachePhotograph();this.drawFrame(dt);if(this.signalViews?.length){for(const v of this.signalViews)this.paintSignal(v.index,v.canvas,true);}else this.paintSignal(this.game.activeIndex||0);}
  drawFrame(dt){this.water();this.drawSurface();this.drawLife();this.drawAimAndFeed();this.ctx.save();this.ctx.beginPath();this.ctx.rect(0,this.waterTop,this.width,Math.max(0,this.shoreTop-this.waterTop));this.ctx.clip();this.drawRipples();this.ctx.restore();
-  if(this.equipment.deck){const d=this.equipment.deck,p=this.deckCrop;this.ctx.drawImage(d,p.sx,p.sy,p.sw,p.sh,0,0,this.width,this.height);this.metrics.drawImages++;}
+  const bank=this.bankLayout;this.ctx.drawImage(this.stationImage,bank.x,bank.y,bank.width,bank.height);this.metrics.drawImages++;this.metrics.station=this.station.name;
 
   this.drawReeds();
   const session=this.game,rods=session.enabledRods||[session],active=session.activeIndex||0;this.drawCount=rods.length;this.targets=[];this.signals=[];
   for(let i=0;i<rods.length;i++){
    const g=rods[i];this.game=g;this.drawIndex=i;
    this.presentation=this.motionByRod[i];this.pose=this.poseByRod[i];
-   this.target=waterPoint(this.width,this.height,this.waterTop,g.distance||30,(g.phase==='fight'?(g.fishBearing??g.castAngle):g.castAngle||0)-this.yaw,this.equipment.deck?this.shoreTop:null);this.targets.push({...this.target});
+   this.target=waterPoint(this.width,this.height,this.waterTop,g.distance||30,(g.phase==='fight'?(g.fishBearing??g.castAngle):g.castAngle||0)-this.yaw,this.shoreTop);this.targets.push({...this.target});
    this.drawFish();this.drawWaterResponse();this.drawNet();if(g.loadout.method==='float'&&['waiting','bite'].includes(g.phase))this.drawFloat(this.target,false);this.drawRig();
   }
   this.game=session;this.target=this.targets[active];this.drawLighting();

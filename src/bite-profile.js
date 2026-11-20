@@ -1,4 +1,4 @@
-import {RIGS} from './tackle.js?v=0.22.0';
+import {RIGS} from './tackle.js?v=0.24.0';
 // Gameplay profiles for readable differences between tackle, not a biological rule.
 const clamp=v=>Math.max(0,Math.min(1,v));
 export function directCorn(loadout){return loadout.method==='ledger'&&loadout.bait==='corn'&&!RIGS[loadout.rig]?.feeder;}
