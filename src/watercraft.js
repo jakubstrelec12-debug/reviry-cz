@@ -1,5 +1,5 @@
 // Fictional fishing zones, not surveyed bathymetry of the photographed venue.
-import {METHODS,RODS} from './tackle.js?v=0.24.1';
+import {METHODS,RODS} from './tackle.js?v=0.24.2';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 export const WATER_SPOTS=[
  {id:'margin',name:'Pobřežní pás',distance:17,angle:-.28,activity:1.08,weights:{tench:1.65,crucian:1.5,roach:1.35,carp:.85,bream:.8,amur:1.15}},

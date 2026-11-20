@@ -1,11 +1,11 @@
-import {fightPoint} from './fight-view.js?v=0.24.1';
-import {STATIONS,stationFor,stationLayout} from './stations.js?v=0.24.1';
-import {RodPresentation,environmentAt,handResponse} from './immersion.js?v=0.24.1';
-import {runForce} from './encounter.js?v=0.24.1';
-import {tripConditions} from './trip.js?v=0.24.1';
-import {getVenue} from './venues.js?v=0.24.1';
-import {biteMotion} from './bite-motion.js?v=0.24.1';
-import {RODS,RIGS} from './tackle.js?v=0.24.1';
+import {fightPoint} from './fight-view.js?v=0.24.2';
+import {STATIONS,stationFor,stationLayout} from './stations.js?v=0.24.2';
+import {RodPresentation,environmentAt,handResponse} from './immersion.js?v=0.24.2';
+import {runForce} from './encounter.js?v=0.24.2';
+import {tripConditions} from './trip.js?v=0.24.2';
+import {getVenue} from './venues.js?v=0.24.2';
+import {biteMotion} from './bite-motion.js?v=0.24.2';
+import {RODS,RIGS} from './tackle.js?v=0.24.2';
 
 export const PHOTO=getVenue('vajgar').photo;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -75,7 +75,8 @@ export class LakeScene{
   const key=[this.yaw.toFixed(3),this.pitch.toFixed(3),this.width,this.height,this.photo.src,this.wideView].join('/');if(key===this.lastView)return;
   this.station=stationFor(this.venueId);this.stationImage=this.stationImages[Object.keys(STATIONS).find(key=>STATIONS[key]===this.station)];this.bankLayout=stationLayout(this.width,this.height,this.stationImage,this.station);this.shoreTop=this.bankLayout.shoreTop;
   const [rx,ry,rw,rh]=this.photo.crop||[0,0,1,1],iw=this.image.width,ih=this.image.height;
-  const wide=this.wideView&&this.height>this.width;
+  // A shoreline photograph must not become a telephoto view on a tall phone.
+  const wide=this.height>this.width&&(this.wideView||this.photo.preserveScale===true);
   let viewHeight=this.height*.82,photoY=this.shoreTop+8-viewHeight;
   if(wide){viewHeight=Math.min(this.height*.65,this.width*(ih*rh)/(iw*rw));const scale=viewHeight/(ih*rh);photoY=this.height*.36-(ih*this.photo.waterStart-ih*ry)*scale+this.pitch*this.height*.3;}
   this.crop=photoCrop(iw*rw,ih*rh,this.width,viewHeight,this.yaw,this.pitch);const p=this.crop;p.sx+=iw*rx;p.sy+=ih*ry;
@@ -88,7 +89,7 @@ export class LakeScene{
    for(let y=Math.max(0,end-24);y<this.shoreTop+12;y+=2){const q=((y-(end-24))/waterScale)%(bandH*2),sy=ih*band[1]+Math.min(bandH-sourceHeight,q<bandH?q:bandH*2-q);this.bctx.drawImage(this.image,iw*band[0],sy,iw*band[2],sourceHeight,0,y,this.width,2.1);}
    // Mask the edges on a separate transparent layer; draw the actual photograph once.
    const layer=this.photoCtx;layer.clearRect(0,0,this.width,this.height);layer.drawImage(this.image,p.sx,p.sy,p.sw,p.sh,0,photoY,this.width,viewHeight);
-   const mask=layer.createLinearGradient(0,photoY,0,end);mask.addColorStop(0,'rgba(0,0,0,0)');mask.addColorStop(Math.min(.2,16/viewHeight),'#000');mask.addColorStop(Math.max(.8,1-24/viewHeight),'#000');mask.addColorStop(1,'rgba(0,0,0,0)');layer.globalCompositeOperation='destination-in';layer.fillStyle=mask;layer.fillRect(0,0,this.width,this.height);layer.globalCompositeOperation='source-over';this.bctx.drawImage(this.photoLayer,0,0,this.width,this.height);
+   const mask=layer.createLinearGradient(0,photoY,0,end);mask.addColorStop(0,'rgba(0,0,0,0)');mask.addColorStop(Math.min(.2,(this.photo.skyBlend||16)/viewHeight),'#000');mask.addColorStop(Math.max(.8,1-24/viewHeight),'#000');mask.addColorStop(1,'rgba(0,0,0,0)');layer.globalCompositeOperation='destination-in';layer.fillStyle=mask;layer.fillRect(0,0,this.width,this.height);layer.globalCompositeOperation='source-over';this.bctx.drawImage(this.photoLayer,0,0,this.width,this.height);
   }else {
    // Keep water underneath the irregular transparent bank edge, including its central dip.
    const band=this.photo.waterBand||[.1,.7,.7,.15];

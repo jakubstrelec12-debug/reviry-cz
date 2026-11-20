@@ -1,9 +1,9 @@
-import {MISSIONS,MissionRun} from './missions.js?v=0.24.1';
-import {normalizeAim} from './watercraft.js?v=0.24.1';
-import {DEFAULT_TRIP,validTrip} from './trip.js?v=0.24.1';
-import {VENUES} from './venues.js?v=0.24.1';
-import {Fishing} from './fishing.js?v=0.24.1';
-import {cleanLoadout,validateLoadout,createFeedStocks} from './tackle.js?v=0.24.1';
+import {MISSIONS,MissionRun} from './missions.js?v=0.24.2';
+import {normalizeAim} from './watercraft.js?v=0.24.2';
+import {DEFAULT_TRIP,validTrip} from './trip.js?v=0.24.2';
+import {VENUES} from './venues.js?v=0.24.2';
+import {Fishing} from './fishing.js?v=0.24.2';
+import {cleanLoadout,validateLoadout,createFeedStocks} from './tackle.js?v=0.24.2';
 const LOCKED=['casting','flying','held','fight','landed'];
 export class FishingSession{
  constructor(random=Math.random){

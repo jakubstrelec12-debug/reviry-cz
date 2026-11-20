@@ -1,5 +1,5 @@
-import {probeLift} from './encounter.js?v=0.24.1';
-import {strikeWindow,biteAge} from './strike-timing.js?v=0.24.1';
+import {probeLift} from './encounter.js?v=0.24.2';
+import {strikeWindow,biteAge} from './strike-timing.js?v=0.24.2';
 // A single pose drives the tackle, optical detail and short movement caption.
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 export function biteMotion(game,clock=0){

@@ -57,3 +57,19 @@ test('wide portrait view exposes more source pixels without stretching the actua
  scene.setWideView(false);const normal=scene.crop.sw;scene.setWideView(true);assert.ok(scene.crop.sw>normal*1.5);assert.ok(Math.abs(scene.crop.sw-scene.image.width)<1);
  assert.ok(scene.waterTop>100&&scene.waterTop<scene.shoreTop);assert.equal(scene.crop.scale,390/scene.image.width);const clock=scene.clock;scene.setWideView(false);assert.equal(scene.clock,clock);scene.dispose();
 });
+
+test('Orlik retains the shoreline photo scale on phones even with an older saved close-view preference',async()=>{
+ for(const [w,h] of [[390,650],[390,844],[844,390],[1366,768]]){
+  Object.assign(globalThis,{innerWidth:w,innerHeight:h,devicePixelRatio:1,window:{addEventListener(){},removeEventListener(){}},localStorage:{getItem:()=> 'off',setItem(){}},document:{createElement:()=>createCanvas(w,h)}});
+  globalThis.Image=class extends NativeImage{set src(v){super.src=v.startsWith('file:')?fileURLToPath(v):v;}};
+  const canvas=createCanvas(w,h);canvas.addEventListener=()=>{};
+  const g=new Fishing(()=>.2);g.venueId='orlik';g.phase='waiting';g.distance=30;
+  const scene=await new LakeScene(canvas,g).init();
+  assert.match(scene.photo.src,/orlik-bank/);
+  assert.ok(Math.abs(scene.crop.sw-scene.image.width)<1,'retain the full horizontal field instead of zooming the castle');
+  assert.ok(Math.abs(scene.crop.scale-w/scene.image.width)<.0001,'landmark widths must scale with viewport width');
+  if(h>w)assert.ok(Math.abs(scene.waterTop-h*.36)<1);
+  assert.ok(scene.target.y>scene.waterTop&&scene.target.y<scene.shoreTop);
+  scene.dispose();
+ }
+});

@@ -162,27 +162,33 @@ export const VENUE_PHOTOS={
     "note": "Skutečná fotografie lokality: Pískovna Cep, Suchdol nad Lužnicí, Česko.jpg."
   },
   "orlik": {
-    "src": "assets/venues/orlik.webp",
-    "author": "Michal Ritter",
-    "title": "Zámek Orlík , pohled z vyhlídky.jpg",
-    "source": "https://commons.wikimedia.org/wiki/File:Z%C3%A1mek_Orl%C3%ADk_,_pohled_z_vyhl%C3%ADdky.jpg",
+    "src": "assets/venues/orlik-bank.webp",
+    "author": "Richenza",
+    "title": "Vodní nádrž Orlík a Orlík (zámek) (2.).jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Vodn%C3%AD_n%C3%A1dr%C5%BE_Orl%C3%ADk_a_Orl%C3%ADk_(z%C3%A1mek)_(2.).jpg",
     "license": "CC BY-SA 3.0",
-    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
-    "waterStart": 0.53,
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+    "waterStart": 0.56,
     "crop": [
       0,
       0,
       1,
-      0.77
+      0.78
     ],
     "waterBand": [
-      0.1,
-      0.59,
-      0.65,
-      0.12
+      0.25,
+      0.62,
+      0.55,
+      0.15
     ],
+    "sky": [
+      "#acc7db",
+      "#b1c9dc"
+    ],
+    "preserveScale": true,
+    "note": "Skutečná fotografie Orlíku z protějšího břehu u Radavy. Pohled z úrovně hladiny; na telefonu zachované široké měřítko krajiny.",
     "verified": true,
-    "note": "Skutečná fotografie lokality: Zámek Orlík , pohled z vyhlídky.jpg."
+    "skyBlend": 32
   },
   "luznice10a": {
     "src": "assets/venues/luznice10a.webp",

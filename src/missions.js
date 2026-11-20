@@ -1,4 +1,4 @@
-import {DEFAULT_LOADOUT,methodPreset} from './tackle.js?v=0.24.1';
+import {DEFAULT_LOADOUT,methodPreset} from './tackle.js?v=0.24.2';
 const ledger=(bait,feed,rig='running')=>({...DEFAULT_LOADOUT,bait,feed,rig,feedPortion:150});
 export const MISSIONS=[
  {id:'hejtman-corn',name:'Kapr pod Chlumem',venueId:'hejtman',speciesId:'carp',minLength:55,count:1,seconds:1200,grams:300,trip:{date:'2026-06-15',time:'06:00'},loadout:ledger('corn','grain')},

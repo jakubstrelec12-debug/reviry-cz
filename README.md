@@ -6,6 +6,10 @@ Rybářská hra pro Safari na iPhonu. Výhled nově tvoří **skutečná fotogra
 
 Nejlépe na šířku. Všechny herní fotografie jsou přiložené lokálně. HD / ECO mění rozlišení a jemnost animace vody. Fotografie není 360° panorama: tažením jde pouze mírně posouvat výhled a směr náhozu. Nejde o volně průchozí 3D svět.
 
+## Měřítko Orlíku — 0.24.2
+
+Pohled z vyhlídky nahrazuje skutečná fotografie z protějšího břehu u Radavy. Orlík na telefonu zachovává celou šířku záběru, takže se zámek a protější břeh nezvětšují podle výšky displeje. Starší uložená volba úzkého záběru už na této vodě nezpůsobí nepřiměřený zoom. Pruty a stojany zachovávají své měřítko i polohu. Pozadí zůstává fotografickým kompozitem.
+
 ## Viditelná ryba a podběrák — 0.24.1
 
 Při zdolávání jsou na hladině čitelné značky RYBA a PODBĚRÁK. Podběrák stojí na jednom místě; posun ryby reaguje na její směr. Na telefonu se panel ovládání přesunul dolů a projekce udržuje obě značky v odkryté vodě mezi úkolem a ovládáním. Na šířku je zdolávání napravo od panelu. Pokyn pod šipkami vychází ze skutečného směru ryby vůči koši i z podmínek podebrání. Kontrolní scéna se stejným DOM, CSS a rendererem je v `tools/fight-visibility.html`.
