@@ -76,3 +76,8 @@ Externí originál `https://nachytano.cz/files/images/jarosov_IX.JPG`, zdrojová
 ## Pohyblivé náčiní a popředí 0.15
 
 Nové ilustrační AI vrstvy `equipment/held-animated.webp`, `winding-hand.webp`, `empty-tripod.webp` a `shore-reeds.webp` byly vytvořeny 19. 11. 2026. Ruce a prázdný stojan vycházejí ze stávajících syntetických podkladů náčiní, které zachovávají souřadnice. Nejde o fotografie konkrétního modelu výrobce ani o dokumentaci vegetace na daném revíru. Transparentní části byly odděleny a převedeny do WebP. Zadání a rozdělení: [ANIMATION.md](ANIMATION.md). Zvukové pozadí, ptačí hlasy, brzda a naviják jsou procedurálně syntetizované, bez cizích nahrávek.
+
+## Hejtman and Staňkov (0.22.0)
+- `venues/hejtman.webp`: ŠJů, [Chlum u Třeboně, přes rybník Hejtman (01)](https://commons.wikimedia.org/wiki/File:Chlum_u_T%C5%99ebon%C4%9B,_p%C5%99es_rybn%C3%ADk_Hejtman_(01).jpg), 1 May 2009, [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/). Resized and converted to WebP; adapted image remains CC BY-SA 3.0.
+- `venues/stankov.webp`: Harold, [Staňkov, Staňkovský rybník (2020-07-06; 01)](https://commons.wikimedia.org/wiki/File:Sta%C5%88kov,_Sta%C5%88kovsk%C3%BD_rybn%C3%ADk_(2020-07-06;_01).jpg), 6 July 2020, [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Resized and converted to WebP; adapted image remains CC BY-SA 4.0.
+Both photographs depict the named venue. In-game view adds crop, extended/animated water and shared synthetic equipment/foreground. Stock evidence is linked in the venue picker; probabilities and lengths are game balance.

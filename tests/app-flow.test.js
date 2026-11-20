@@ -90,3 +90,20 @@ test('two-rod UI keeps both live indicators and lets an inactive bite be picked 
  assert.equal(state().phase,'landed');assert.equal(state().catches,1);$('release').click();tick();
  document.querySelector('[data-signal-rod="1"]').click();tick();assert.equal(state().activeRod,2);assert.equal($('fatal').classList.contains('hidden'),true);assert.equal(views.length,2);
 });
+
+test('scenario UI launches fixed gear, pauses timer, records success, retries and restores free fishing',async()=>{
+ const dom=new JSDOM(fs.readFileSync(new URL('../index.html',import.meta.url),'utf8'),{url:'https://example.test',pretendToBeVisual:true}),document=dom.window.document;
+ globalThis.document=document;let frame,now=performance.now(),model;
+ class LakeStub{constructor(){this.high=true;this.assetWarnings=[];}async init(){return this;}async setVenue(id){this.venueId=id;this.photo=VENUES[id].photo;}render(){}setCastDirection(){}splash(){}scatterFeed(){}}
+ const code=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8').replace(/^import .*;\n/gm,'');
+ new Function('LakeSound','alarmStep','TripPlanner','VENUES','STOCK_SOURCES','SPECIES_NAMES','getVenue','biteMotion','signalCaption','Preparation','METHODS','BAITS','FEEDS','setupSummary','validateLoadout','showCatchPhoto','photoFor','Fishing','LakeScene','window','document','localStorage','navigator','requestAnimationFrame','setTimeout','clearTimeout',code)(LakeSound,alarmStep,TripPlanner,VENUES,STOCK_SOURCES,SPECIES_NAMES,getVenue,biteMotion,signalCaption,Preparation,tackle.METHODS,tackle.BAITS,tackle.FEEDS,tackle.setupSummary,tackle.validateLoadout,showCatchPhoto,photoFor,class extends Fishing{constructor(){super(()=>.1);model=this;}},LakeStub,dom.window,document,dom.window.localStorage,dom.window.navigator,callback=>{frame=callback;},()=>0,()=>{});
+ await new Promise(setImmediate);const $=id=>document.getElementById(id),tick=()=>{now+=50;frame(now);};
+ $('welcomeMissions').click();assert.equal(document.querySelectorAll('[data-mission]').length,4);document.querySelector('[data-mission="hejtman-corn"]').click();await new Promise(setImmediate);tick();
+ assert.equal(model.venueId,'hejtman');assert.equal(model.mission.status,'running');assert.equal(model.paused,false);assert.equal($('tackle').disabled,true);assert.equal(model.feedStocks.grain,300);assert.equal($('missionHud').classList.contains('hidden'),false);
+ const before=model.mission.elapsed;$('missionManage').click();for(let i=0;i<10;i++)tick();assert.equal(model.mission.elapsed,before);$('missionsClose').click();tick();assert.ok(model.mission.elapsed>before);
+ $('waters').click();assert.equal($('venuesOverlay').classList.contains('hidden'),true);
+ model.phase='fight';model.fish={id:'carp',name:'Kapr obecný',length:60,weight:3};model.active.land();tick();assert.equal(model.mission.status,'succeeded');assert.equal($('catchOverlay').classList.contains('hidden'),false);assert.equal($('missionResult').classList.contains('hidden'),true);
+ $('release').click();tick();assert.equal($('missionResult').classList.contains('hidden'),false);assert.match($('missionResultTitle').textContent,/splněn/);assert.ok(JSON.parse(dom.window.localStorage.getItem('reviry-mission-records'))['hejtman-corn']);assert.equal(dom.window.localStorage.getItem('reviry-session-setup'),null);
+ $('missionRetry').click();await new Promise(setImmediate);tick();assert.equal(model.mission.status,'running');assert.equal(model.feedStocks.grain,300);assert.ok(model.mission.elapsed<1);
+ $('missionManage').click();$('missionAbandon').click();await new Promise(setImmediate);tick();assert.equal(model.mission,null);assert.equal(model.venueId,'vajgar');assert.equal($('intro').classList.contains('hidden'),false);assert.equal($('fatal').classList.contains('hidden'),true);
+});

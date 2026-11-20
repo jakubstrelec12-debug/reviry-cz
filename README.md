@@ -1,10 +1,25 @@
-# REVÍRY CZ — Jižní Čechy 0.12
+# REVÍRY CZ — Jižní Čechy 0.22.0
 
 Rybářská hra pro Safari na iPhonu. Výhled nově tvoří **skutečná fotografie Vajgaru** s animovanou hladinou, prutem, čihátkem, náhozem, splávkem a krmením. Zjednodušená 3D zástavba se v hlavní hře nepoužívá. Vykreslování běží přes Canvas 2D a nepotřebuje WebGL.
 
-**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.21.0
+**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.22.0
 
 Nejlépe na šířku. Všechny herní fotografie jsou přiložené lokálně. HD / ECO mění rozlišení a jemnost animace vody. Fotografie není 360° panorama: tažením jde pouze mírně posouvat výhled a směr náhozu. Nejde o volně průchozí 3D svět.
+
+## Revíry a úkoly — 0.22.0
+
+Přibyly Hejtman v Chlumu u Třeboně a Staňkovský rybník se skutečnými fotografiemi a odkazy na osádku/pravidla provozovatele. Druhy mimo herní model jsou uvedené informativně. Nejde o sčítání aktuální populace. Licenční údaje jsou u revíru i v `assets/CREDITS.md`.
+
+Na úvodu nebo v **☰ → Úkoly a výzvy** vyber samostatný režim:
+
+- Hejtman: kapr alespoň 55 cm, kukuřice, průběžné olovo, 300 g partiklu.
+- Staňkov: kapr alespoň 65 cm, boilies 15 mm, vlasová montáž, 150 g drceného boilies.
+- Jarošov: lín alespoň 35 cm, plavaná se žížalou, 300 g směsi.
+- Vlkov: kapr alespoň 50 cm, feeder s kukuřicí, 300 g sladké směsi.
+
+Každý úkol má jeden prut, pevnou montáž, revír, datum a čas a limit 20 minut aktivního lovu. Nástraha není počítána na kusy; omezena je její volba. Krmení ze břehu a naplnění krmítka spotřebovává stejnou konečnou zásobu; po vyčerpání lze dál lovit bez přikrmování. Počítá se úspěšně podebraná ryba správného druhu a délky před koncem limitu. Jiný úlovek lze pustit a pokračovat.
+
+Menu, karta úlovku a pozadí aplikace pozastaví čas. Po limitu se vyhodnotí neúspěch i během zdolávání. Výsledek nabízí nový pokus, jiný úkol nebo návrat do volného lovu. Nejlepší úspěšný čas se ukládá místně; rozpracovaný pokus se po obnovení stránky neobnovuje. Návrat obnoví předchozí sestavy, revír a zásoby volného lovu. Úlovky z úkolů zůstávají v deníku s označením scénáře.
 
 ## Oprava spuštění — 0.21.0
 
