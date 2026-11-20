@@ -10,7 +10,7 @@ Nejlépe na šířku. Všechny herní fotografie jsou přiložené lokálně. HD
 
 Před volným lovem nejprve zabal výbavu a zásoby. Čtyři výchozí tašky (všestranná, kaprová, feederová a plavaná) lze libovolně upravit a až šest vlastních tašek se sestavami uložit v zařízení. U vody pak vybíráš jen zabalené věci. Tlačítko **Taška** ukazuje obsah a zbývající krmení; pro doplnění nejprve stáhni oba pruty a připrav novou výpravu. Zavření přípravy změny zahodí. Obnovení stránky zachová zbývající zásoby, nedoplní je.
 
-Katalog obsahuje 39 nástrah, 19 druhů krmení včetně volby bez krmení, 10 montáží, šest prutů a čtyři obecné typy navijáků. Schéma montáže otevírá nastavení vlasce, zátěže, návazce, háčku a nástrahy. Každý prut má vlastní sestavu, ale sdílí zásobu krmení. Navijáky mírně mění rychlost navíjení. Výbava je bez měny a balí se podle typů; stejný typ lze použít na obou prutech. Nástrahy se nespotřebovávají na kusy, krmení ano. Samostatné úkoly používají své předepsané vybavení a po návratu obnoví původní tašku i zásoby.
+Katalog obsahuje 39 nástrah, 19 druhů krmení a volbu bez krmení, 10 montáží, šest prutů a čtyři obecné typy navijáků. Schéma montáže otevírá nastavení vlasce, zátěže, návazce, háčku a nástrahy. Každý prut má vlastní sestavu, ale sdílí zásobu krmení. Navijáky mírně mění rychlost navíjení. Výbava je bez měny a balí se podle typů; stejný typ lze použít na obou prutech. Nástrahy se nespotřebovávají na kusy, krmení ano. Samostatné úkoly používají své předepsané vybavení a po návratu obnoví původní tašku i zásoby.
 
 Kontrola mobilního rozložení skutečné aplikace: `tools/bag-view.html`.
 
