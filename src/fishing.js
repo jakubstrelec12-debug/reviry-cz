@@ -1,10 +1,10 @@
-import {normalizeAim,aimPower,castLanding,waterSpot,spotWeights,horizontalGap} from './watercraft.js?v=0.24.2';
-import {allowsProbes,makeBiteProfile} from './bite-profile.js?v=0.24.2';
-import {nextRun,runForce} from './encounter.js?v=0.24.2';
-import {DEFAULT_TRIP,activityFor} from './trip.js?v=0.24.2';
-import {getVenue,EXTRA_SPECIES,venueWeights} from './venues.js?v=0.24.2';
-import {strikeWindow,assessStrike,strikeReason} from './strike-timing.js?v=0.24.2';
-import {DEFAULT_LOADOUT, METHODS, RODS, RIGS, catchWeight, validateLoadout, cleanLoadout, feedInfluence, speciesWeights, biteDelay,createFeedStocks} from './tackle.js?v=0.24.2';
+import {normalizeAim,aimPower,castLanding,waterSpot,spotWeights,horizontalGap} from './watercraft.js?v=0.25.0';
+import {allowsProbes,makeBiteProfile} from './bite-profile.js?v=0.25.0';
+import {nextRun,runForce} from './encounter.js?v=0.25.0';
+import {DEFAULT_TRIP,activityFor} from './trip.js?v=0.25.0';
+import {getVenue,EXTRA_SPECIES,venueWeights} from './venues.js?v=0.25.0';
+import {strikeWindow,assessStrike,strikeReason} from './strike-timing.js?v=0.25.0';
+import {DEFAULT_LOADOUT, METHODS, RODS, REELS, RIGS, catchWeight, validateLoadout, cleanLoadout, feedInfluence, speciesWeights, biteDelay,createFeedStocks} from './tackle.js?v=0.25.0';
 export const SPECIES = [
   {id:'carp',name:'Kapr obecný', min:1.4, max:7.8, power:0.85, color:0xb79b5d},
   {id:'tench',name:'Lín obecný', min:0.45, max:2.3, power:0.6, color:0x6d7841},
@@ -91,7 +91,7 @@ export class Fishing {
       const previousDistance=this.distance;
       const lineStrength=Math.pow(this.loadout.line/.25,.85);const target=(0.08+this.drag*surge*0.95+(this.reeling?0.16:0)+(this.lifting?0.2:0))/lineStrength;
       this.tension+=(target-this.tension)*Math.min(1,dt*2.4);
-      this.distance=Math.max(2.2,this.distance+(surge*(1-this.drag)*2.3-(this.reeling?1.9*(0.35+this.drag)*RODS[this.loadout.rod].power:0)-(this.lifting?0.25:0))*dt);
+      this.distance=Math.max(2.2,this.distance+(surge*(1-this.drag)*2.3-(this.reeling?1.9*(0.35+this.drag)*RODS[this.loadout.rod].power*(REELS[this.loadout.reel||'universal']?.retrieve||1):0)-(this.lifting?0.25:0))*dt);
       this.lineOutRate=dt>0?Math.max(0,(this.distance-previousDistance)/dt):0;this.lineInRate=dt>0?Math.max(0,(previousDistance-this.distance)/dt):0;
       this.stamina=Math.max(0,this.stamina-dt*(.002+this.tension*.008+effort*.006+(this.reeling?.012:0)+(this.lifting?.010:0)));
       this.overload=this.tension>0.94?this.overload+dt:Math.max(0,this.overload-dt*2);

@@ -18,6 +18,12 @@ export const RODS={
  match:{brand:'Mivardi',model:'Easy Match II 390',source:'https://www.mivardi.cz/easy-match-ii-390',name:'Mivardi Easy Match II · 3,90 m · 5–20 g',length:3.9,maxWeight:20,power:.82},
  bolo:{brand:'Mivardi',model:'Phenomena TMX Bolo 500',source:'https://www.mivardi.cz/prut-phenomena-tmx-bolo-500',name:'Mivardi Phenomena TMX · 5,00 m · 10–20 g',length:5,maxWeight:20,power:.78},
 };
+export const REELS={
+ universal:{name:'Univerzální naviják 4000',detail:'Vyvážený návin pro všechny techniky',retrieve:1},
+ compact:{name:'Kompaktní naviják 2500',detail:'Jemný a pomalejší návin',retrieve:.9},
+ feeder:{name:'Feederový naviják 5000',detail:'Rychlejší dobírání vlasce',retrieve:1.08},
+ bigpit:{name:'Kaprový naviják 6000',detail:'Velká cívka a svižný návin',retrieve:1.12},
+};
 export const RIGS={
  running:{name:'Průběžné olovo',detail:'Kmenový vlasec → průběžné olovo → obratlík → návazec → háček',baits:['corn','worm','maggots','bread']},
  spring:{name:'Krmítko na položenou',feeder:true,detail:'Vlasec → průběžné pružinové krmítko → obratlík → návazec → háček',baits:['corn','worm','maggots','bread']},
@@ -28,6 +34,9 @@ export const RIGS={
  fixed:{name:'Pevný splávek',detail:'Kmenový vlasec → pevný splávek → broky → návazec → háček',baits:['corn','worm','maggots','bread']},
  sliding:{name:'Průběžný splávek',detail:'Zarážka → splávek → broky → obratlík → návazec → háček',baits:['corn','worm','maggots','bread']},
 };
+RIGS.leadclip={hair:true,name:'Bezpečnostní závěska s přívěsem',detail:'Vlasec → závěska s uvolnitelným olovem → návazec → háček s přívěsem',baits:[...RIGS.hair.baits]};
+RIGS.loop={feeder:true,name:'Průběžný feeder ve smyčce',detail:'Vlasec → průběžný závěs krmítka → obratlík → návazec → háček',baits:[...RIGS.cage.baits]};
+METHODS.ledger.rigs.push('leadclip');METHODS.feeder.rigs.push('loop');
 export const BAITS={
  corn:{name:'Kukuřice',detail:'Zrnko na háček nebo vlasový přívěs',weights:[3,1.4,1.2],sizeBias:1.4},
  worm:{name:'Žížala',detail:'Živá nástraha přímo na háček',weights:[.7,3,1.5],sizeBias:1.7},
@@ -43,6 +52,33 @@ export const FEEDS={
  groundbait:{brand:'Sonubaits',model:'Supercrush Green',source:'https://www.sonubaits.com/en/products/groundbait/sp-10474',name:'Sonubaits Supercrush Green',detail:'Do krmítka i pro zakrmení ze břehu',weights:[1.05,1.1,1.7]},
  micro:{name:'Mikropelety 2 mm',detail:'Do krmítka i k vytvoření krmného místa',weights:[1.8,1.1,.7]},
 };
+// Additional unbranded bait types. Their response values are game balance.
+Object.assign(BAITS,{
+ cornSweet:{name:'Sladká kukuřice · vanilka',detail:'Sladké zrno pro kapra a lína',family:'natural',sample:'corn',weights:[3.5,1.8,1],sizeBias:1.25,speed:1.05},
+ cornStrawberry:{name:'Kukuřice · jahoda',detail:'Výrazná ovocná příchuť',family:'natural',sample:'corn',weights:[4,1.5,.8],sizeBias:1.2,speed:.98},
+ redMaggots:{name:'Červení červi',detail:'Malý svazek na jemný háček',family:'natural',sample:'maggots',weights:[.35,1.8,3.7],sizeBias:2,minHook:10},
+ dendrobaena:{name:'Hnojní žížaly',detail:'Menší živá nástraha pro lína a cejna',family:'natural',sample:'worm',weights:[.8,3.5,1.7],sizeBias:1.8},
+ breadFlake:{name:'Vločkované pečivo',detail:'Lehká nástraha pro jemnou plavanou',family:'natural',sample:'bread',weights:[.5,.8,4],sizeBias:2.2},
+ boilieScopex:{name:'Boilies 15 mm · scopex',detail:'Sladká potápivá kulička',family:'boilie',sample:'boilie',hairOnly:true,weights:[11,.2,.1],sizeBias:.95,minWeights:{carp:2},maxHook:10},
+ boilieFish:{name:'Boilies 18 mm · rybí moučka',detail:'Masová kulička pro kapry',family:'boilie',sample:'boilie',hairOnly:true,weights:[17,.1,.03],sizeBias:.8,minWeights:{carp:3},maxHook:8,speed:.9},
+ boilieStrawberry:{name:'Boilies 12 mm · jahoda',detail:'Menší ovocná kulička',family:'boilie',sample:'boilie',hairOnly:true,weights:[8,.6,.3],sizeBias:1.05,maxHook:10},
+ boilieGarlic:{name:'Boilies 16 mm · česnek',detail:'Výrazná potápivá nástraha',family:'boilie',sample:'boilie',hairOnly:true,weights:[13,.15,.05],sizeBias:.9,maxHook:8,minWeights:{carp:2.4}},
+ popupPineapple:{name:'Pop-up 12 mm · ananas',detail:'Plovoucí kulička nad dnem',family:'balanced',sample:'boilie',hairOnly:true,weights:[12,.25,.08],sizeBias:.95,maxHook:10},
+ popupWhite:{name:'Pop-up 10 mm · bílý česnek',detail:'Malá výrazná plovoucí kulička',family:'balanced',sample:'boilie',hairOnly:true,weights:[9,.5,.2],sizeBias:1.05,maxHook:10},
+ wafterChocolate:{name:'Wafter 8 mm · čokoláda',detail:'Vyvážená nástraha pro method feeder',family:'balanced',sample:'pellet',hairOnly:true,weights:[6,1.5,1.2],sizeBias:1.3,maxHook:12},
+ pelletKrill:{name:'Peleta 10 mm · krill',detail:'Výrazná peleta na vlasový přívěs',family:'pellet',sample:'pellet',hairOnly:true,weights:[9,.6,.25],sizeBias:1,maxHook:10},
+ pelletTrout:{name:'Pstruží peleta 6 mm',detail:'Menší rybí peleta na přívěsu',family:'pellet',sample:'pellet',hairOnly:true,weights:[4,1.5,1.4],sizeBias:1.4,maxHook:12},
+});
+Object.assign(FEEDS,{
+ vanillaMix:{name:'Vanilková směs',detail:'Sladká směs pro kapra a lína',family:'mix',weights:[1.8,1.6,.9],duration:280,feederSafe:true},
+ breamMix:{name:'Tmavá cejnová směs',detail:'Jemná směs do chladnější vody',family:'mix',weights:[.8,1.2,2.6],duration:220,feederSafe:true},
+ tenchMix:{name:'Línová směs s konopím',detail:'Zemité drobné krmení',family:'mix',weights:[1,2.5,1.1],duration:300,feederSafe:true},
+ strawberryMix:{name:'Jahodová směs',detail:'Ovocná směs pro kaprovité ryby',family:'mix',weights:[2,1.3,.8],duration:280,feederSafe:true},
+ krillMicro:{name:'Mikropelety 2 mm · krill',detail:'Drobné masové pelety do krmítka',family:'pellet',weights:[2.1,1.3,.7],duration:320,feederSafe:true,sizeBoost:.2},
+ halibutFeed:{name:'Halibut pelety · krmení',detail:'Hrubé pelety do krmného místa',family:'pellet',weights:[2.5,.6,.3],duration:480,feederSafe:false,sizeBoost:.4},
+ maizeFeed:{name:'Vařená kukuřice',detail:'Celá zrna pro zakrmení ze břehu',family:'particle',weights:[2,1.5,.7],duration:360,feederSafe:false},
+ mixedParticle:{name:'Míchaný partikl',detail:'Kukuřice, pšenice a konopí',family:'particle',weights:[1.7,1.8,1.1],duration:420,feederSafe:false},
+});
 // Expanded catalogue. Product names are factual; response values are game balance.
 Object.assign(BAITS,{
  casters:{name:'Kukly červů (casters)',detail:'Dvě kukly na jemný háček',family:'natural',sample:'maggots',weights:[.6,2.1,2.6],sizeBias:1.8,maxHook:14,speed:1.08},
@@ -85,7 +121,7 @@ for(const [id,f] of Object.entries(FEEDS)){if(id!=='none'){f.family||=id==='micr
 export const BAIT_FAMILIES={all:'Vše',natural:'Přírodní',boilie:'Potápivé boilies',balanced:'Pop-up a wafters',pellet:'Pelety'};
 export function feedAllowed(loadout,id){return Object.hasOwn(FEEDS,id)&&(!RIGS[loadout.rig]?.feeder||FEEDS[id].feederSafe!==false);}
 export function createFeedStocks(){return Object.fromEntries(Object.keys(FEEDS).filter(id=>id!=='none').map(id=>[id,1000]));}
-export const DEFAULT_LOADOUT=Object.freeze({method:'ledger',indicator:'bobbin',rod:'carp',rig:'running',line:.255,hook:8,leader:40,weight:40,bait:'corn',feed:'none',feedPortion:150,depth:2});
+export const DEFAULT_LOADOUT=Object.freeze({method:'ledger',indicator:'bobbin',reel:'universal',rod:'carp',rig:'running',line:.255,hook:8,leader:40,weight:40,bait:'corn',feed:'none',feedPortion:150,depth:2});
 export function methodPreset(method,current=DEFAULT_LOADOUT){
  const m=METHODS[method];if(!m)throw new Error('Neznámý způsob lovu.');
  const rig=m.rigs[0];
@@ -94,6 +130,7 @@ export function methodPreset(method,current=DEFAULT_LOADOUT){
 export function validateLoadout(value){
  if(!value||typeof value!=='object')return ['Chybí sestava.'];
  const v=value,m=METHODS[v.method],errors=[];if(!m)return ['Vyber způsob lovu.'];
+ if(v.reel!==undefined&&!Object.hasOwn(REELS,v.reel))errors.push('Vyber naviják.');
  if(v.indicator!==undefined&&!Object.hasOwn(INDICATORS,v.indicator))errors.push('Vyber signalizaci záběru.');
  if(!m.rods.includes(v.rod))errors.push('Tento prut nepatří ke zvolené technice.');
  if(!m.rigs.includes(v.rig))errors.push('Montáž neodpovídá technice.');

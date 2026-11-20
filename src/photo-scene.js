@@ -1,11 +1,11 @@
-import {fightPoint} from './fight-view.js?v=0.24.2';
-import {STATIONS,stationFor,stationLayout} from './stations.js?v=0.24.2';
-import {RodPresentation,environmentAt,handResponse} from './immersion.js?v=0.24.2';
-import {runForce} from './encounter.js?v=0.24.2';
-import {tripConditions} from './trip.js?v=0.24.2';
-import {getVenue} from './venues.js?v=0.24.2';
-import {biteMotion} from './bite-motion.js?v=0.24.2';
-import {RODS,RIGS} from './tackle.js?v=0.24.2';
+import {fightPoint} from './fight-view.js?v=0.25.0';
+import {STATIONS,stationFor,stationLayout} from './stations.js?v=0.25.0';
+import {RodPresentation,environmentAt,handResponse} from './immersion.js?v=0.25.0';
+import {runForce} from './encounter.js?v=0.25.0';
+import {tripConditions} from './trip.js?v=0.25.0';
+import {getVenue} from './venues.js?v=0.25.0';
+import {biteMotion} from './bite-motion.js?v=0.25.0';
+import {RODS,RIGS} from './tackle.js?v=0.25.0';
 
 export const PHOTO=getVenue('vajgar').photo;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));

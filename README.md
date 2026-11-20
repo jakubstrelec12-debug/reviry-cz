@@ -1,10 +1,18 @@
-# REVÍRY CZ — Jižní Čechy 0.24.0
+# REVÍRY CZ — Jižní Čechy 0.25.0
 
 Rybářská hra pro Safari na iPhonu. Výhled nově tvoří **skutečná fotografie Vajgaru** s animovanou hladinou, prutem, čihátkem, náhozem, splávkem a krmením. Zjednodušená 3D zástavba se v hlavní hře nepoužívá. Vykreslování běží přes Canvas 2D a nepotřebuje WebGL.
 
-**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.24.0
+**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.25.0
 
 Nejlépe na šířku. Všechny herní fotografie jsou přiložené lokálně. HD / ECO mění rozlišení a jemnost animace vody. Fotografie není 360° panorama: tažením jde pouze mírně posouvat výhled a směr náhozu. Nejde o volně průchozí 3D svět.
+
+## Rybářská taška a montáže — 0.25.0
+
+Před volným lovem nejprve zabal výbavu a zásoby. Čtyři výchozí tašky (všestranná, kaprová, feederová a plavaná) lze libovolně upravit a až šest vlastních tašek se sestavami uložit v zařízení. U vody pak vybíráš jen zabalené věci. Tlačítko **Taška** ukazuje obsah a zbývající krmení; pro doplnění nejprve stáhni oba pruty a připrav novou výpravu. Zavření přípravy změny zahodí. Obnovení stránky zachová zbývající zásoby, nedoplní je.
+
+Katalog obsahuje 39 nástrah, 19 druhů krmení včetně volby bez krmení, 10 montáží, šest prutů a čtyři obecné typy navijáků. Schéma montáže otevírá nastavení vlasce, zátěže, návazce, háčku a nástrahy. Každý prut má vlastní sestavu, ale sdílí zásobu krmení. Navijáky mírně mění rychlost navíjení. Výbava je bez měny a balí se podle typů; stejný typ lze použít na obou prutech. Nástrahy se nespotřebovávají na kusy, krmení ano. Samostatné úkoly používají své předepsané vybavení a po návratu obnoví původní tašku i zásoby.
+
+Kontrola mobilního rozložení skutečné aplikace: `tools/bag-view.html`.
 
 ## Měřítko Orlíku — 0.24.2
 
