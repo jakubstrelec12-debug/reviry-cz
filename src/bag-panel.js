@@ -1,6 +1,6 @@
-import {BAG_CATALOG,makeBag,cleanBag,fitToBag,bagCount,bagWeight} from './bag.js?v=0.25.0';
-import {RODS,REELS,RIGS,BAITS,FEEDS,INDICATORS,BAIT_FAMILIES,DEFAULT_LOADOUT,validateLoadout,lineName} from './tackle.js?v=0.25.0';
-import {equipmentArt} from './equipment-art.js?v=0.25.0';
+import {BAG_CATALOG,makeBag,cleanBag,fitToBag,bagCount,bagWeight} from './bag.js?v=0.25.1';
+import {RODS,REELS,RIGS,BAITS,FEEDS,INDICATORS,BAIT_FAMILIES,DEFAULT_LOADOUT,validateLoadout,lineName} from './tackle.js?v=0.25.1';
+import {equipmentArt} from './equipment-art.js?v=0.25.1';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const categories=[['rods','Pruty a navijáky'],['rigs','Montáže'],['baits','Nástrahy'],['feeds','Krmení'],['details','Vlasce a drobnosti']];
 export class BagPanel{

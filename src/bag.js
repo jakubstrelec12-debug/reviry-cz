@@ -1,4 +1,4 @@
-import {METHODS,RODS,REELS,RIGS,BAITS,FEEDS,INDICATORS,LINE_DIAMETERS,DEFAULT_LOADOUT,validateLoadout,cleanLoadout,feedAllowed} from './tackle.js?v=0.25.0';
+import {METHODS,RODS,REELS,RIGS,BAITS,FEEDS,INDICATORS,LINE_DIAMETERS,DEFAULT_LOADOUT,validateLoadout,cleanLoadout,feedAllowed} from './tackle.js?v=0.25.1';
 export const BAG_CATALOG={rods:Object.keys(RODS),reels:Object.keys(REELS),rigs:Object.keys(RIGS),lines:[...new Set([...LINE_DIAMETERS,.16,.20,.25,.30,.35])],hooks:[6,8,10,12,14],leaders:[10,20,40,60],weights:[2,3,5,20,30,40,45,60],indicators:Object.keys(INDICATORS),baits:Object.keys(BAITS)};
 const map={rod:'rods',reel:'reels',rig:'rigs',line:'lines',hook:'hooks',leader:'leaders',weight:'weights',indicator:'indicators',bait:'baits'};
 export function cleanBag(value){

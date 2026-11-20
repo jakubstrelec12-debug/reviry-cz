@@ -72,3 +72,12 @@ test('loading a saved two rod bag stages both loadouts and cancelling leaves one
  dom.window.localStorage.setItem('reviry-bags',JSON.stringify([{bag,loadouts:[a,b]}]));p.open({pack:true});click('[data-saved-bag="0"]');assert.equal(p.drafts.length,2);assert.equal(p.preparingSecond,true);assert.equal(game.secondEnabled,false);click('#setupClose');assert.equal(game.secondEnabled,false);
  p.open({pack:true});click('[data-saved-bag="0"]');click('#setupApply');click('#setupApply');assert.equal(game.secondEnabled,true);assert.equal(game.rods[1].loadout.bait,'corn');
 });
+
+test('packing an item or changing bag category preserves scroll, while another preparation tab starts at the top',()=>{
+ const {p,click}=ui();p.open({pack:true});click('[data-bag-category="baits"]');
+ const body=document.querySelector('#setupOverlay .setup-body');body.scrollTop=1163;
+ click('[data-pack-item="baits"][data-value="boilie20"]');assert.equal(body.scrollTop,1163);
+ click('[data-bag-category="feeds"]');assert.equal(body.scrollTop,1163);
+ click('[data-tab="assembly"]');assert.equal(body.scrollTop,0);
+ body.scrollTop=200;click('#setupClose');p.open({pack:true});assert.equal(body.scrollTop,0);
+});

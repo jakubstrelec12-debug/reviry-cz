@@ -1,10 +1,14 @@
-# REVÍRY CZ — Jižní Čechy 0.25.0
+# REVÍRY CZ — Jižní Čechy 0.25.1
 
 Rybářská hra pro Safari na iPhonu. Výhled nově tvoří **skutečná fotografie Vajgaru** s animovanou hladinou, prutem, čihátkem, náhozem, splávkem a krmením. Zjednodušená 3D zástavba se v hlavní hře nepoužívá. Vykreslování běží přes Canvas 2D a nepotřebuje WebGL.
 
-**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.25.0
+**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.25.1
 
 Nejlépe na šířku. Všechny herní fotografie jsou přiložené lokálně. HD / ECO mění rozlišení a jemnost animace vody. Fotografie není 360° panorama: tažením jde pouze mírně posouvat výhled a směr náhozu. Nejde o volně průchozí 3D svět.
+
+## Posouvání na telefonu — 0.25.1
+
+Karty tašky, množství krmení i uložené tašky dovolují nativní posun prstem. Zákaz dotykového posouvání zůstává jen na herních tlačítkách, která se drží při náhozu a zdolávání. Překreslení nabídky zachovává svislou pozici i vodorovnou polohu kategorií; změna hlavní záložky začíná nahoře. Na mobilu se kategorie tašky zalamují do řádků. Vstup názvu má velikost písma 16 px, aby Safari při psaní nepřibližovalo formulář.
 
 ## Rybářská taška a montáže — 0.25.0
 
