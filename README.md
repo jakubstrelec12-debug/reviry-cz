@@ -6,6 +6,10 @@ Rybářská hra pro Safari na iPhonu. Výhled nově tvoří **skutečná fotogra
 
 Nejlépe na šířku. Všechny herní fotografie jsou přiložené lokálně. HD / ECO mění rozlišení a jemnost animace vody. Fotografie není 360° panorama: tažením jde pouze mírně posouvat výhled a směr náhozu. Nejde o volně průchozí 3D svět.
 
+## Viditelná ryba a podběrák — 0.24.1
+
+Při zdolávání jsou na hladině čitelné značky RYBA a PODBĚRÁK. Podběrák stojí na jednom místě; posun ryby reaguje na její směr. Na telefonu se panel ovládání přesunul dolů a projekce udržuje obě značky v odkryté vodě mezi úkolem a ovládáním. Na šířku je zdolávání napravo od panelu. Pokyn pod šipkami vychází ze skutečného směru ryby vůči koši i z podmínek podebrání. Kontrolní scéna se stejným DOM, CSS a rendererem je v `tools/fight-visibility.html`.
+
 ## Prostředí a břehy — 0.24.0
 
 Každý z 15 revírů má samostatný podklad. Devět novějších vod nyní používá fotografie skutečné lokality (Lipno, Orlík, Hněvkovice, Jordán, Nežárka u Lásenice, Lužnice u Pilaře, pískovna Cep, Stupský a Zadní Kouty). Fotografie původních revírů se za jiné vody nevydávají. Vlkovská malá má vlastní výslovně označenou AI ilustraci; ověřenou fotografii nemáme. Jarošov při nedostupnosti externího originálu použije vlastní označenou ilustraci, nikoli Matějovec.

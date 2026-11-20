@@ -1,7 +1,7 @@
-import {stationFor} from './stations.js?v=0.24.0';
-import {VENUE_PHOTOS} from './venue-photos.js?v=0.24.0';
-import {speciesActivity} from './trip.js?v=0.24.0';
-import {speciesWeights,BAITS,FEEDS} from './tackle.js?v=0.24.0';
+import {stationFor} from './stations.js?v=0.24.1';
+import {VENUE_PHOTOS} from './venue-photos.js?v=0.24.1';
+import {speciesActivity} from './trip.js?v=0.24.1';
+import {speciesWeights,BAITS,FEEDS} from './tackle.js?v=0.24.1';
 export const STOCK_SOURCES={
  jarosov2022:{title:'Pořadatel závodu · Jarošov, 30. 4. 2022',url:'https://www.rybarskezebricky.cz/termin.php?co=detail&id=10893',date:'2022',scope:'Konkrétní malá vodní nádrž; osádka uvedená pořadatelem závodu.'},
  jarosov2025:{title:'Jarní šupinka · 29. 3. 2025',url:'https://www.rybarskezebricky.cz/termin.php?co=detail&id=13289',date:'2025',scope:'Stejná nádrž; novější seznam uvádí i štiku, candáta a okouna.'},

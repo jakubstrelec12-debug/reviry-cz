@@ -1,0 +1,27 @@
+<!doctype html><html lang="cs"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kontrola viditelnosti ryby a podběráku</title><link rel="stylesheet" href="../style.css?v=0.24.1"><body><script type="module">
+import {LakeScene} from '../src/photo-scene.js?v=0.24.1';
+import {FishingSession} from '../src/session.js?v=0.24.1';
+import {netGuidance} from '../src/fight-view.js?v=0.24.1';
+const params=new URLSearchParams(location.search);
+if(!params.has('frame')){
+ document.body.innerHTML='<h1 style="font:16px system-ui">Skutečné rozložení při zdolávání · telefon 390 × 650 a 390 × 844</h1><div style="display:flex;gap:16px;flex-wrap:wrap"><iframe title="Zdolávání v Safari" src="?frame=1" width="390" height="650"></iframe><iframe title="Zdolávání na vyšším displeji" src="?frame=1" width="390" height="844"></iframe><iframe title="Zdolávání na šířku" src="?frame=1" width="844" height="390"></iframe></div>';
+ document.body.style.cssText='overflow:auto;padding:16px;height:auto';
+}else{
+ const html=await (await fetch('../index.html')).text(),doc=new DOMParser().parseFromString(html,'text/html');
+ doc.querySelectorAll('script').forEach(s=>s.remove());document.body.replaceChildren(...doc.body.childNodes);
+ document.body.classList.add('immersive');document.body.dataset.phase='fight';
+ for(const id of ['intro','loading','status','castMeter','targetPanel','signalFocus','rodSignals'])document.getElementById(id).classList.add('hidden');
+ for(const id of ['fightPanel','missionHud','lift','net'])document.getElementById(id).classList.remove('hidden');
+ const set=(id,t)=>document.getElementById(id).textContent=t;
+ set('locationName','LIPNO');set('locationRegion','LIPNO NAD VLTAVOU');set('loadoutBadge','Feeder · Průběžné klecové krmítko · Bílí červi');
+ set('missionObjective','Cejn velký · alespoň 36 cm · 1 ks · 0/1');set('missionTimer','17:24');set('distance','2.3 m');set('tensionText','V pořádku');set('net','Podběrák ve vodě');
+ document.getElementById('rodDock').innerHTML='<button class="rod-tab active" style="padding:10px">PRUT 1<br>Zdolávání</button>';
+ document.getElementById('action').innerHTML='NAVÍJET <span>drž tlačítko</span>';document.getElementById('tensionFill').style.left='40%';
+ const g=new FishingSession(()=>.2);g.setVenue('lipno');g.phase='fight';g.fish={id:'bream',length:40};g.distance=2.3;g.tension=.4;g.stamina=.1;g.netDeployed=true;g.fishBearing=Number(params.get('bearing')||-.3);
+ set('netState',netGuidance(g));const s=await new LakeScene(document.getElementById('world'),g).init();
+ function frame(){
+  const dock=document.getElementById('rodDock').getBoundingClientRect(),mission=document.getElementById('missionHud').getBoundingClientRect();document.documentElement.style.setProperty('--station-note-top',`${dock.bottom+16}px`);
+  s.setUiBounds({headerBottom:dock.bottom,missionBottom:mission.bottom,fightPanelTop:document.getElementById('fightPanel').getBoundingClientRect().top,fightPanelRight:document.getElementById('fightPanel').getBoundingClientRect().right});s.render(0);requestAnimationFrame(frame);
+ }frame();
+}
+</script></body></html>
