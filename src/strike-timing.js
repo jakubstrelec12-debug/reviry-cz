@@ -1,4 +1,4 @@
-import {BAITS} from './tackle.js?v=0.15.1';
+import {BAITS} from './tackle.js?v=0.16.0';
 // Gameplay model: deliberately readable timing, not measured biological data.
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 export function strikeWindow(loadout,fish={}){

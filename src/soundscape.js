@@ -1,5 +1,5 @@
-import {environmentAt,RodPresentation} from './immersion.js?v=0.15.1';
-import {tripConditions} from './trip.js?v=0.15.1';
+import {environmentAt,RodPresentation} from './immersion.js?v=0.16.0';
+import {tripConditions} from './trip.js?v=0.16.0';
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 export class LakeSound{
  constructor(Context){
@@ -7,6 +7,7 @@ export class LakeSound{
   const length=Math.floor(this.context.sampleRate*3);this.noise=this.context.createBuffer(1,length,this.context.sampleRate);const data=this.noise.getChannelData(0);let brown=0;for(let i=0;i<length;i++){brown=(brown+(Math.random()*2-1)*.08)/1.035;data[i]=brown;}
   this.water=this.loop(920,.22);this.wind=this.loop(320,.13);this.wind.filter.Q.value=.5;
  }
+ setVolume(value){const volume=Number.isFinite(value)?Math.max(0,Math.min(1,value)):1;this.target(this.master.gain,.65*volume,.06);}
  get state(){return this.context.state;}
  resume(){return this.context.resume();}suspend(){return this.context.suspend();}
  target(param,value,time=.1){param.setTargetAtTime(value,this.context.currentTime,time);}

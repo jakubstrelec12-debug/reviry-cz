@@ -29,3 +29,13 @@ test('soundscape pauses foreground sound, follows control and line movement, and
  g.reeling=false;g.lineOutRate=1;const drag=s.context.started.length;s.update(g,.2);assert.ok(s.context.started.length>drag);
  await s.suspend();const stopped=s.context.started.length;s.update(g,10);assert.equal(s.context.started.length,stopped);await s.resume();s.update(g,.2);assert.equal(s.context.started.filter(x=>x==='ambient').length,2);
 });
+test('blank flex lags load, responds to head shakes and settles without advancing on paused frames',()=>{
+ const g=new Fishing(),p=new RodPresentation();g.phase='fight';g.tension=.8;p.update(g,.05);assert.ok(p.bend>0&&p.bend<.8);
+ for(let i=0;i<60;i++)p.update(g,1/60);assert.ok(Math.abs(p.bend-.8)<.001);
+ const stopped=JSON.stringify(p);p.update(g,0);assert.equal(JSON.stringify(p),stopped);
+ g.phase='escaped';p.update(g,.05);assert.ok(p.bend>0&&p.bend<.8);for(let i=0;i<100;i++)p.update(g,1/60);assert.ok(Math.abs(p.bend)<.001);
+ const slow=new RodPresentation(),fast=new RodPresentation();g.phase='fight';for(let i=0;i<30;i++)slow.update(g,1/30);for(let i=0;i<120;i++)fast.update(g,1/120);assert.ok(Math.abs(slow.bend-fast.bend)<.001);
+});
+test('master volume clamps to a safe range and persists when effects pause',()=>{
+ const s=new LakeSound(FakeContext);s.setVolume(.4);assert.ok(Math.abs(s.master.gain.value-.26)<1e-9);s.setPaused(true);assert.ok(Math.abs(s.master.gain.value-.26)<1e-9);s.setVolume(-1);assert.equal(s.master.gain.value,0);s.setVolume(2);assert.equal(s.master.gain.value,.65);
+});

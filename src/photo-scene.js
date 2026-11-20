@@ -1,9 +1,9 @@
-import {RodPresentation,environmentAt,releaseGesture} from './immersion.js?v=0.15.1';
-import {runForce} from './encounter.js?v=0.15.1';
-import {tripConditions} from './trip.js?v=0.15.1';
-import {getVenue} from './venues.js?v=0.15.1';
-import {biteMotion} from './bite-motion.js?v=0.15.1';
-import {RODS,RIGS} from './tackle.js?v=0.15.1';
+import {RodPresentation,environmentAt,releaseGesture} from './immersion.js?v=0.16.0';
+import {runForce} from './encounter.js?v=0.16.0';
+import {tripConditions} from './trip.js?v=0.16.0';
+import {getVenue} from './venues.js?v=0.16.0';
+import {biteMotion} from './bite-motion.js?v=0.16.0';
+import {RODS,RIGS} from './tackle.js?v=0.16.0';
 
 export const PHOTO=getVenue('vajgar').photo;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -163,7 +163,7 @@ export class LakeScene{
   const angle=(held.angle+releaseGesture(g)+breath+clamp((g.fishBearing||0)-(g.castAngle||0),-.18,.18)*.12)*u;
 
   const transform=(u,v)=>{const x=(u-.83)*image.width*scale,y=(v-.88)*image.height*scale;return {x:base.x+x*Math.cos(angle)-y*Math.sin(angle),y:base.y+x*Math.sin(angle)+y*Math.cos(angle)};};
-  const flex=(g.phase==='held'&&g.loadout.method==='feeder'?biteMotion(g,this.clock).feederFlex:0)+(g.phase==='fight'?g.tension*24:0),shift=v=>Math.pow(Math.max(0,1-v/.42),2)*flex;
+  const flex=(g.phase==='held'&&g.loadout.method==='feeder'?biteMotion(g,this.clock).feederFlex:0)+((m?.bend??(g.phase==='fight'?g.tension:0))*34/Math.pow(RODS[g.loadout.rod].power,.35)),shift=v=>Math.pow(Math.max(0,1-v/.42),2)*flex;
   const rawTip=transform(.049,.039),tip={x:rawTip.x+shift(.039)*Math.cos(angle),y:rawTip.y+shift(.039)*Math.sin(angle)};this.tip=tip;
   c.save();c.translate(base.x,base.y);c.rotate(angle);c.filter='saturate(0.76) brightness(0.88)';
   const cut=Math.round(image.height*.42),x=-.83*image.width*scale,y=-.88*image.height*scale;

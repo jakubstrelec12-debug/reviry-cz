@@ -30,6 +30,9 @@ test('app flow: prepare float tackle, cast, strike, land, show real photo, store
  for(let i=0;i<1000&&state().phase!=='bite';i++)tick();assert.equal(state().phase,'bite');assert.match($('action').textContent,/ZASEKNOUT/);assert.equal($('signalFocus').classList.contains('hidden'),false);assert.match($('signalTitle').textContent,/Splávek/);
  for(let i=0;i<50;i++)tick();
  $('action').dispatchEvent(new dom.window.KeyboardEvent('keydown',{key:' ',bubbles:true}));$('action').dispatchEvent(new dom.window.KeyboardEvent('keyup',{key:' ',bubbles:true}));assert.equal(state().phase,'fight');
+ const initialDrag=Number($('drag').value);$('dragDown').click();assert.equal(Number($('drag').value),initialDrag-5);$('dragUp').click();assert.equal(Number($('drag').value),initialDrag);
+ for(let i=0;i<25;i++)$('dragDown').click();assert.equal($('drag').value,'8');assert.equal($('dragDown').disabled,true);for(let i=0;i<25;i++)$('dragUp').click();assert.equal($('drag').value,'95');assert.equal($('dragUp').disabled,true);
+ $('volume').value='35';$('volume').dispatchEvent(new dom.window.Event('input'));assert.equal(dom.window.localStorage.getItem('reviry-volume'),'0.35');assert.equal($('volumeValue').textContent,'35 %');
  for(let i=0;i<6000&&state().phase==='fight';i++){
   $('drag').value=state().tension>.8?'20':'50';$('drag').dispatchEvent(new dom.window.Event('input',{bubbles:true}));
   $('action').dispatchEvent(new dom.window.KeyboardEvent(state().tension<.78?'keydown':'keyup',{key:' ',bubbles:true}));tick();if(!$('net').disabled)$('net').click();
@@ -74,6 +77,9 @@ test('two-rod UI keeps both live indicators and lets an inactive bite be picked 
  assert.equal(state().activeRod,1);assert.equal(state().phase,'held');assert.match($('action').textContent,/ZASEKNOUT/);assert.equal(document.querySelector('[data-signal-rod="1"]').disabled,true);
  if(!$('takeUp').classList.contains('hidden')){press('takeUp','keydown');for(let i=0;i<20;i++)tick();press('takeUp','keyup');}
  for(let i=0;i<100&&$('status').textContent!=='Teď zasekni.';i++)tick();action();tick();assert.equal(state().phase,'fight');
+ const initialDrag=Number($('drag').value);$('dragDown').click();assert.equal(Number($('drag').value),initialDrag-5);$('dragUp').click();assert.equal(Number($('drag').value),initialDrag);
+ for(let i=0;i<25;i++)$('dragDown').click();assert.equal($('drag').value,'8');assert.equal($('dragDown').disabled,true);for(let i=0;i<25;i++)$('dragUp').click();assert.equal($('drag').value,'95');assert.equal($('dragUp').disabled,true);
+ $('volume').value='35';$('volume').dispatchEvent(new dom.window.Event('input'));assert.equal(dom.window.localStorage.getItem('reviry-volume'),'0.35');assert.equal($('volumeValue').textContent,'35 %');
  for(let i=0;i<6000&&state().phase==='fight';i++){
   $('drag').value=state().tension>.8?'20':'50';$('drag').dispatchEvent(new dom.window.Event('input',{bubbles:true}));press('action',state().tension<.78?'keydown':'keyup');tick();if(!$('net').disabled)$('net').click();
  }
