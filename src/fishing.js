@@ -2,7 +2,7 @@ import {normalizeAim,aimPower,castLanding,waterSpot,spotWeights,horizontalGap} f
 import {allowsProbes,makeBiteProfile} from './bite-profile.js?v=0.22.0';
 import {nextRun,runForce} from './encounter.js?v=0.22.0';
 import {DEFAULT_TRIP,activityFor} from './trip.js?v=0.22.0';
-import {getVenue,EXTRA_SPECIES,venueWeights} from './venues.js?v=0.22.0';
+import {getVenue,EXTRA_SPECIES,venueWeights} from './venues.js?v=0.23.0';
 import {strikeWindow,assessStrike,strikeReason} from './strike-timing.js?v=0.22.0';
 import {DEFAULT_LOADOUT, METHODS, RODS, RIGS, catchWeight, validateLoadout, cleanLoadout, feedInfluence, speciesWeights, biteDelay,createFeedStocks} from './tackle.js?v=0.22.0';
 export const SPECIES = [
