@@ -303,8 +303,49 @@ export class LakeScene{
  drawTerminal(p,size){const c=this.ctx,r=this.game.loadout.rig;
   if(RIGS[r].feeder){c.save();c.translate(p.x,p.y);c.rotate(this.clock*4);c.fillStyle='#8a7960';c.fillRect(-4*size,-7*size,8*size,14*size);for(let i=-3;i<=3;i+=2)this.line([{x:i*size,y:-7*size},{x:i*size,y:7*size}],'#bdc4a7',.6);for(const y of [-6,0,6])this.line([{x:-4*size,y:y*size},{x:4*size,y:y*size}],'#c6ceb0',.8);c.restore();}else this.ellipse(p.x,p.y,2*size,4*size,'#667363');
  }
+ paintLedgerSignal(active,canvas){
+  const rod=this.game.enabledRods?.[active]||this.game;
+  const m=biteMotion(rod,rod.time);
+  const ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height;
+  if(!ctx)return;
+  const indicator=rod.loadout.indicator||'bobbin',lift=clamp(m.ledgerLift||0,-30,30);
+  const x=w*.50,restY=h*.61,travel=-lift*h*.0038;
+  ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,w,h);
+  const bg=ctx.createLinearGradient(0,0,0,h);bg.addColorStop(0,'#29433e');bg.addColorStop(1,'#11292b');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+  // A fishing line runs horizontally between the rod and the rest.
+  const lineY=h*.31;ctx.strokeStyle='#dfdec6';ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.moveTo(w*.08,lineY);ctx.quadraticCurveTo(x,lineY+1,w*.92,lineY);ctx.stroke();
+  const y=restY+travel;
+  if(indicator==='bobbin'){
+   // The mechanical bobbin hangs UNDER the fishing line and rises on a run.
+   ctx.strokeStyle='#a9b7a7';ctx.lineWidth=2;
+   ctx.beginPath();ctx.moveTo(x,lineY);ctx.lineTo(x,y-h*.10);ctx.stroke();
+   ctx.fillStyle='#aab7a8';ctx.fillRect(x-10,y-h*.11,20,5);
+   const body=ctx.createLinearGradient(x-24,y,x+24,y);
+   body.addColorStop(0,'#94612f');body.addColorStop(.45,'#edb967');body.addColorStop(1,'#855226');
+   ctx.fillStyle=body;ctx.strokeStyle='#e0d2aa';ctx.lineWidth=2;
+   ctx.beginPath();ctx.roundRect(x-22,y-h*.08,44,h*.32,17);ctx.fill();ctx.stroke();
+   ctx.fillStyle='#d5d8bf';ctx.beginPath();ctx.ellipse(x,y+h*.24,8,5,0,0,Math.PI*2);ctx.fill();
+  }else{
+   // Swinger has a hinged arm, rather than a hanging bobbin or float.
+   const pivot={x:w*.24,y:h*.83},end={x:x+lift*.7,y:y-h*.02};
+   ctx.strokeStyle='#9ab2ad';ctx.lineWidth=8;ctx.lineCap='round';
+   ctx.beginPath();ctx.moveTo(pivot.x,pivot.y);ctx.lineTo(end.x,end.y);ctx.stroke();
+   ctx.fillStyle=indicator==='electronic'?'#8cd5eb':'#d5c883';
+   ctx.beginPath();ctx.roundRect(end.x-19,end.y-29,38,55,12);ctx.fill();
+   ctx.fillStyle='#687d75';ctx.beginPath();ctx.arc(pivot.x,pivot.y,12,0,Math.PI*2);ctx.fill();
+   if(indicator==='electronic'&&m.stage==='run'){
+    ctx.fillStyle='#80e8fa';ctx.beginPath();ctx.arc(w*.82,h*.14,8,0,Math.PI*2);ctx.fill();
+   }
+  }
+  ctx.restore();
+ }
  paintSignal(active,canvas=this.signalCanvas,force=false){
-  const target=this.signals[active];if(!target||!canvas||(!force&&!this.signalVisible))return;
+  if(!canvas||(!force&&!this.signalVisible))return;
+  const activeRod=this.game.enabledRods?.[active]||this.game;
+  if(activeRod.loadout.method==='ledger'){this.paintLedgerSignal(active,canvas);return;}
+  const target=this.signals[active];if(!target)return;
   // Fixed optical axis: following the moving tip would hide the bite itself.
   const anchor=target.anchor||target,roi=target.kind==='float'?54:target.kind==='ledger'?110:130;
   const roiHeight=roi*canvas.height/canvas.width,sx=anchor.x-roi/2,sy=anchor.y-roiHeight/2-(target.kind==='float'?8:0);
