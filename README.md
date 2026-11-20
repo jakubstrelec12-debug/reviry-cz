@@ -2,11 +2,11 @@
 
 Rybářská hra pro Safari na iPhonu. Výhled nově tvoří **skutečná fotografie Vajgaru** s animovanou hladinou, prutem, čihátkem, náhozem, splávkem a krmením. Zjednodušená 3D zástavba se v hlavní hře nepoužívá. Vykreslování běží přes Canvas 2D a nepotřebuje WebGL.
 
-**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.18.0
+**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.19.0
 
 Nejlépe na šířku. Všechny herní fotografie jsou přiložené lokálně. HD / ECO mění rozlišení a jemnost animace vody. Fotografie není 360° panorama: tažením jde pouze mírně posouvat výhled a směr náhozu. Nejde o volně průchozí 3D svět.
 
-## Oprava spuštění — 0.18.0
+## Oprava spuštění — 0.19.0
 
 Pauza lovu už nezmrazí celé okolí na úvodní obrazovce a při sestavování montáže. Voda a trávy se animují, aniž běží čas záběru nebo zdolávání. Ruch prostředí má vlastní zvukovou větev; při zapnutí zazní krátký testovací tón i před spuštěním lovu. Hlasitost prostředí je zřetelnější. Pokud prohlížeč nespustí zvukový kontext, hra na to výslovně upozorní. Návrat na stránku znovu vyhodnotí pozastavení. Skutečný odchod do pozadí nadále zastaví lov i zvuk.
 
@@ -145,14 +145,17 @@ Validace: 54 testů — celý cyklus lovu a záseku, dostupnost všech nástrah 
 
 Položená: v přípravě zvol **02 Montáž → Signalizace** (nebo Vybrat signalizaci záběru). Každý prut má vlastní čihátko, swinger či elektronický hlásič se swingerem. Hlásič bliká a při zapnutém zvuku pípá i u nevybraného prutu. Starší uložené sestavy dostanou mechanické čihátko.
 
-### Vylepšení zdolávání 0.18.0
+### Vylepšení zdolávání 0.19.0
 Prut pružně reaguje na napětí a krátké výpady; po uvolnění tahu se postupně vrací. Jde o prezentační model, nemění pravděpodobnost úlovku. Brzdu lze upravit posuvníkem i tlačítky po 5 procentních bodech (8–95 %). Připravený podběrák se zvýrazní. Hlasitost v deníku se ukládá pro příští spuštění; zvuk je nadále nutné zapnout klepnutím.
 
-### Zvuky náčiní 0.18.0
+### Zvuky náčiní 0.19.0
 Výraznější zvuk převodů při navíjení, cvakání brzdy pouze při odvíjení vlasce a vícevrstvý dopad do vody. Jde o syntetizované zvuky, ne terénní nahrávky. Okolní šum je tišší. V menu lze samostatně přehrát ukázku navíjení, brzdy a šplouchnutí i během pauzy. Běžné herní efekty jsou během pauzy stále potlačené.
 
-### Skutečné nahrávky 0.18.0
+### Skutečné nahrávky 0.19.0
 Navíjení, odvíjení přes brzdu a dopad zátěže jsou nyní lokální MP3 nahrávky (CC0), viz assets/audio/CREDITS.md. Navíjení a brzda hrají souvisle podle ovládání a skutečného odvíjení, na každém prutu samostatně. Po uvolnění ovládání nebo pauze smyčka krátce dozněje. Pokud se nahrávky nenačtou, hra to oznámí; nenahrazuje je syntetickým cvakáním. Vypnutí a nové zapnutí zvuku načtení opakuje. Okolí a drobné ostatní efekty zatím zůstávají syntetické.
 
-### Pohyb náčiní 0.18.0
+### Pohyb náčiní 0.19.0
 Plynulý nápřah a došvih navazují i u slabých náhozů; při uvolnění se již nemění úhel skokem. Při vyzvednutí a vracení se náčiní pohybuje po oblouku. Pumpování zvedá celý úchop, naviják i ruce; směr prutu s tlumením sleduje tah ryby a při odvíjení mírně ustupuje. Blank reaguje i na zatížení při nápřahu a uvolnění švihu. Animace nemění pravděpodobnost úlovku ani běh časovačů; během pauzy jsou gesta zmrazená.
+
+### Záběry podle sestavy 0.19.0
+Položená s průběžným olovem nebo olovem a vlasovou montáží na kukuřici ve hře nemá falešné předchozí dotyky ani povinné ochutnávání. Skutečný záběr začíná přímo tahem nebo padákem; zásek lze provést ihned a není penalizován za přeskočení čekání. Padák stále vyžaduje dobrání povoleného vlasce. U krmítka zůstávají dotyky a náhodně se mění přímý, pozvolný nebo opatrný nástup, tempo, síla i délka záběru. Každý prut má samostatný profil. Čekání na rybu se tím nezkracuje. Jde o záměr herního modelu, ne tvrzení, že se ryby při skutečném lovu vždy chovají stejně.

@@ -1,8 +1,9 @@
-import {nextRun,runForce} from './encounter.js?v=0.18.0';
-import {DEFAULT_TRIP,activityFor} from './trip.js?v=0.18.0';
-import {getVenue,EXTRA_SPECIES,venueWeights} from './venues.js?v=0.18.0';
-import {strikeWindow,assessStrike,strikeReason} from './strike-timing.js?v=0.18.0';
-import {DEFAULT_LOADOUT, METHODS, RODS, RIGS, catchWeight, validateLoadout, cleanLoadout, feedInfluence, speciesWeights, biteDelay,createFeedStocks} from './tackle.js?v=0.18.0';
+import {allowsProbes,makeBiteProfile} from './bite-profile.js?v=0.19.0';
+import {nextRun,runForce} from './encounter.js?v=0.19.0';
+import {DEFAULT_TRIP,activityFor} from './trip.js?v=0.19.0';
+import {getVenue,EXTRA_SPECIES,venueWeights} from './venues.js?v=0.19.0';
+import {strikeWindow,assessStrike,strikeReason} from './strike-timing.js?v=0.19.0';
+import {DEFAULT_LOADOUT, METHODS, RODS, RIGS, catchWeight, validateLoadout, cleanLoadout, feedInfluence, speciesWeights, biteDelay,createFeedStocks} from './tackle.js?v=0.19.0';
 export const SPECIES = [
   {id:'carp',name:'Kapr obecný', min:1.4, max:7.8, power:0.85, color:0xb79b5d},
   {id:'tench',name:'Lín obecný', min:0.45, max:2.3, power:0.6, color:0x6d7841},
@@ -13,7 +14,7 @@ export class Fishing {
     this.trip={...DEFAULT_TRIP};this.venueId='vajgar';this.loadout={...DEFAULT_LOADOUT};this.feedSpot=null;this.feedStocks=createFeedStocks();this.castAngle=0;this.random=random; this.phase='ready'; this.time=0;this.castPower=0;this.distance=0;
     this.drag=0.48;this.tension=0.25;this.stamina=1;this.reeling=false;this.lifting=false;
     this.lineOutRate=0;this.lineInRate=0;this.elapsed=0;this.biteIn=0;this.biteElapsed=0;this.fish=null;this.result=null;
-    this.probe=null;this.nextProbeAt=Infinity;this.run=null;this.fishBearing=0;this.biteWindow=null;this.slackToTake=0;this.hookQuality=1;this.lastStrike=null;this.lastStrikeAt=-Infinity;this.journal=[]; this.onChange=()=>{};this.onEvent=()=>{};this.paused=false;
+    this.probe=null;this.nextProbeAt=Infinity;this.run=null;this.fishBearing=0;this.biteWindow=null;this.biteProfile=null;this.slackToTake=0;this.hookQuality=1;this.lastStrike=null;this.lastStrikeAt=-Infinity;this.journal=[]; this.onChange=()=>{};this.onEvent=()=>{};this.paused=false;
   }
   emit(name, data={}) {this.onEvent(name,data);this.onChange(this);}
   setLoadout(value){
@@ -33,7 +34,7 @@ export class Fishing {
     this.biteIn=this.elapsed+Math.max(.5,(this.biteIn-this.elapsed)/(1+this.feedBonus*.7));this.emit('feed');return true;
   }
   startCast(){if(!['ready','escaped','landed'].includes(this.phase))return false;
-    this.probe=null;this.run=null;this.lineOutRate=0;this.lineInRate=0;this.phase='casting';this.castPower=0;this.result=null;this.fish=null;this.biteWindow=null;this.biteElapsed=0;this.slackToTake=0;this.hookQuality=1;this.lastStrike=null;this.emit('cast-start');return true;}
+    this.probe=null;this.run=null;this.lineOutRate=0;this.lineInRate=0;this.phase='casting';this.castPower=0;this.result=null;this.fish=null;this.biteWindow=null;this.biteProfile=null;this.biteElapsed=0;this.slackToTake=0;this.hookQuality=1;this.lastStrike=null;this.emit('cast-start');return true;}
   releaseCast(){if(this.phase!=='casting')return false;
     const range=METHODS[this.loadout.method].cast;this.distance=range[0]+this.castPower*range[1]*(RODS[this.loadout.rod].length/3.6);this.throwDistance=this.distance;this.phase='flying';this.elapsed=0;
     this.reeling=false;this.lifting=false;this.emit('cast');return true;}
@@ -56,8 +57,8 @@ export class Fishing {
   }
   tick(dt){if(this.paused)return;dt=Math.min(Math.max(dt,0),0.05);this.time+=dt;this.elapsed+=dt;
     if(this.phase==='casting')this.castPower=Math.min(1,this.castPower+dt/1.7);
-    if(this.phase==='flying'&&this.elapsed>1.1){this.phase='waiting';if(RIGS[this.loadout.rig].feeder)this.depositFeed(20);this.biteIn=biteDelay(this.loadout,this.random(),this.feedBonus)/activityFor(getVenue(this.venueId).playable,venueWeights(this.loadout,this.venueId,this.feedBonus),this.trip);this.elapsed=0;this.probe=null;this.nextProbeAt=this.time+3+this.random()*9;this.emit('splash');}
-    if(this.phase==='waiting'&&this.time>=this.nextProbeAt&&this.elapsed<this.biteIn-3){
+    if(this.phase==='flying'&&this.elapsed>1.1){this.phase='waiting';if(RIGS[this.loadout.rig].feeder)this.depositFeed(20);this.biteIn=biteDelay(this.loadout,this.random(),this.feedBonus)/activityFor(getVenue(this.venueId).playable,venueWeights(this.loadout,this.venueId,this.feedBonus),this.trip);this.elapsed=0;this.probe=null;this.nextProbeAt=allowsProbes(this.loadout)?this.time+3+this.random()*9:Infinity;this.emit('splash');}
+    if(this.phase==='waiting'&&allowsProbes(this.loadout)&&this.time>=this.nextProbeAt&&this.elapsed<this.biteIn-3){
       this.probe={at:this.time,duration:2.3,seed:this.random(),power:1.8+this.random()*2.8};this.nextProbeAt=this.time+7+this.random()*22;
     }
     if(this.probe&&this.time-this.probe.at>this.probe.duration)this.probe=null;
@@ -65,12 +66,12 @@ export class Fishing {
       const pool=getVenue(this.venueId).playable.map(id=>[...SPECIES,...EXTRA_SPECIES].find(s=>s.id===id));const weights=venueWeights(this.loadout,this.venueId,this.feedBonus,this.trip);let pick=Math.max(0,Math.min(1-Number.EPSILON,this.random()))*weights.reduce((a,b)=>a+b,0),index=0;while(index<weights.length-1&&pick>=weights[index])pick-=weights[index++];const species=pool[index];
       const weight=catchWeight(species,this.loadout,this.random(),this.feedBonus);
       this.fish={...species,weight,length:Math.round((species.lengthBase||22)+Math.pow(weight,0.44)*(species.lengthFactor||23))};
-      this.probe=null;this.biteStyle=this.random()<.32?'dropback':'pull';this.biteWindow=strikeWindow(this.loadout,this.fish);this.phase='bite';this.elapsed=0;this.biteElapsed=0;this.emit('bite');
+      this.probe=null;this.biteStyle=this.random()<.32?'dropback':'pull';this.biteProfile=makeBiteProfile(this.loadout,this.random);this.biteWindow=strikeWindow(this.loadout,this.fish,this.biteProfile);this.phase='bite';this.elapsed=0;this.biteElapsed=0;this.emit('bite');
     }
     if(['bite','held'].includes(this.phase)&&this.fish){
       this.biteElapsed=this.phase==='bite'?this.elapsed:this.biteElapsed+dt;
       if(this.phase==='held'&&this.reeling)this.slackToTake=Math.max(0,this.slackToTake-dt);
-      const window=this.biteWindow||strikeWindow(this.loadout,this.fish);
+      const window=this.biteWindow||strikeWindow(this.loadout,this.fish,this.biteProfile);
       if(this.biteElapsed>window.leaveAt)this.lose('Zásek přišel pozdě. Ryba pustila nástrahu.',{strike:{outcome:'missed',age:this.biteElapsed,offset:this.biteElapsed-window.closeAt,quality:0}});
     }
     if(this.phase==='fight'){

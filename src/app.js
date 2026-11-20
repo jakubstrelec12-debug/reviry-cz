@@ -1,13 +1,13 @@
-import {LakeSound} from './soundscape.js?v=0.18.0';
-import {alarmStep} from './encounter.js?v=0.18.0';
-import {TripPlanner} from './trip-planner.js?v=0.18.0';
-import {VENUES,STOCK_SOURCES,SPECIES_NAMES,getVenue} from './venues.js?v=0.18.0';
-import {biteMotion,signalCaption} from './bite-motion.js?v=0.18.0';
-import {Preparation} from './preparation.js?v=0.18.0';
-import {METHODS,BAITS,FEEDS,setupSummary,validateLoadout} from './tackle.js?v=0.18.0';
-import {showCatchPhoto,photoFor} from './fish-photos.js?v=0.18.0';
-import {FishingSession as Fishing} from './session.js?v=0.18.0';
-import {LakeScene} from './photo-scene.js?v=0.18.0';
+import {LakeSound} from './soundscape.js?v=0.19.0';
+import {alarmStep} from './encounter.js?v=0.19.0';
+import {TripPlanner} from './trip-planner.js?v=0.19.0';
+import {VENUES,STOCK_SOURCES,SPECIES_NAMES,getVenue} from './venues.js?v=0.19.0';
+import {biteMotion,signalCaption} from './bite-motion.js?v=0.19.0';
+import {Preparation} from './preparation.js?v=0.19.0';
+import {METHODS,BAITS,FEEDS,setupSummary,validateLoadout} from './tackle.js?v=0.19.0';
+import {showCatchPhoto,photoFor} from './fish-photos.js?v=0.19.0';
+import {FishingSession as Fishing} from './session.js?v=0.19.0';
+import {LakeScene} from './photo-scene.js?v=0.19.0';
 const $=id=>document.getElementById(id);const game=new Fishing();let lake;let last=performance.now(),started=false,drawerOpen=false,audio=null,soundOn=false,toastTimer,venueOpen=false,venueLoading=false;
 let volume=1;try{const saved=localStorage.getItem('reviry-volume');if(saved!==null&&Number.isFinite(Number(saved)))volume=Math.max(0,Math.min(1,Number(saved)));}catch{}
 $('volume').value=String(Math.round(volume*100));$('volumeValue').textContent=`${Math.round(volume*100)} %`;
@@ -24,7 +24,7 @@ function saveJournal(){try{localStorage.setItem('reviry-vajgar-journal',JSON.str
 function venueDetails(v){return `<p>${v.evidence}</p><p><strong>Ve hře:</strong> ${v.playable.map(id=>SPECIES_NAMES[id]).join(', ')}.</p><p><strong>Další údaje ve zdrojích:</strong> ${v.reported.join(', ')}.</p><p>${v.photo.note} Autor: <a href="${v.photo.source}" target="_blank" rel="noopener">${v.photo.author}</a>, <a href="${v.photo.licenseUrl}" target="_blank" rel="noopener">${v.photo.license}</a>. ${v.photo.external?'Externí originál se načítá od vydavatele, není zahrnutý do souborů hry.':'Zmenšení a WebP.'} Ořez, animace a rozšíření hladiny, společné AI popředí.</p><ul>${v.sources.map(id=>{const s=STOCK_SOURCES[id];return `<li><a href="${s.url}" target="_blank" rel="noopener">${s.title}</a><br>${s.scope}</li>`;}).join('')}</ul>`;}
 function updateVenue(){
  const v=getVenue(game.venueId),p=lake?.venueId===game.venueId?lake.photo:v.photo;document.title=`REVÍRY · ${v.name}`;$('locationName').textContent=v.short;$('locationRegion').textContent=v.region.toUpperCase();$('world').setAttribute('aria-label',`Revír ${v.name} · ${p.note}`);
- $('sceneNote').replaceChildren(document.createTextNode(`${v.short} / ${p.verified?'FOTOGRAFICKÝ REVÍR':'ILUSTRAČNÍ PROSTŘEDÍ'} `));const version=document.createElement('span');version.textContent='0.18.0';$('sceneNote').append(version);
+ $('sceneNote').replaceChildren(document.createTextNode(`${v.short} / ${p.verified?'FOTOGRAFICKÝ REVÍR':'ILUSTRAČNÍ PROSTŘEDÍ'} `));const version=document.createElement('span');version.textContent='0.19.0';$('sceneNote').append(version);
  $('welcomeTitle').textContent=v.intro;$('venueEvidence').innerHTML=venueDetails({...v,photo:p});$('venuePhotoNotice').textContent=p.externalUnavailable?'Fotografie Jarošova se nenačetla · dočasně ILUSTRAČNÍ MATĚJOVEC':'ILUSTRAČNÍ MATĚJOVEC · fotografie cílové nádrže zatím chybí';setHidden('venuePhotoNotice',p.verified);document.body.classList.toggle('illustrative-venue',!p.verified);
  $('photoCredit').innerHTML=`${p.verified?'':'<b>ILUSTRAČNÍ MATĚJOVEC · </b>'}<a href="${p.source}" target="_blank" rel="noopener">Foto: ${p.author}</a> · <a href="${p.licenseUrl}" target="_blank" rel="noopener">${p.license}</a><span> · ořez / rozšířená hladina / AI náčiní a popředí</span>`;updateTrip();
 }
@@ -165,5 +165,5 @@ game.onEvent=(event,data)=>{
 async function boot(){loadJournal();try{const session=JSON.parse(localStorage.getItem('reviry-session-setup')||'null');if(!game.restoreSetup(session)){const saved=JSON.parse(localStorage.getItem('reviry-loadout')||'null');if(saved&&validateLoadout(saved).length===0)game.setLoadout(saved);}}catch{}updateVenue();updateTrip();setPause();try{lake=await new LakeScene($('world'),game).init();lake.setSignalCanvas?.($('signalCanvas'));updateVenue();$('wideView').textContent=lake.wideView?'Širší záběr: zap.':'Širší záběr: vyp.';$('wideView').setAttribute('aria-pressed',String(lake.wideView));$('quality').textContent=lake.high?'HD':'ECO';$('geoCredit').textContent='Původ prostředí a zdroje osádky vybraného revíru jsou uvedeny níže. Fotografie je doplněna o pohyb vody a vybavení. Hlavní prut s navijákem, trojnožka a varianta v ruce jsou vytvořené pomocí AI. Splávek je upravená fotografie Geotek (CC BY-SA 3.0). Grafika je ilustrační a nemusí odpovídat vybranému modelu. Odložený prut s navijákem a trojnožkou tvoří společný syntetický fotorealistický podklad; popředí stanoviště je také vytvořené pomocí AI. Pohyblivá levá ruka, prázdný stojan a trávy v popředí jsou také ilustrační AI podklady. Okolní zvuky i naviják jsou syntetizované ve hře. Jde o fotografický pohled s omezeným posunem kamery. Hloubky a chování ryb jsou herní model.';setHidden('loading',true);if(lake.assetWarnings.length)toast('Část grafických podkladů se nenačetla. Zkus obnovit stránku.');requestAnimationFrame(frame);}catch(error){fatal(error);}}
 function frame(now){const dt=Math.min(.25,Math.max(0,(now-last)/1000));last=now;try{game.advance(dt);updateUI();document.documentElement.style.setProperty('--station-note-top',`${$('rodDock').getBoundingClientRect().bottom+16}px`);document.documentElement.style.setProperty('--fishing-hud-height',`${window.innerHeight-$('fishingUI').getBoundingClientRect().top}px`);lake.setUiBounds?.({hudTop:$('fishingUI').getBoundingClientRect().top,headerBottom:Math.max(document.querySelector('header').getBoundingClientRect().bottom,$('rodDock').getBoundingClientRect().bottom)});if(!document.hidden)lake.render(dt,{paused:game.paused});if(audio&&soundOn)audio.update(game,dt,{clock:lake.clock,rods:lake.motionByRod});}catch(error){fatal(error);return;}requestAnimationFrame(frame);}
 // Diagnostics expose observable state only; normal play never depends on this interface.
-window.reviry={getState:()=>({venueId:game.venueId,activeRod:game.activeIndex+1,rodCount:game.enabledRods.length,rods:game.enabledRods.map(r=>({phase:r.phase,loadout:{...r.loadout},distance:r.distance})),phase:game.phase,loadout:{...game.loadout},trip:{...game.trip},feedBonus:game.feedBonus,feedStocks:{...game.feedStocks},distance:game.distance,stamina:game.stamina,tension:game.tension,catches:game.journal.length,paused:game.paused,engine:lake?.metrics?.engine,assetWarnings:lake?.assetWarnings,drawImages:lake?.metrics?.drawImages}),version:'0.18.0'};
+window.reviry={getState:()=>({venueId:game.venueId,activeRod:game.activeIndex+1,rodCount:game.enabledRods.length,rods:game.enabledRods.map(r=>({phase:r.phase,loadout:{...r.loadout},distance:r.distance})),phase:game.phase,loadout:{...game.loadout},trip:{...game.trip},feedBonus:game.feedBonus,feedStocks:{...game.feedStocks},distance:game.distance,stamina:game.stamina,tension:game.tension,catches:game.journal.length,paused:game.paused,engine:lake?.metrics?.engine,assetWarnings:lake?.assetWarnings,drawImages:lake?.metrics?.drawImages}),version:'0.19.0'};
 boot();

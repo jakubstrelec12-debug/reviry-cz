@@ -5,7 +5,7 @@ import {biteMotion} from '../src/bite-motion.js';
 import {probeLift,alarmStep,nextRun,runForce} from '../src/encounter.js';
 import {DEFAULT_LOADOUT,biteDelay} from '../src/tackle.js';
 function step(g,t){for(let i=0;i<Math.ceil(t/.05);i++)g.tick(.05);}
-function cast(){const g=new Fishing(()=>.1);g.startCast();g.releaseCast();step(g,1.2);return g;}
+function cast(){const g=new Fishing(()=>.1);g.loadout.rig='spring';g.startCast();g.releaseCast();step(g,1.2);return g;}
 test('uncommitted nibble moves the actual indicator, settles and does not create a fish',()=>{
  const g=cast(),deadline=g.biteIn;for(let i=0;i<400&&!g.probe;i++)g.tick(.05);assert.ok(g.probe);step(g,.25);
  const before=JSON.stringify(g);assert.ok(Math.abs(probeLift(g))>1);assert.equal(biteMotion(g).stage,'touch');assert.equal(JSON.stringify(g),before);

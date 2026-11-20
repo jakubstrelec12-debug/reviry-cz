@@ -1,5 +1,5 @@
-import {environmentAt} from './immersion.js?v=0.18.0';
-import {tripConditions} from './trip.js?v=0.18.0';
+import {environmentAt} from './immersion.js?v=0.19.0';
+import {tripConditions} from './trip.js?v=0.19.0';
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 export class LakeSound{
  constructor(Context){
@@ -8,7 +8,7 @@ export class LakeSound{
   this.transients=this.context.createBuffer(1,length,this.context.sampleRate);const white=this.transients.getChannelData(0);for(let i=0;i<length;i++)white[i]=Math.random()*2-1;
   this.water=this.loop(920,.045);this.wind=this.loop(320,.025);this.wind.filter.Q.value=.5;
  }
- async loadSamples(fetcher=fetch){if(this.sampleLoad)return this.sampleLoad;this.sampleLoad=Promise.all(['reel','drag','splash'].map(async name=>{try{const response=await fetcher(new URL('../assets/audio/'+name+'.mp3?v=0.18.0.1',import.meta.url));if(!response.ok)throw Error('HTTP '+response.status);this.samples[name]=await this.context.decodeAudioData(await response.arrayBuffer());return null;}catch{return name;}})).then(failed=>{const missing=failed.filter(Boolean);if(missing.length)this.sampleLoad=null;return missing;});return this.sampleLoad;}
+ async loadSamples(fetcher=fetch){if(this.sampleLoad)return this.sampleLoad;this.sampleLoad=Promise.all(['reel','drag','splash'].map(async name=>{try{const response=await fetcher(new URL('../assets/audio/'+name+'.mp3?v=0.19.0.1',import.meta.url));if(!response.ok)throw Error('HTTP '+response.status);this.samples[name]=await this.context.decodeAudioData(await response.arrayBuffer());return null;}catch{return name;}})).then(failed=>{const missing=failed.filter(Boolean);if(missing.length)this.sampleLoad=null;return missing;});return this.sampleLoad;}
  playSample(name,{pan=0,volume=.65,loop=false,rate=1,preview=false,duration=null}={}){
   const buffer=this.samples[name];if(!buffer||this.state!=='running'||(this.paused&&!preview))return null;
   const c=this.context,source=c.createBufferSource(),gain=c.createGain(),at=c.currentTime;source.buffer=buffer;source.loop=loop;source.playbackRate.value=rate;source.connect(gain);this.pan(gain,pan,preview);gain.gain.setValueAtTime(.0001,at);gain.gain.exponentialRampToValueAtTime(volume,at+.012);source.start(at);
