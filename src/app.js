@@ -8,7 +8,9 @@ import {METHODS,BAITS,FEEDS,setupSummary,validateLoadout} from './tackle.js?v=0.
 import {showCatchPhoto,photoFor} from './fish-photos.js?v=0.22.0';
 import {FishingSession as Fishing} from './session.js?v=0.22.0';
 import {LakeScene} from './photo-scene.js?v=0.22.0';
-const $=id=>document.getElementById(id);const game=new Fishing();let lake;let last=performance.now(),started=false,drawerOpen=false,audio=null,soundOn=false,toastTimer,venueOpen=false,venueLoading=false;
+const $=id=>document.getElementById(id);
+// Preserve a tappable water area on portrait phones; spots remain expandable on demand.
+if(window.matchMedia('(max-width:650px) and (orientation:portrait)').matches) $('targetPanel').open=false;const game=new Fishing();let lake;let last=performance.now(),started=false,drawerOpen=false,audio=null,soundOn=false,toastTimer,venueOpen=false,venueLoading=false;
 let missionsOpen=false,missionLoading=false,freeStarted=false,missionRecorded=false;
 let missionRecords={};try{missionRecords=JSON.parse(localStorage.getItem("reviry-mission-records")||"{}");if(!missionRecords||typeof missionRecords!=="object")missionRecords={};}catch{}
 let volume=1;try{const saved=localStorage.getItem('reviry-volume');if(saved!==null&&Number.isFinite(Number(saved)))volume=Math.max(0,Math.min(1,Number(saved)));}catch{}
