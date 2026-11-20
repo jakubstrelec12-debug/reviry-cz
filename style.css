@@ -134,7 +134,7 @@ body.immersive[data-phase="waiting"] #action{display:block}
 @media (max-width:650px) and (orientation:portrait){
   .fishing-ui{gap:7px;bottom:calc(12px + env(safe-area-inset-bottom))}
   .mission-hud{
-    position:fixed;z-index:3;top:calc(182px + env(safe-area-inset-top));left:16px;right:16px;
+    position:fixed;z-index:3;top:var(--station-note-top,calc(182px + env(safe-area-inset-top)));left:16px;right:16px;
     width:auto;margin:0;padding:7px 10px;gap:8px;min-height:54px;
     background:#152e30e8;
   }
@@ -154,3 +154,20 @@ body.immersive[data-phase="waiting"] #action{display:block}
 /* In-game rapid strike gestures must never be interpreted as Safari double-tap zoom. */
 html,body,.fishing-ui,.controls,.status-block,#missionHud{touch-action:manipulation;-webkit-text-size-adjust:100%}
 #action{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+
+/* Fight HUD is stacked beneath the mission banner, not beneath it visually. */
+@media(max-width:650px) and (orientation:portrait){
+ body[data-phase="fight"] #fightPanel{
+   top:var(--mission-fight-top,var(--station-note-top,170px));
+   bottom:auto;
+   max-height:calc(100dvh - var(--mission-fight-top,var(--station-note-top,170px)) - 110px);
+   overflow-y:auto;
+   z-index:2;
+ }
+ body[data-phase="fight"] .mission-hud{z-index:4}
+}
+.mission-card-completed{border-color:#6fb88a!important}
+.mission-completed-badge{display:inline-flex;align-items:center;gap:7px;border:1px solid #80c99677;background:#1b563c;color:#d7ffe2;padding:7px 11px;border-radius:999px;font-size:12px;font-weight:800;letter-spacing:.02em;margin:0 0 10px}
+.mission-card-completed .action{border-color:#8ec99e}
+#missionResult.mission-success .welcome{border-color:#8ec99e;box-shadow:0 0 0 1px #8ec99e55,0 20px 100px #0a20296b}
+#missionResult.mission-success #missionResultTitle{color:#a2e4b2}
