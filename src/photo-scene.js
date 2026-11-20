@@ -1,9 +1,9 @@
-import {RodPresentation,environmentAt,releaseGesture} from './immersion.js?v=0.17.0';
-import {runForce} from './encounter.js?v=0.17.0';
-import {tripConditions} from './trip.js?v=0.17.0';
-import {getVenue} from './venues.js?v=0.17.0';
-import {biteMotion} from './bite-motion.js?v=0.17.0';
-import {RODS,RIGS} from './tackle.js?v=0.17.0';
+import {RodPresentation,environmentAt,handResponse} from './immersion.js?v=0.18.0';
+import {runForce} from './encounter.js?v=0.18.0';
+import {tripConditions} from './trip.js?v=0.18.0';
+import {getVenue} from './venues.js?v=0.18.0';
+import {biteMotion} from './bite-motion.js?v=0.18.0';
+import {RODS,RIGS} from './tackle.js?v=0.18.0';
 
 export const PHOTO=getVenue('vajgar').photo;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -158,9 +158,9 @@ export class LakeScene{
  }
  drawPhotoHeld(){
   const image=this.equipment?.animatedHeld||this.equipment?.held;if(!image)return false;
-  const c=this.ctx,g=this.game,m=this.presentation,cast=g.phase==='casting'?g.castPower:0,held=heldLayout(this.width,this.height,this.pose,cast),rest=restingLayout(this.width,this.height,{index:this.drawIndex,count:this.drawCount,shoreTop:this.shoreTop}),u=g.loadout.method==='float'?1:(m?.pickup??1);
-  const scale=mix(rest.height/image.height,held.scale,u),anchor=rest.at(.83,.88),base={x:mix(anchor.x,held.base.x,u),y:mix(anchor.y,held.base.y,u)},breath=Math.sin(this.clock*1.15+this.drawIndex)*.002;
-  const angle=(held.angle+releaseGesture(g)+breath+clamp((g.fishBearing||0)-(g.castAngle||0),-.18,.18)*.12)*u;
+  const c=this.ctx,g=this.game,m=this.presentation,held=heldLayout(this.width,this.height,this.pose,0),rest=restingLayout(this.width,this.height,{index:this.drawIndex,count:this.drawCount,shoreTop:this.shoreTop}),u=g.loadout.method==='float'?1:(m?.pickup??1);
+  const scale=mix(rest.height/image.height,held.scale,u),anchor=rest.at(.83,.88),response=handResponse(g,m,this.width,this.height,this.clock+this.drawIndex),base={x:mix(anchor.x,held.base.x,u)+response.x*u,y:mix(anchor.y,held.base.y,u)+response.y};
+  const angle=(held.angle+response.angle)*u;
 
   const transform=(u,v)=>{const x=(u-.83)*image.width*scale,y=(v-.88)*image.height*scale;return {x:base.x+x*Math.cos(angle)-y*Math.sin(angle),y:base.y+x*Math.sin(angle)+y*Math.cos(angle)};};
   const flex=(g.phase==='held'&&g.loadout.method==='feeder'?biteMotion(g,this.clock).feederFlex:0)+((m?.bend??(g.phase==='fight'?g.tension:0))*34/Math.pow(RODS[g.loadout.rod].power,.35)),shift=v=>Math.pow(Math.max(0,1-v/.42),2)*flex;

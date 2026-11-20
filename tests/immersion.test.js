@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {RodPresentation,environmentAt,releaseGesture} from '../src/immersion.js';
+import {RodPresentation,environmentAt,releaseGesture,castGesture,handResponse} from '../src/immersion.js';
 import {Fishing} from '../src/fishing.js';
 import {LakeSound} from '../src/soundscape.js';
 const step=(g,t)=>{for(let i=0;i<t*20;i++)g.tick(.05);};
@@ -58,4 +58,13 @@ test('samples decode once, report download failures and allow retry without synt
  const s=new LakeSound(FakeContext);let calls=0;const fetcher=async()=>{calls++;return {ok:true,arrayBuffer:async()=>new ArrayBuffer(8)}};
  assert.deepEqual(await s.loadSamples(fetcher),[]);assert.equal(calls,3);await s.loadSamples(fetcher);assert.equal(calls,3);assert.ok(s.samples.reel);
  const failed=new LakeSound(FakeContext);assert.equal(failed.playSample('reel'),null);assert.equal((await failed.loadSamples(async()=>({ok:false,status:404}))).length,3);assert.deepEqual(await failed.loadSamples(fetcher),[]);
+});
+
+test('partial casts release from the same backswing and settle without a discontinuous angle',()=>{
+ for(const power of [0,.1,.35,.7,1]){const g=new Fishing();g.phase='casting';g.castPower=power;const before=castGesture(g),m=new RodPresentation();m.update(g,.05);g.phase='flying';g.elapsed=0;assert.equal(castGesture(g),before);const angle=m.castSwing;m.update(g,0);assert.equal(m.castSwing,angle);g.elapsed=.1;m.update(g,.05);assert.ok(Math.abs(m.castSwing-angle)<.5);g.elapsed=3;for(let i=0;i<90;i++)m.update(g,1/60);assert.ok(Math.abs(m.castSwing)<.001);}
+});
+test('pump raises the grip, fish direction is followed with a lag and the response is frozen in a zero-time repaint',()=>{
+ const g=new Fishing(),m=new RodPresentation();g.phase='fight';g.tension=.5;m.update(g,.1);const low=handResponse(g,m,844,390,0);g.lifting=true;g.fishBearing=.2;g.lineOutRate=1;
+ m.update(g,.05);assert.ok(m.yaw>0&&m.yaw<.2);for(let i=0;i<60;i++)m.update(g,1/60);const lifted=handResponse(g,m,844,390,0);assert.ok(lifted.y<low.y-10);assert.ok(lifted.x>low.x);assert.ok(lifted.angle>low.angle);const frozen=JSON.stringify(m);m.update(g,0);assert.equal(JSON.stringify(m),frozen);
+ g.lifting=false;g.fishBearing=-.2;g.lineOutRate=0;for(let i=0;i<90;i++)m.update(g,1/60);assert.ok(m.yaw<0);assert.ok(m.pump<.001);
 });

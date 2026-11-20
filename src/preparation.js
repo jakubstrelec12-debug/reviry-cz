@@ -1,6 +1,6 @@
-import {getVenue,SPECIES_NAMES,venueChances} from './venues.js?v=0.17.0';
-import {equipmentArt} from './equipment-art.js?v=0.17.0';
-import {INDICATORS,indicatorName,METHODS,RODS,RIGS,BAITS,FEEDS,methodPreset,validateLoadout,setupSummary,speciesWeights,chooseBait,baitChances,LINE_DIAMETERS,LINE_PRODUCT,lineName,BAIT_FAMILIES,feedAllowed} from './tackle.js?v=0.17.0';
+import {getVenue,SPECIES_NAMES,venueChances} from './venues.js?v=0.18.0';
+import {equipmentArt} from './equipment-art.js?v=0.18.0';
+import {INDICATORS,indicatorName,METHODS,RODS,RIGS,BAITS,FEEDS,methodPreset,validateLoadout,setupSummary,speciesWeights,chooseBait,baitChances,LINE_DIAMETERS,LINE_PRODUCT,lineName,BAIT_FAMILIES,feedAllowed} from './tackle.js?v=0.18.0';
 const $=id=>document.getElementById(id);
 const fields={
  rod:['Prut',false],rig:['Montáž',false],line:['Kmenový vlasec',true],hook:['Háček',true],leader:['Návazec',true],weight:['Zátěž',true],bait:['Nástraha na háček',false],feed:['Krmení',false],feedPortion:['Jedna dávka zakrmení',true],
