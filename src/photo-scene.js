@@ -1,9 +1,9 @@
-import {RodPresentation,environmentAt,releaseGesture} from './immersion.js?v=0.15.0';
-import {runForce} from './encounter.js?v=0.15.0';
-import {tripConditions} from './trip.js?v=0.15.0';
-import {getVenue} from './venues.js?v=0.15.0';
-import {biteMotion} from './bite-motion.js?v=0.15.0';
-import {RODS,RIGS} from './tackle.js?v=0.15.0';
+import {RodPresentation,environmentAt,releaseGesture} from './immersion.js?v=0.15.1';
+import {runForce} from './encounter.js?v=0.15.1';
+import {tripConditions} from './trip.js?v=0.15.1';
+import {getVenue} from './venues.js?v=0.15.1';
+import {biteMotion} from './bite-motion.js?v=0.15.1';
+import {RODS,RIGS} from './tackle.js?v=0.15.1';
 
 export const PHOTO=getVenue('vajgar').photo;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -280,7 +280,7 @@ export class LakeScene{
   ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,canvas.width,canvas.height);ctx.setTransform(canvas.width/roi,0,0,canvas.height/roiHeight,-sx*canvas.width/roi,-sy*canvas.height/roiHeight);
   try{this.ctx=ctx;this.drawFrame(0);}finally{this.ctx=mainCtx;ctx.restore();Object.assign(this,saved);this.metrics={...metrics,opticalDetail:true};}
  }
- render(dt){if(!this.image)return;dt=Math.max(0,dt);this.clock+=dt;const rods=this.game.enabledRods||[this.game];for(let i=0;i<rods.length;i++){const g=rods[i],m=this.motionByRod[i]??=new RodPresentation();m.update(g,dt);const strikePulse=Math.max(0,1-(g.time-g.lastStrikeAt)/.55),targetPose=Math.max(['held','fight'].includes(g.phase)?.5+m.pump*.4:0,strikePulse*.85);this.poseByRod[i]=mix(this.poseByRod[i],targetPose,1-Math.exp(-dt*8));}this.cachePhotograph();this.drawFrame(dt);if(this.signalViews?.length){for(const v of this.signalViews)this.paintSignal(v.index,v.canvas,true);}else this.paintSignal(this.game.activeIndex||0);}
+ render(dt,{paused=false}={}){if(!this.image)return;dt=Math.max(0,dt);this.clock+=dt;const motionDt=paused?0:dt;const rods=this.game.enabledRods||[this.game];for(let i=0;i<rods.length;i++){const g=rods[i],m=this.motionByRod[i]??=new RodPresentation();m.update(g,motionDt);const strikePulse=Math.max(0,1-(g.time-g.lastStrikeAt)/.55),targetPose=Math.max(['held','fight'].includes(g.phase)?.5+m.pump*.4:0,strikePulse*.85);this.poseByRod[i]=mix(this.poseByRod[i],targetPose,1-Math.exp(-motionDt*8));}this.cachePhotograph();this.drawFrame(dt);if(this.signalViews?.length){for(const v of this.signalViews)this.paintSignal(v.index,v.canvas,true);}else this.paintSignal(this.game.activeIndex||0);}
  drawFrame(dt){this.water();this.drawSurface();this.ctx.save();this.ctx.beginPath();this.ctx.rect(0,this.waterTop,this.width,Math.max(0,this.shoreTop-this.waterTop));this.ctx.clip();this.drawRipples();this.ctx.restore();
   if(this.equipment.deck){const d=this.equipment.deck,p=this.deckCrop;this.ctx.drawImage(d,p.sx,p.sy,p.sw,p.sh,0,0,this.width,this.height);this.metrics.drawImages++;}
 

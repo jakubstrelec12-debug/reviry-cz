@@ -1,5 +1,5 @@
-import {DEFAULT_TRIP,validTrip,tripConditions,tripSummary,speciesActivity,activityFor} from './trip.js?v=0.15.0';
-import {getVenue,venueWeights,SPECIES_NAMES} from './venues.js?v=0.15.0';
+import {DEFAULT_TRIP,validTrip,tripConditions,tripSummary,speciesActivity,activityFor} from './trip.js?v=0.15.1';
+import {getVenue,venueWeights,SPECIES_NAMES} from './venues.js?v=0.15.1';
 const $=id=>document.getElementById(id);
 export class TripPlanner{
  constructor({game,onApply,onToggle}){

@@ -1,7 +1,7 @@
-import {DEFAULT_TRIP,validTrip} from './trip.js?v=0.15.0';
-import {VENUES} from './venues.js?v=0.15.0';
-import {Fishing} from './fishing.js?v=0.15.0';
-import {cleanLoadout,validateLoadout,createFeedStocks} from './tackle.js?v=0.15.0';
+import {DEFAULT_TRIP,validTrip} from './trip.js?v=0.15.1';
+import {VENUES} from './venues.js?v=0.15.1';
+import {Fishing} from './fishing.js?v=0.15.1';
+import {cleanLoadout,validateLoadout,createFeedStocks} from './tackle.js?v=0.15.1';
 const LOCKED=['casting','flying','held','fight','landed'];
 export class FishingSession{
  constructor(random=Math.random){

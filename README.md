@@ -2,9 +2,13 @@
 
 Rybářská hra pro Safari na iPhonu. Výhled nově tvoří **skutečná fotografie Vajgaru** s animovanou hladinou, prutem, čihátkem, náhozem, splávkem a krmením. Zjednodušená 3D zástavba se v hlavní hře nepoužívá. Vykreslování běží přes Canvas 2D a nepotřebuje WebGL.
 
-**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.15.0
+**Hrát:** https://jakubstrelec12-debug.github.io/reviry-cz/?v=0.15.1
 
 Nejlépe na šířku. Všechny herní fotografie jsou přiložené lokálně. HD / ECO mění rozlišení a jemnost animace vody. Fotografie není 360° panorama: tažením jde pouze mírně posouvat výhled a směr náhozu. Nejde o volně průchozí 3D svět.
+
+## Oprava spuštění — 0.15.1
+
+Pauza lovu už nezmrazí celé okolí na úvodní obrazovce a při sestavování montáže. Voda a trávy se animují, aniž běží čas záběru nebo zdolávání. Ruch prostředí má vlastní zvukovou větev; při zapnutí zazní krátký testovací tón i před spuštěním lovu. Hlasitost prostředí je zřetelnější. Pokud prohlížeč nespustí zvukový kontext, hra na to výslovně upozorní. Návrat na stránku znovu vyhodnotí pozastavení. Skutečný odchod do pozadí nadále zastaví lov i zvuk.
 
 ## Ruce, náčiní a okolí — 0.15.0
 
@@ -12,7 +16,7 @@ Po nahození a při zvednutí se prut přesouvá plynule mezi stojanem a rukou; 
 
 Rychlost odvíjení cívky vychází z reálného přírůstku vzdálenosti ryby v herním modelu. Odvíjení přes brzdu má vlastní zvuk; navíjení má jemné mechanické cvakání. Výpad a změna směru vytvoří pohyb vlasce a vlnky u ryby. Nezávislé náhledy obou indikátorů nepřičítají čas k pohybům rukou ani cívky.
 
-**Pro plný dojem zapni Zvuk.** Ruch hladiny, poryvy větru, vzácné vzdálené denní ptačí hlasy a jemné noční zvuky jsou syntetizované v prohlížeči. Nához, dopad montáže a práce s náčiním mají samostatné zvuky. Žádné nahrávky se nestahují a žádný mikrofon se nepoužívá. Zvuk se pozastavuje s výpravou a v pozadí; běžný prohlížeč může spuštění vyžadovat klepnutím na tlačítko.
+**Pro plný dojem zapni Zvuk.** Ruch hladiny, poryvy větru, vzácné vzdálené denní ptačí hlasy a jemné noční zvuky jsou syntetizované v prohlížeči. Nához, dopad montáže a práce s náčiním mají samostatné zvuky. Žádné nahrávky se nestahují a žádný mikrofon se nepoužívá. Ruch vody a větru zní i na úvodní obrazovce a při přípravě, zatímco práce s náčiním zůstává pozastavená. V pozadí se zvuk zastaví; běžný prohlížeč může spuštění vyžadovat klepnutím na tlačítko.
 
 Řídké ilustrační trávy u levého dolního okraje se pohybují ve stejném modelovaném poryvu jako šum větru a drobné odlesky hladiny. Vegetace je společné herní popředí, ne nový geografický údaj o vybraném revíru. Fotografie a geometrie vzdáleného břehu se neohýbají. Podrobnosti o nových podkladech a zadání: [assets/ANIMATION.md](assets/ANIMATION.md).
 
