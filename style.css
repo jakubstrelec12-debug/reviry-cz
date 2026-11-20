@@ -150,3 +150,7 @@ body.immersive[data-phase="waiting"] #action{display:block}
   .controls .action{padding:11px 12px;min-height:56px}
   .controls .action span{margin-top:3px}
 }
+
+/* In-game rapid strike gestures must never be interpreted as Safari double-tap zoom. */
+html,body,.fishing-ui,.controls,.status-block,#missionHud{touch-action:manipulation;-webkit-text-size-adjust:100%}
+#action{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
