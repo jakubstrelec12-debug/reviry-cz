@@ -171,3 +171,6 @@ html,body,.fishing-ui,.controls,.status-block,#missionHud{touch-action:manipulat
 .mission-card-completed .action{border-color:#8ec99e}
 #missionResult.mission-success .welcome{border-color:#8ec99e;box-shadow:0 0 0 1px #8ec99e55,0 20px 100px #0a20296b}
 #missionResult.mission-success #missionResultTitle{color:#a2e4b2}
+
+/* Mechanical bite indication uses a close-up of the bobbin, not a crop of the lake. */
+#signalFocus.expanded:has(#signalCanvas) #signalCanvas{background:#18312f}
