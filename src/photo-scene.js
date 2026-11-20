@@ -1,9 +1,9 @@
-import {RodPresentation,environmentAt,releaseGesture} from './immersion.js?v=0.16.0';
-import {runForce} from './encounter.js?v=0.16.0';
-import {tripConditions} from './trip.js?v=0.16.0';
-import {getVenue} from './venues.js?v=0.16.0';
-import {biteMotion} from './bite-motion.js?v=0.16.0';
-import {RODS,RIGS} from './tackle.js?v=0.16.0';
+import {RodPresentation,environmentAt,releaseGesture} from './immersion.js?v=0.16.1';
+import {runForce} from './encounter.js?v=0.16.1';
+import {tripConditions} from './trip.js?v=0.16.1';
+import {getVenue} from './venues.js?v=0.16.1';
+import {biteMotion} from './bite-motion.js?v=0.16.1';
+import {RODS,RIGS} from './tackle.js?v=0.16.1';
 
 export const PHOTO=getVenue('vajgar').photo;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));

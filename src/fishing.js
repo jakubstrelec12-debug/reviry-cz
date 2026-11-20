@@ -1,8 +1,8 @@
-import {nextRun,runForce} from './encounter.js?v=0.16.0';
-import {DEFAULT_TRIP,activityFor} from './trip.js?v=0.16.0';
-import {getVenue,EXTRA_SPECIES,venueWeights} from './venues.js?v=0.16.0';
-import {strikeWindow,assessStrike,strikeReason} from './strike-timing.js?v=0.16.0';
-import {DEFAULT_LOADOUT, METHODS, RODS, RIGS, catchWeight, validateLoadout, cleanLoadout, feedInfluence, speciesWeights, biteDelay,createFeedStocks} from './tackle.js?v=0.16.0';
+import {nextRun,runForce} from './encounter.js?v=0.16.1';
+import {DEFAULT_TRIP,activityFor} from './trip.js?v=0.16.1';
+import {getVenue,EXTRA_SPECIES,venueWeights} from './venues.js?v=0.16.1';
+import {strikeWindow,assessStrike,strikeReason} from './strike-timing.js?v=0.16.1';
+import {DEFAULT_LOADOUT, METHODS, RODS, RIGS, catchWeight, validateLoadout, cleanLoadout, feedInfluence, speciesWeights, biteDelay,createFeedStocks} from './tackle.js?v=0.16.1';
 export const SPECIES = [
   {id:'carp',name:'Kapr obecný', min:1.4, max:7.8, power:0.85, color:0xb79b5d},
   {id:'tench',name:'Lín obecný', min:0.45, max:2.3, power:0.6, color:0x6d7841},

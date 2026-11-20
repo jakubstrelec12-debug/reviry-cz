@@ -39,3 +39,17 @@ test('blank flex lags load, responds to head shakes and settles without advancin
 test('master volume clamps to a safe range and persists when effects pause',()=>{
  const s=new LakeSound(FakeContext);s.setVolume(.4);assert.ok(Math.abs(s.master.gain.value-.26)<1e-9);s.setPaused(true);assert.ok(Math.abs(s.master.gain.value-.26)<1e-9);s.setVolume(-1);assert.equal(s.master.gain.value,0);s.setVolume(2);assert.equal(s.master.gain.value,.65);
 });
+test('audition plays all three effects through menu pause, while ordinary game effects stay muted',()=>{
+ const s=new LakeSound(FakeContext);s.setPaused(true);
+ for(const name of ['reel','drag','splash']){const before=s.context.started.length;s.preview(name);assert.ok(s.context.started.length>before,name);}
+ const before=s.context.started.length;s.reelClick();s.dragClick();s.splash();assert.equal(s.context.started.length,before);
+});
+test('reel and drag cues follow controls and actual payout independently on both rods',()=>{
+ const s=new LakeSound(FakeContext),a=new Fishing(),b=new Fishing(),reel=[],drag=[],splash=[];
+ s.reelClick=pan=>reel.push(pan);s.dragClick=pan=>drag.push(pan);s.splash=(distance,pan)=>splash.push({distance,pan});
+ a.phase=b.phase='fight';a.reeling=true;a.lineOutRate=0;b.reeling=false;b.lineOutRate=1;b.distance=20;
+ s.update({paused:false,enabledRods:[a,b],trip:a.trip},.1);assert.equal(reel.length,1);assert.equal(drag.length,1);assert.ok(reel[0]<0);assert.ok(drag[0]>0);
+ a.reeling=false;b.lineOutRate=0;s.update({paused:false,enabledRods:[a,b],trip:a.trip},.2);assert.equal(reel.length,1);assert.equal(drag.length,1);
+ s.event('splash',{rodIndex:1},b);assert.equal(splash.length,1);assert.equal(splash[0].distance,20);assert.ok(splash[0].pan>0);
+ const before=reel.length;s.event('retrieved',{rodIndex:0},a);assert.equal(reel.length,before+7);
+});
